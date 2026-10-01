@@ -149,4 +149,3 @@ function obterContratoBackupPorId($id) {
     $sth->execute();
     return $sth->fetchAll()[0];
 }
-?>
