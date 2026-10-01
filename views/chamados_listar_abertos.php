@@ -1,0 +1,47 @@
+<?php
+include 'header.php'; ?>
+
+<div class="az-content-header d-block d-md-flex">
+    <div>
+        <h2 class="az-content-title mg-b-5 mg-b-lg-8">Chamados em aberto</h2>
+    </div>
+</div><!-- az-content-header -->
+<div class="az-content-body">
+    <div class="row row-sm">
+        <div class="col-md-12">
+            <form action="chamado_interagir" method="post">
+                <div class="table-responsive">
+                    <table class="table mg-b-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo</th>
+                                <th>Última Interação</th>
+                                <th>Técnico</th>
+                                <th>Status</th>
+                                <th>Opções</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        foreach($chamados_abertos as $ca): ?>
+                            <tr>
+                                <th scope="row"><?=$ca['id']?></th>
+                                <td><?=$ca['tipo_contrato']?></td>
+                                <td><?=data_brasil_datetime($chamados_abertos_ultima_interacao[$ca['id']]['data'].' '.$chamados_abertos_ultima_interacao[$ca['id']]['hora'])?></td>
+                                <td><?=$chamados_abertos_ultima_interacao[$ca['id']]['nome_pessoa']?></td>
+                                <td><?=$ca['situacao']?></td>
+                                <td><button class="btn btn-az-primary" name="chamado_id" value="<?=$ca['id']?>">Interagir</button></td>
+                            </tr>
+                        <?php
+                        endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div><!-- az-content-body -->
+<?php
+include 'footer.php'; 
+?>

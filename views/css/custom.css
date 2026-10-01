@@ -1,0 +1,101 @@
+/* Sobreescrevendo cores do tema - inicio */
+.az-sidebar-body .nav-item.active .nav-link,
+.az-sidebar-body .nav-sub-link.active,
+.az-sidebar-body .nav-sub-link:hover,
+.az-sidebar-body .nav-sub-link:focus,
+.az-profile-menu .dropdown-item:hover,
+.az-profile-menu .dropdown-item:focus,
+.btn-outline-indigo,
+.az-signin-header h2,
+.az-signin-footer a:hover, .az-signin-footer a:focus {
+    color: #dd9933;
+}
+
+.btn-az-primary,
+.az-chat-body .media.flex-row-reverse .az-msg-wrapper {
+    background-color: #dd9933;
+}
+.btn-az-primary:hover,
+.btn-az-primary:not(:disabled):not(.disabled):active,
+.btn-az-primary:not(:disabled):not(.disabled).active,
+.show > .btn-az-primary.dropdown-toggle,
+.btn-outline-indigo:hover, .btn-outline-indigo:focus {
+    background-color: #d15d04;
+}
+.az-logo {
+    width: 135px;
+}
+
+.btn-outline-indigo {
+    border-color: #dd9933;
+}
+/* Sobreescrevendo cores do tema - fim */
+
+#container-chat {
+    width: 100%;
+    height: 55vh;
+    display: block;
+    overflow-x: auto;
+}
+
+.az-chat-body.chat-chamados {
+    height: auto!important;
+}
+
+#chamados_fechados {
+    position: relative;
+}
+
+#carregando {
+    width: 100%;
+    height: 100%;
+    background-color: #f2f4f6;
+    position: absolute;
+    z-index: 11;
+}
+
+.relatorio-listar {
+    margin-top: 26px;
+}
+
+th.align-right, td.align-right {
+    text-align: right;
+}
+th.width-30, td.width-30 {
+    width: 30px;
+}
+th.width-120, td.width-120 {
+    width: 120px;
+}
+th.width-150, td.width-150 {
+    width: 150px;
+}
+th.width-170, td.width-170 {
+    width: 170px;
+}
+
+/* Estilo do overlay */
+#overlay {
+    position: fixed;       /* cobre toda a tela */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.7); /* fundo semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;         /* fica acima de tudo */
+}
+#overlay img {
+    width: 80px;           /* tamanho da GIF */
+    height: 80px;
+}
+
+.floating-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050; /* Ensures it sits above navigation/content */
+    min-width: 350px;
+}

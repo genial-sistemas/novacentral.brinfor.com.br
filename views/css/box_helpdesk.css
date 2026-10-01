@@ -1,0 +1,94 @@
+.box-brinfor {
+    width: 210px;
+    height: 75px;
+    background-color: white;
+    margin-bottom: 1rem;
+    margin-left: 15px;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+.box-brinfor-esquerda {
+    position: absolute;
+    width: 85px;
+    height: 73px;
+    background-color: transparent;
+    border-right: 1px solid black;
+}
+
+.box-brinfor-esquerda-input {
+    position: absolute;
+    margin-top: -5px;
+    margin-left: 15px;
+}
+
+.box-brinfor-esquerda-label {
+    position: absolute;
+    font-size: 10px;
+    margin-top: 56px;
+    margin-left: 15px;
+    font-weight: bold;
+}
+
+.box-brinfor-direita {
+    width: 123px;
+    height: 73px;
+    margin-left: 85px;
+    background-color: transparent;
+}
+
+.box-brinfor-direita-imagem {
+    position: absolute;
+    margin-top: 3px;
+    width: inherit;
+}
+
+.imagem-brinfor-direita {
+    width: 70px;
+    margin-left: 25px;
+}
+
+
+.box-brinfor-direita-input {
+    position: absolute;
+    font-size: 30px;
+    margin-top: 15px;
+    margin-left: 21px;
+}
+
+.box-brinfor-direita-label {
+    position: absolute;
+    font-size: 10px;
+    margin-top: 56px;
+    margin-left: 26px;
+    font-weight: bold;
+}
+
+.input-brinfor-esquerda {
+    text-align: center;
+    width: 62px;
+    margin-left: -5px;
+    height: 46px;
+    font-size: 2vw;
+    margin-top: 13px;
+}
+
+.input-brinfor-direita {
+    text-align: center;
+    width: 87px;
+    margin-left: -5px;
+    height: 27px;
+    font-size: 1.2rem;
+    margin-top: 13px;
+}
+
+@media only screen and (max-width: 600px) {
+    .input-brinfor-esquerda {
+        font-size: 30px;
+        padding: 0;
+    }
+    .input-brinfor-direita {
+        font-size: 20px;
+        padding: 0;
+    }
+}
