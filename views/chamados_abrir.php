@@ -35,8 +35,9 @@ include 'header.php'
                                         $contato_nome = $contato_info["nome"];
                                         $contato_email = $contato_info["email"];
                                         $contato_telefone = $contato_info["cel"];
+                                        $numero_serie = trim((string)($co['sn'] ?? ''));
                                     ?>
-                                    <option value="<?=$co['id']?>" data-codigo="<?=$codigo?>" data-nome="<?=$contato_nome?>" data-email="<?=$contato_email?>" data-telefone="<?=$contato_telefone?>"<?php if($co['id']==$frm_codigo_equipamento){ echo "selected"; } ?>><?=$codigo?> - <?=$co['descricao']?> - <?php echo validaNomeContato($contato_nome); ?></option>
+                                    <option value="<?=$co['id']?>" data-codigo="<?=$codigo?>" data-nome="<?=$contato_nome?>" data-email="<?=$contato_email?>" data-telefone="<?=$contato_telefone?>"<?php if($co['id']==$frm_codigo_equipamento){ echo "selected"; } ?>><?=$codigo?> - <?=$co['descricao']?> - <?php echo validaNomeContato($contato_nome); ?><?php if ($numero_serie !== ''): ?> -- S/N: <?=htmlspecialchars($numero_serie, ENT_QUOTES, 'UTF-8')?><?php endif; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
