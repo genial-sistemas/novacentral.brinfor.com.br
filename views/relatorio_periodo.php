@@ -13,13 +13,13 @@ include 'header.php'; ?>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="data_inicial">Data Inicial</label>
-                    <input type="text" class="form-control" id="data_inicial" name="data_inicial" value="<?=isset($_POST['data_inicial'])?$_POST['data_inicial']:''?>" placeholder="Digite a data inicial">
+                    <input type="text" class="form-control" id="data_inicial" name="data_inicial" value="<?=htmlspecialchars($_POST['data_inicial'] ?? '', ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric">
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="data_final">Data Final</label>
-                    <input type="text" class="form-control" id="data_final" name="data_final" value="<?=isset($_POST['data_final'])?$_POST['data_final']:''?>" placeholder="Digite a data final">
+                    <input type="text" class="form-control" id="data_final" name="data_final" value="<?=htmlspecialchars($_POST['data_final'] ?? '', ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric">
                 </div>
             </div>
             <div class="col-md-4">
@@ -45,6 +45,9 @@ include 'header.php'; ?>
             </div>
         </div>
     </form>
+    <?php if ($erro_relatorio !== null): ?>
+        <div class="alert alert-danger" role="alert"><?=htmlspecialchars($erro_relatorio, ENT_QUOTES, 'UTF-8')?></div>
+    <?php endif; ?>
     <div class="row row-sm">
         <div class="col-md-12">
             <form action="/chamados_interagir" method="post">

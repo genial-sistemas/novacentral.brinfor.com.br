@@ -42,6 +42,18 @@
     height: auto!important;
 }
 
+.az-footer .container-fluid {
+    justify-content: center;
+    text-align: center;
+}
+
+.relatorio-equipamento-descricao {
+    width: 45%;
+    min-width: 360px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 #chamados_fechados {
     position: relative;
 }

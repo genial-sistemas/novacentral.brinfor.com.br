@@ -32,6 +32,7 @@
                 <a href="/relatorio_periodo" class="nav-link with-sub"><i class="typcn typcn-tabs-outline"></i>Relatórios</a>
                 <nav class="nav-sub">
                     <a href="/relatorio_periodo" class="nav-sub-link <?=($pagina=='Por período'?'active':'')?>">Por período</a>
+                    <a href="/relatorio_equipamento" class="nav-sub-link <?=($pagina=='Por equipamento'?'active':'')?>">Por equipamento</a>
                 </nav>
             </li>
         </ul>

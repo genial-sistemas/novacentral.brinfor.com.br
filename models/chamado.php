@@ -364,9 +364,64 @@ function obterChamadosPorPeriodo($contrato, $data_inicial, $data_final) {
     $consulta = "SELECT a.*, b.nome_pessoa
     FROM contrato_chamado a
     JOIN pessoa b ON a.resp_abertura=b.id
-    WHERE a.id_contrato=$contrato AND a.data_abertura BETWEEN '$data_inicial' AND '$data_final';";
+    WHERE a.id_contrato = :contrato
+      AND a.data_abertura >= :data_inicial
+      AND a.data_abertura < DATE_ADD(:data_final, INTERVAL 1 DAY)";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
-    $sth->execute();
+    $sth->execute(array(
+        ':contrato' => (int)$contrato,
+        ':data_inicial' => $data_inicial,
+        ':data_final' => $data_final
+    ));
+    return $sth->fetchAll();
+}
+
+function obterChamadosPorEquipamentoPeriodo($contrato, $equipamento, $data_inicial, $data_final) {
+    $consulta = "SELECT chamado.*, pessoa.nome_pessoa
+    FROM contrato_chamado chamado
+    JOIN pessoa ON pessoa.id = chamado.resp_abertura
+    WHERE chamado.id_contrato = :contrato
+      AND chamado.data_abertura >= :data_inicial
+      AND chamado.data_abertura < DATE_ADD(:data_final, INTERVAL 1 DAY)
+      AND EXISTS (
+          SELECT 1
+          FROM contrato_chamado_eventos evento
+          WHERE evento.id_chamado = chamado.id
+            AND evento.id_equipamento = :equipamento
+      )
+    ORDER BY chamado.data_abertura DESC";
+
+    $dbh = getConexao();
+    $sth = $dbh->prepare($consulta);
+    $sth->execute(array(
+        ':contrato' => (int)$contrato,
+        ':equipamento' => (int)$equipamento,
+        ':data_inicial' => $data_inicial,
+        ':data_final' => $data_final
+    ));
+    return $sth->fetchAll();
+}
+
+function obterChamadosTodosEquipamentosPeriodo($contratos, $data_inicial, $data_final) {
+    $contratos = array_values(array_unique(array_map('intval', $contratos)));
+    if (!$contratos) {
+        return array();
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
+    $consulta = "SELECT DISTINCT chamado.*, pessoa.nome_pessoa, evento.id_equipamento
+    FROM contrato_chamado chamado
+    JOIN pessoa ON pessoa.id = chamado.resp_abertura
+    JOIN contrato_chamado_eventos evento ON evento.id_chamado = chamado.id
+    WHERE chamado.id_contrato IN ($placeholders)
+      AND chamado.data_abertura >= ?
+      AND chamado.data_abertura < DATE_ADD(?, INTERVAL 1 DAY)
+      AND evento.id_equipamento > 0
+    ORDER BY chamado.data_abertura DESC";
+
+    $dbh = getConexao();
+    $sth = $dbh->prepare($consulta);
+    $sth->execute(array_merge($contratos, array($data_inicial, $data_final)));
     return $sth->fetchAll();
 }

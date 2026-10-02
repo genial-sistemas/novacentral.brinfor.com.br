@@ -53,6 +53,9 @@
         case 'relatorio_periodo':
             include 'controlers/relatorio_periodo.php';
             break;
+        case 'relatorio_equipamento':
+            include 'controlers/relatorio_equipamento.php';
+            break;
         case 'logout':
             include 'controlers/logoff.php';
             break;

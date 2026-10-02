@@ -35,6 +35,43 @@ function obterContratoOutsourcingEquipamentosaAtivos($id_contato) {
     return $sth->fetchAll();
 }
 
+function obterEquipamentosParaRelatorio($contratos) {
+    $equipamentos = array();
+    $dbh = getConexao();
+
+    foreach ($contratos as $contrato) {
+        $id_contrato = (int)$contrato['id'];
+        $id_tipo = (int)$contrato['id_tipo'];
+
+        if ($id_tipo === 1) {
+            foreach (obterContratoOutsourcingEquipamentosaAtivos($id_contrato) as $equipamento) {
+                $equipamento['id_contrato'] = $id_contrato;
+                $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
+                $equipamento['rotulo'] = $id_contrato . ' - ' . str_pad($equipamento['codigo'], 4, '0', STR_PAD_LEFT) . ' - ' . $equipamento['descricao'];
+                $equipamentos[] = $equipamento;
+            }
+        } elseif ($id_tipo === 7) {
+            $consulta = "SELECT DISTINCT equipamento.id, equipamento.descricao, equipamento.patrimonio
+            FROM contrato_locacao_equipamentos_locados locado
+            JOIN contrato_locacao_equipamentos equipamento ON equipamento.id = locado.id_equipamento
+            WHERE locado.id_contrato = :id_contrato
+            ORDER BY equipamento.descricao";
+            $sth = $dbh->prepare($consulta);
+            $sth->execute(array(':id_contrato' => $id_contrato));
+
+            foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $equipamento) {
+                $equipamento['id_contrato'] = $id_contrato;
+                $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
+                $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
+                $equipamento['rotulo'] = $id_contrato . ' - ' . ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao'];
+                $equipamentos[] = $equipamento;
+            }
+        }
+    }
+
+    return $equipamentos;
+}
+
 function obterNomeContato($id_contato) {
     $consulta = "SELECT * FROM pessoa_juridica_contatos 
     WHERE id=$id_contato";
