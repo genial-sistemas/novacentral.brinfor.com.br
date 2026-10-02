@@ -1,3 +1,13 @@
+<?php
+$idChamado = filter_var($_GET['id'] ?? '', FILTER_VALIDATE_INT);
+$idChamado = $idChamado ?: 0;
+$createdChamadoId = $idChamado;
+$urlInteragir = 'index.php?' . http_build_query([
+    'page' => 'visitante-chamados-interacoes',
+    'id' => $idChamado,
+    'seguranca' => $_GET['seguranca'] ?? ''
+]);
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -184,8 +194,8 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <button class="btn btn-az-primary pd-x-20" onclick="window.location.href='<?=$urlInteragir?>'">Interagir com Chamado</button>
-                <button class="btn btn-az-primary pd-x-20" onclick="window.location.href='abrir-chamado'">Novo Chamado</button>
+                <a class="btn btn-az-primary pd-x-20" href="<?=htmlspecialchars($urlInteragir, ENT_QUOTES, 'UTF-8')?>">Interagir com Chamado</a>
+                <a class="btn btn-az-primary pd-x-20" href="index.php?page=visitante-abrir-chamado">Novo Chamado</a>
             </div>
         </div>
     </div>

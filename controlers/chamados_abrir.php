@@ -85,7 +85,14 @@ if($_POST['acao']=="abrir_chamado") {
                         </button>
                     </div>';        
     }else{
-        if($retorno = true){ //abrirChamado($contrato_id,$frm_tipo_contrato,  $frm_tipo_solicitacao, $frm_nome, $frm_email, $frm_telefone, $frm_codigo_equipamento, $frm_descricao_solicitacao)){
+        $contrato_id = 0;
+        if ($frm_tipo_contrato == 1) {
+            $equipamento = obterContratoOutsourcingPorId($frm_codigo_equipamento);
+            $contrato_id = $equipamento['contrato'] ?? 0;
+        }
+
+        $retorno = abrirChamado($contrato_id, $frm_tipo_contrato, $frm_tipo_solicitacao, $frm_nome, $frm_email, $frm_telefone, $frm_codigo_equipamento, $frm_descricao_solicitacao);
+        if($retorno){
             $mensagem = '<div class="alert alert-success alert-dismissible fade show floating-alert" role="alert">
                             <p>Chamado Aberto com sucesso! '.$contrato_id.', '.$frm_tipo_contrato.', '.$frm_tipo_solicitacao.', '.$frm_nome.', '.$frm_email.', '.$frm_telefone.', '.$frm_codigo_equipamento.', '.$frm_descricao_solicitacao.'</p>
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">

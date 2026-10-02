@@ -3,11 +3,14 @@ require "models/contrato.php";
 require "models/chamado.php";
 
 $contratosTipos = obterContratosTiposAtivos();
-$frm_tipo_contrato = $_GET["tipo_contrato"];
- 
+$frm_tipo_contrato = isset($_GET["tipo_contrato"]) ? $_GET["tipo_contrato"] : null;
+
+/*
+if ($_GET!="") {
+    
     $contratos_outsourcing_equipamentos = array();
     foreach ($contratosTipos as $c) {
-        switch($c['id']) {
+        switch($c['id_tipo']) {
             case '1':
                 foreach(obterContratoOutsourcingEquipamentosaAtivos($c['id']) as $e) {
                     array_push($contratos_outsourcing_equipamentos, $e);
@@ -24,7 +27,7 @@ $frm_tipo_contrato = $_GET["tipo_contrato"];
         }
         $tipos_solicitacao = obterTiposSolicitacao();
     }
-
+}
 
 if(!isset($_POST['acao'])) {
     $contratos = obterContratos($_SESSION['contratos']);

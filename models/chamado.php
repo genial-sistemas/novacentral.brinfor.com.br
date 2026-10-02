@@ -290,7 +290,7 @@ function abrirChamado($contrato_id, $id_tipo_contrato,  $tipo_solicitacao, $frm_
         $sth->execute();
         $id_chamado = $sth->fetchAll()[0]['id'];
 
-        $interacaoCriada = criarInteracao($id_chamado, 0, $_POST['codigo_equipamento'], $_POST['solicitacao'], 1);
+        $interacaoCriada = criarInteracao($id_chamado, 0, $frm_codigo_equipamento, $frm_descricao_solicitacao, 1);
     }
     return $interacaoCriada;
 }

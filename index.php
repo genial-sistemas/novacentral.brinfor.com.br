@@ -9,8 +9,17 @@
     }
 
     switch($pagina) {
+        case 'visualizar-chamado':
+            include 'controlers/visitante/visualizar-chamado.php';
+            break;
         case 'visitante-abrir-chamado':
             include 'controlers/visitante/chamados_abrir.php';
+            break;
+        case 'visitante-abrir-chamado-resultado':
+            include 'views/visitante/chamados_abrir_resultado.php';
+            break;
+        case 'visitante-chamados-interacoes':
+            include 'controlers/visitante/chamados_interacoes.php';
             break;
         case 'login':
             include 'controlers/login.php';
@@ -41,6 +50,9 @@
             break;
         case 'logout':
             include 'controlers/logoff.php';
+            break;
+        case 'buscar-contrato':
+            include 'controlers/buscar_contrato.php';
             break;
         default:
             include 'views/404.php';

@@ -31,7 +31,6 @@
     <link href="/views/lib/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
 
     <!-- Vendors CSS -->
-    <link href="/views/css/iziToast.min.css" rel="stylesheet">
     <link href="/views/lib/morris.js/morris.css" rel="stylesheet">
 
     <!-- azia CSS -->
@@ -45,12 +44,10 @@
             color: #ffc107;
         }
 
-        /* Esconder o botão Buscar - busca automática via Enter ou blur */
         #btnBuscarContrato {
             display: none !important;
         }
 
-        /* Alertas personalizados */
         .custom-alert {
             position: fixed;
             top: 20px;
@@ -171,7 +168,7 @@
             }
         }
 
-        /* Box Brinfor - Estilo para helpdesk */
+        /* Box Brinfor */
         .box-brinfor {
             width: 210px;
             height: 75px;
@@ -254,23 +251,92 @@
             width: 67px;
         }
 
-        /* Estilo para o container de resultados ao lado do botão */
-        #resultadoBuscaContainer select,
-        #resultadoBuscaContainer input {
+        #resultadoBuscaContainer {
             width: 100%;
         }
 
-        /* Estilo para campos obrigatórios */
-        .form-control:required,
-        select:required,
-        textarea:required {
-            border-left: 3px solid #dc3545;
+        #resultadoBuscaContainer select,
+        #resultadoBuscaContainer input {
+            width: 100%;
+            margin-top: 0;
         }
 
-        .form-control:required:valid,
-        select:required:valid,
-        textarea:required:valid {
-            border-left: 3px solid #28a745;
+        /* ESTILOS DE VALIDAÇÃO - CORRIGIDOS */
+        .campo-obrigatorio {
+            border-left: 3px solid #dc3545 !important;
+            transition: border-left 0.3s ease;
+        }
+
+        .campo-valido {
+            border-left: 3px solid #28a745 !important;
+            transition: border-left 0.3s ease;
+        }
+
+        select.campo-obrigatorio,
+        textarea.campo-obrigatorio {
+            border-left: 3px solid #dc3545 !important;
+        }
+
+        select.campo-valido,
+        textarea.campo-valido {
+            border-left: 3px solid #28a745 !important;
+        }
+
+        .form-control,
+        select.form-control,
+        textarea.form-control {
+            border-left: 1px solid #ced4da;
+            transition: border-left 0.3s ease;
+        }
+
+        /* Estilos para os resultados da busca */
+        .contrato-info-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin-top: 10px;
+        }
+
+        .contrato-info-card .info-row {
+            display: flex;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+
+        .contrato-info-card .info-row .label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 100px;
+        }
+
+        .contrato-info-card .info-row .value {
+            color: #212529;
+        }
+
+        .select-resultado {
+            border-color: #28a745 !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 
@@ -278,32 +344,45 @@
 
 <body class="az-body az-body-sidebar az-light">
 
-    <!-- az-content -->
     <div class="az-content az-content-dashboard-five">
         <div class="az-header">
             <div class="container-fluid">
                 <a href="https://brinfor.com.br">
                     <img src="/views/img/brInfor_logo_mini.png" class="img-fluid" alt="Br Info logo" style="width: 127px">
                 </a>
-                <div class="az-header-center"></div><!-- az-header-center -->
+                <div class="az-header-center"></div>
                 <div class="az-header-right">
                     <div class="dropdown az-profile-menu">
                         <h2 class="az-content-title mg-b-5 mg-b-lg-8">Abrir Chamado</h2>
                     </div>
-                </div><!-- az-header-right -->
-            </div><!-- container -->
-        </div><!-- az-header -->
+                </div>
+            </div>
+        </div>
         <div class="az-content-body">
-            <form method="post" id="formChamado" class="validated" enctype="multipart/form-data" action="chamados_abrir">
-                <!-- Primeira linha: Tipo de Contrato + Box Brinfor -->
+            <form method="post" id="formChamado" class="validated" enctype="multipart/form-data" action="index.php?page=visualizar-chamado">
+                <!-- CAMPOS OCULTOS -->
+                <input type="hidden" id="id_contrato" name="id_contrato" value="0">
+                <input type="hidden" id="id_contato" name="id_contato" value="0">
+                <input type="hidden" id="id_equipamento" name="id_equipamento" value="0">
+                <input type="hidden" id="id_dominio" name="id_dominio" value="0">
+                <input type="hidden" id="id_backup" name="id_backup" value="0">
+                <input type="hidden" id="id_suporte" name="id_suporte" value="0">
+                <input type="hidden" id="id_pessoa" name="id_pessoa" value="0">
+                <input type="hidden" id="id_situacao" name="id_situacao" value="1">
+                <input type="hidden" id="id_tipo_abertura" name="id_tipo_abertura" value="1">
+                <input type="hidden" id="id_tipo_atendimento" name="id_tipo_atendimento" value="1">
+                <input type="hidden" id="id_resp_abertura" name="id_resp_abertura" value="0">
+                <input type="hidden" name="codigoSeguranca" value="">
+
+                <!-- Primeira linha: Tipo de Contrato + Busca -->
                 <div class="row">
                     <div class="col-md-12">
                         <div class="row align-items-end">
-                            <!-- SELECT CONTRATO (obrigatório) -->
+                            <!-- SELECT CONTRATO -->
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="form-label">Tipo de Contrato <span class="text-danger">*</span></label>
-                                    <select class="form-control" name="id_tipo_contrato" id="id_tipo_contrato" required>
+                                    <select class="form-control" name="id_tipo_contrato" id="id_tipo_contrato">
                                         <option value="">Selecione:</option>
                                         <option value="1">1 - Helpdesk (Outsourcing)</option>
                                         <option value="2">2 - Hospedagem</option>
@@ -315,7 +394,7 @@
                                 </div>
                             </div>
 
-                            <!-- BOX BRINFOR (apenas para Helpdesk) -->
+                            <!-- BOX BRINFOR (Helpdesk) -->
                             <div class="col-md-4" id="boxContratoOutsourcing" style="display: none;">
                                 <div class="box-brinfor">
                                     <div class="box-brinfor-esquerda">
@@ -324,9 +403,8 @@
                                                 class="input-brinfor-esquerda"
                                                 id="inputCodigoContrato"
                                                 name="etiqueta_codigo_contrato"
-                                                value="<?= $frm_etiqueta_codigo_contrato ?>"
+                                                value=""
                                                 maxlength="2"
-                                                max="2"
                                                 autocomplete="off"
                                                 placeholder=" ">
                                         </div>
@@ -343,9 +421,8 @@
                                                 class="input-brinfor-direita"
                                                 id="codigo_equipamento"
                                                 name="etiqueta_codigo_equipamento"
-                                                value="<?= $frm_etiqueta_codigo_equipamento ?? null ?>"
+                                                value=""
                                                 maxlength="4"
-                                                max="4"
                                                 autocomplete="off"
                                                 placeholder=" ">
                                         </div>
@@ -356,10 +433,10 @@
                                 </div>
                             </div>
 
-                            <!-- BUSCA CNPJ/CPF/ID (para outros tipos) -->
+                            <!-- BUSCA para outros tipos -->
                             <div class="col-md-8" id="boxBuscaDados" style="display:none;">
                                 <div class="form-group">
-                                    <label class="form-label">Buscar dados <span class="text-danger">*</span></label>
+                                    <label class="form-label">Buscar dados</label>
                                     <div class="row align-items-center">
                                         <div class="col-md-3">
                                             <select class="form-control" id="selectSearchType" name="search_type">
@@ -378,15 +455,8 @@
                                                 autocomplete="off">
                                         </div>
                                         <div class="col-md-4">
-                                            <button type="button" id="btnBuscarContrato" class="btn btn-primary" style="width: 100%;">
-                                                Buscar
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <!-- CONTAINER DO RESULTADO (aparece após a busca) -->
-                                    <div class="row mt-2" id="resultadoBuscaContainer" style="display:none;">
-                                        <div class="col-md-12">
-                                            <!-- O select/input será inserido aqui -->
+                                            <div id="resultadoBuscaContainer" style="display:none;"></div>
+                                            <button type="button" id="btnBuscarContrato" class="btn btn-primary" style="width: 100%; display: none;">Buscar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -417,6 +487,14 @@
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
+                            <label>Urgência <span class="text-danger">*</span></label>
+                            <select class="form-control" name="urgencia">
+                                <option value="4">Padrão</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
                             <label>Tipo de Solicitação <span class="text-danger">*</span></label>
                             <select class="form-control" id="selectTipoSolicitacao" name="id_tipo_solicitacao" required>
                                 <option value="">Selecione:</option>
@@ -426,21 +504,21 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Urgência <span class="text-danger">*</span></label>
-                            <select class="form-control" name="urgencia" required>
-                                <option value="4">Padrão</option>
-                            </select>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label>Descrição da sua solicitação: <span class="text-danger">*</span></label>
-                            <textarea class="form-control" rows="6" name="solicitacao" placeholder="Descreva sua solicitação ..." required></textarea>
+                            <label>
+                                Descrição da sua solicitação:
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea
+                                class="form-control"
+                                rows="6"
+                                name="solicitacao"
+                                placeholder="Descreva sua solicitação..."
+                                required></textarea>
                         </div>
                     </div>
                 </div>
@@ -461,117 +539,31 @@
                 </div>
             </form>
 
-            <?php if ($_POST['acao'] == "abrir_chamado"): ?>
+            <?php if (isset($sucesso) && $sucesso && isset($_POST['id_chamado'])): ?>
+                <div style="display:none;">
+                    <input type="hidden" id="chamado_id" value="<?= $_POST['id_chamado'] ?>">
+                </div>
+            <?php elseif (!empty($erro)): ?>
                 <div class="row mt-4">
                     <div class="col-md-12">
-                        <p>Chamado Aberto com sucesso!!</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <button class="btn btn-az-primary pd-x-20" onclick="window.location.href = 'chamados_abrir'">Ok</button>
+                        <div class="alert alert-danger">
+                            <i class="fa fa-exclamation-circle"></i>
+                            <?= $erro ?>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
-        </div><!-- az-content-body -->
-    </div><!-- az-content -->
+        </div>
 
-    <!-- JS no final do body -->
+    <!-- JS -->
     <script src="/views/lib/jquery/jquery.min.js"></script>
-    <script src="/views/js/iziToast.min.js"></script>
-    <script src="/views/js/jquery.mask.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="/views/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="/views/lib/ionicons/ionicons.js"></script>
+    <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
     <script src="/views/js/azia.js"></script>
-    <script src="/views/js/geral/global-constants.js"></script>
-    <script src="/views/js/geral/helper-functions.js"></script>
-    <script src="/views/js/geral/alert-message-functions.js"></script>
-
     <script>
-        // ============================================
-        // ALERTAS PERSONALIZADOS
-        // ============================================
-
-        function showSuccessAlert(message, detail = '') {
-            showAlert('success', '✅ Sucesso!', message, detail);
-        }
-
-        function showErrorAlert(message, detail = '') {
-            showAlert('error', '❌ Atenção!', message, detail);
-        }
-
-        function showWarningAlert(message, detail = '') {
-            showAlert('warning', '⚠️ Atenção!', message, detail);
-        }
-
-        function showAlert(type, title, message, detail = '') {
-            $('.custom-alert').remove();
-
-            var $alert = $('<div>', {
-                class: 'custom-alert',
-                'data-type': type
-            });
-
-            var iconClass = '';
-            var iconSymbol = '';
-            var barClass = (type === 'success') ? '' : 'error';
-
-            if (type === 'success') {
-                iconClass = 'success';
-                iconSymbol = '✓';
-                barClass = '';
-            } else if (type === 'error') {
-                iconClass = 'error';
-                iconSymbol = '⚠';
-                barClass = 'error';
-            } else if (type === 'warning') {
-                iconClass = 'warning';
-                iconSymbol = '⚠';
-                barClass = 'error';
-            }
-
-            var content = `
-        <div class="custom-alert-content">
-            <div class="custom-alert-icon ${iconClass}">
-                <span>${iconSymbol}</span>
-            </div>
-            <div class="custom-alert-message">
-                <strong>${title}</strong>
-                <span>${message}</span>
-                ${detail ? `<small style="display:block; margin-top:4px; font-size:11px; color:#888;">${detail}</small>` : ''}
-            </div>
-            <div class="custom-alert-close">×</div>
-        </div>
-        <div class="custom-alert-bar ${barClass}">
-            <div class="progress"></div>
-        </div>
-    `;
-
-            $alert.html(content);
-            $('body').append($alert);
-
-            $alert.find('.custom-alert-close').on('click', function() {
-                closeAlert($alert);
-            });
-
-            setTimeout(function() {
-                closeAlert($alert);
-            }, 3000);
-        }
-
-        function closeAlert($alert) {
-            $alert.addClass('fade-out');
-            setTimeout(function() {
-                $alert.remove();
-            }, 500);
-        }
-
         (function($) {
             $(document).ready(function() {
-
-                // ============================================
-                // 1. ELEMENTOS DA PÁGINA
-                // ============================================
                 const $tipoContrato = $('#id_tipo_contrato');
                 const $inputBusca = $('#inputSearchContext');
                 const $selectSearchType = $('#selectSearchType');
@@ -579,170 +571,307 @@
                 const $boxContratoOutsourcing = $('#boxContratoOutsourcing');
                 const $resultadoBuscaContainer = $('#resultadoBuscaContainer');
 
-                // Esconder o botão Buscar - busca automática via Enter ou blur
-                $('#btnBuscarContrato').hide();
+                // ============================================
+                // FUNÇÕES DE UTILIDADE
+                // ============================================
+                function apenasNumeros(valor) {
+                    return String(valor).replace(/\D/g, '');
+                }
+
+                function limparCamposFormulario() {
+                    $('#id_contrato').val('0');
+                    $('#id_contato').val('0');
+                    $('#id_equipamento').val('0');
+                    $('#id_dominio').val('0');
+                    $('#id_backup').val('0');
+                    $('#id_suporte').val('0');
+                    $('#id_pessoa').val('0');
+                    $('#nome, #email, #telefone').val('');
+                }
+
+                function limparResultados() {
+                    $resultadoBuscaContainer.hide().empty();
+                }
 
                 // ============================================
-                // 2. CONTROLE DE BLOCOS
+                // FUNÇÃO PARA EXTRAIR ID DE QUALQUER FONTE
                 // ============================================
-                function showBlocksByType(tipo) {
-                    const tipoNumero = parseInt(tipo);
+                function extrairIdContrato(option) {
+                    var $opt = $(option);
+                    var id = parseInt($opt.data('id-contrato'), 10) || 0;
+                    if (id > 0) return id;
 
-                    // Esconde ambos por padrão
-                    $boxContratoOutsourcing.hide();
-                    $boxBuscaDados.hide();
-                    $resultadoBuscaContainer.hide().find('.col-md-12').empty();
+                    var val = $opt.val();
+                    if (val && val !== '' && val !== '0') {
+                        id = parseInt(val, 10);
+                    }
 
-                    if (tipoNumero === 1) {
-                        $boxContratoOutsourcing.show();
-                    } else if (tipoNumero >= 2 && tipoNumero <= 7) {
-                        $boxBuscaDados.show();
+                    if (!id || id === 0) {
+                        var dataId = parseInt($opt.data('id-contrato'), 10);
+                        if (dataId && dataId > 0) {
+                            id = dataId;
+                        }
+                    }
+
+                    if (!id || id === 0) {
+                        var dataDominio = parseInt($opt.data('id-dominio'), 10);
+                        if (dataDominio && dataDominio > 0) {
+                            id = dataDominio;
+                        }
+                    }
+
+                    if (!id || id === 0) {
+                        var dataBackup = parseInt($opt.data('id-backup'), 10);
+                        if (dataBackup && dataBackup > 0) {
+                            id = dataBackup;
+                        }
+                    }
+
+                    if (!id || id === 0) {
+                        var dataSuporte = parseInt($opt.data('id-suporte'), 10);
+                        if (dataSuporte && dataSuporte > 0) {
+                            id = dataSuporte;
+                        }
+                    }
+
+                    if (!id || id === 0) {
+                        var dataLocacao = parseInt($opt.data('id-locacao'), 10);
+                        if (dataLocacao && dataLocacao > 0) {
+                            id = dataLocacao;
+                        }
+                    }
+
+                    return id;
+                }
+
+                // ============================================
+                // FUNÇÃO PRINCIPAL: PREENCHER DADOS DO CONTRATO
+                // ============================================
+                function preencherDadosContrato(dados) {
+                    console.log('=== PREENCHENDO DADOS DO CONTRATO ===');
+                    console.log('Dados recebidos:', dados);
+
+                    var idContrato = parseInt(dados.id_contrato, 10) || 0;
+                    var idContato = parseInt(dados.id_contato, 10) || 0;
+                    var idPessoa = parseInt(dados.id_pessoa, 10) || 0;
+                    var idDominio = parseInt(dados.id_dominio, 10) || 0;
+                    var idBackup = parseInt(dados.id_backup, 10) || 0;
+                    var idSuporte = parseInt(dados.id_suporte, 10) || 0;
+
+                    console.log('ID do contrato FINAL:', idContrato);
+
+                    $('#id_contrato').val(idContrato);
+                    $('#id_contato').val(idContato);
+                    $('#id_pessoa').val(idPessoa);
+
+                    if (idDominio > 0) $('#id_dominio').val(idDominio);
+                    if (idBackup > 0) $('#id_backup').val(idBackup);
+                    if (idSuporte > 0) $('#id_suporte').val(idSuporte);
+                    if (dados.id_equipamento) $('#id_equipamento').val(parseInt(dados.id_equipamento, 10) || 0);
+
+                    if (dados.nome) $('#nome').val(dados.nome);
+                    if (dados.email) $('#email').val(dados.email);
+                    if (dados.telefone) $('#telefone').val(dados.telefone);
+
+                    if (idContrato > 0) {
+                        console.log('✅ Contrato ID #' + idContrato + ' selecionado');
+                        showSuccessAlert('Contrato selecionado!', 'ID #' + idContrato);
+                    } else {
+                        console.warn('⚠️ ID do contrato não identificado');
+                        showWarningAlert('Atenção', 'ID do contrato não identificado.');
+                    }
+
+                    // Aplica validação após preencher os dados
+                    aplicarValidacaoCampos();
+                    return idContrato;
+                }
+
+                function showSuccessAlert(message, detail) {
+                    showAlert('success', '✅ Sucesso!', message, detail);
+                }
+
+                function showErrorAlert(message, detail) {
+                    showAlert('error', '❌ Atenção!', message, detail);
+                }
+
+                function showWarningAlert(message, detail) {
+                    showAlert('warning', '⚠️ Atenção!', message, detail);
+                }
+
+                function showAlert(type, title, message, detail) {
+                    $('.custom-alert').remove();
+                    var $alert = $('<div>', {
+                        class: 'custom-alert',
+                        'data-type': type
+                    });
+                    var iconClass = '';
+                    var iconSymbol = '';
+                    var barClass = (type === 'success') ? '' : 'error';
+                    if (type === 'success') {
+                        iconClass = 'success';
+                        iconSymbol = '✓';
+                        barClass = '';
+                    } else if (type === 'error') {
+                        iconClass = 'error';
+                        iconSymbol = '⚠';
+                        barClass = 'error';
+                    } else if (type === 'warning') {
+                        iconClass = 'warning';
+                        iconSymbol = '⚠';
+                        barClass = 'error';
+                    }
+                    var content =
+                        `<div class="custom-alert-content"><div class="custom-alert-icon ${iconClass}"><span>${iconSymbol}</span></div><div class="custom-alert-message"><strong>${title}</strong><span>${message}</span>${detail ? `<small style="display:block; margin-top:4px; font-size:11px; color:#888;">${detail}</small>` : ''}</div><div class="custom-alert-close">×</div></div><div class="custom-alert-bar ${barClass}"><div class="progress"></div></div>`;
+                    $alert.html(content);
+                    $('body').append($alert);
+                    $alert.find('.custom-alert-close').on('click', function() {
+                        closeAlert($alert);
+                    });
+                    setTimeout(function() {
+                        closeAlert($alert);
+                    }, 3000);
+                }
+
+                function closeAlert($alert) {
+                    $alert.addClass('fade-out');
+                    setTimeout(function() {
+                        $alert.remove();
+                    }, 500);
+                }
+
+                // ============================================
+                // GERENCIAMENTO DE VALIDAÇÃO - CORRIGIDO
+                // ============================================
+                function aplicarValidacaoCampos() {
+                    const tipoContrato = $('#id_tipo_contrato').val();
+
+                    function validarCampo($el, tipo) {
+                        if (!$el || $el.length === 0) return;
+                        if (!$el.is(':visible')) {
+                            $el.removeClass('campo-obrigatorio campo-valido');
+                            return;
+                        }
+
+                        let valido = false;
+
+                        if (tipo === 'select') {
+                            const valor = $el.val();
+                            valido = (valor !== '' && valor !== null && valor !== '0');
+
+                            if ($el.is('#selectTipoSolicitacao')) {
+                                valido = (valor !== '' && valor !== null && parseInt(valor) > 0);
+                            }
+                        } else if (tipo === 'textarea') {
+                            const valor = $el.val().trim();
+                            valido = (valor !== '');
+                        } else if (tipo === 'input') {
+                            const valor = $el.val().trim();
+                            valido = (valor !== '');
+
+                            if (valido && $el.is('#email')) {
+                                valido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+                            }
+
+                            if (valido && $el.is('#telefone')) {
+                                const numeros = valor.replace(/\D/g, '');
+                                valido = (numeros.length >= 10);
+                            }
+                        }
+
+                        $el.removeClass('campo-obrigatorio campo-valido');
+
+                        if (valido) {
+                            $el.addClass('campo-valido');
+                        } else if ($el.is(':visible') && ($el.prop('required') || $el.is('[required]'))) {
+                            $el.addClass('campo-obrigatorio');
+                        }
+                    }
+
+                    validarCampo($('#nome'), 'input');
+                    validarCampo($('#email'), 'input');
+                    validarCampo($('#telefone'), 'input');
+                    validarCampo($('#selectTipoSolicitacao'), 'select');
+                    validarCampo($('select[name="urgencia"]'), 'select');
+                    validarCampo($('textarea[name="solicitacao"]'), 'textarea');
+
+                    if (tipoContrato === '1') {
+                        validarCampo($('#inputCodigoContrato'), 'input');
+                        validarCampo($('#codigo_equipamento'), 'input');
                     }
                 }
 
                 // ============================================
-                // 3. FUNÇÃO PARA GERENCIAR CAMPOS REQUIRED DINAMICAMENTE
+                // GERENCIAMENTO DE REQUIRED
                 // ============================================
                 function gerenciarCamposRequired() {
                     const tipoContrato = $('#id_tipo_contrato').val();
 
-                    // Campos do Helpdesk (Tipo 1)
                     const $contrato = $('#inputCodigoContrato');
                     const $equipamento = $('#codigo_equipamento');
                     const $searchContext = $('#inputSearchContext');
                     const $searchTypeSelect = $('#selectSearchType');
 
-                    // Remove required de todos os campos dinâmicos
                     $contrato.prop('required', false);
                     $equipamento.prop('required', false);
                     $searchContext.prop('required', false);
                     $searchTypeSelect.prop('required', false);
 
                     if (tipoContrato === '1') {
-                        // Helpdesk: ativa required para contrato e equipamento
-                        $contrato.prop('required', true);
-                        $equipamento.prop('required', true);
-                        console.log('Required ativado para CONTRATO e EQUIPAMENTO');
-                    } else if (tipoContrato >= 2 && tipoContrato <= 7) {
-                        // Outros tipos: ativa required para o campo de busca e tipo de busca
-                        $searchContext.prop('required', true);
-                        $searchTypeSelect.prop('required', true);
-                        console.log('Required ativado para campo de busca e tipo de busca');
-                    }
-                }
-
-                // ============================================
-                // 4. EVENTO DE MUDANÇA DO TIPO DE CONTRATO
-                // ============================================
-                $tipoContrato.on('change', function() {
-                    showBlocksByType(this.value);
-                    gerenciarCamposRequired();
-                    limparCamposFormulario();
-                    $resultadoBuscaContainer.hide().find('.col-md-12').empty();
-                    $('#inputSearchContext').val('');
-                    $('#inputCodigoContrato, #codigo_equipamento').val('');
-                });
-
-                // Inicialização
-                showBlocksByType($tipoContrato.val());
-                gerenciarCamposRequired();
-
-                // ============================================
-                // 5. MÁSCARA DO TELEFONE
-                // ============================================
-                if ($.fn.mask) {
-                    $('#telefone').mask('(00) 00000-0000');
-                }
-
-                // ============================================
-                // FUNÇÃO PARA LIMPAR RESULTADOS
-                // ============================================
-                function limparResultados() {
-                    $resultadoBuscaContainer.hide().find('.col-md-12').empty();
-                }
-
-                // ============================================
-                // FUNÇÃO PARA LIMPAR CAMPOS DO FORMULÁRIO
-                // ============================================
-                function limparCamposFormulario() {
-                    $('#nome').val('');
-                    $('#email').val('');
-                    $('#telefone').val('');
-                }
-
-                // ============================================
-                // FUNÇÃO PARA REMOVER FORMATAÇÃO
-                // ============================================
-                function apenasNumeros(valor) {
-                    return valor.replace(/\D/g, '');
-                }
-
-                // ============================================
-                // FUNÇÃO PARA VERIFICAR SE DADOS ESTÃO VAZIOS
-                // ============================================
-                function verificarDadosVazios(nome, email, telefone) {
-                    if ((!nome || nome === '') && (!email || email === '') && (!telefone || telefone === '')) {
-                        showWarningAlert('Dados de cadastro vazios!', 'Este contrato não possui informações de contato cadastradas.');
-                        return true;
-                    }
-                    return false;
-                }
-
-                // ============================================
-                // BUSCAR DADOS DO CONTATO POR ID
-                // ============================================
-                function buscarDadosContato(id_contato, callback) {
-                    $.ajax({
-                        url: 'buscar-contrato',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            id_contato: id_contato
-                        },
-                        success: function(resposta) {
-                            if (resposta.success) {
-                                var nome = resposta.nome || '';
-                                var email = resposta.email || '';
-                                var telefone = resposta.telefone || '';
-
-                                if (verificarDadosVazios(nome, email, telefone)) {
-                                    limparCamposFormulario();
-                                } else {
-                                    $('#nome').val(nome);
-                                    $('#email').val(email);
-                                    $('#telefone').val(telefone);
-                                    showSuccessAlert('Contato carregado!', 'Dados preenchidos automaticamente');
-                                }
-                                if (callback) callback(true);
-                            } else {
-                                showErrorAlert('Erro', resposta.erro || 'Contato não encontrado');
-                                limparCamposFormulario();
-                                if (callback) callback(false);
-                            }
-                        },
-                        error: function(xhr) {
-                            console.error(xhr.responseText);
-                            showErrorAlert('Erro', 'Não foi possível carregar os dados do contato');
-                            limparCamposFormulario();
-                            if (callback) callback(false);
+                        if ($('#boxContratoOutsourcing').is(':visible')) {
+                            $contrato.prop('required', true);
+                            $equipamento.prop('required', true);
                         }
-                    });
+                    }
+
+                    if (['2', '4', '5', '6', '7'].includes(tipoContrato)) {
+                        if ($('#boxBuscaDados').is(':visible')) {
+                            $searchContext.prop('required', true);
+                            $searchTypeSelect.prop('required', true);
+                        }
+                    }
                 }
 
                 // ============================================
-                // BUSCA HELPDESK (TIPO 1)
+                // SHOW BLOCKS BY TYPE
                 // ============================================
+                function showBlocksByType(tipo) {
+                    const tipoNumero = parseInt(tipo);
+                    $boxContratoOutsourcing.hide();
+                    $boxBuscaDados.hide();
+                    $resultadoBuscaContainer.hide().empty();
+                    if (tipoNumero === 1) $boxContratoOutsourcing.show();
+                    else if (tipoNumero >= 2 && tipoNumero <= 7) $boxBuscaDados.show();
+                }
+
+                // ============================================
+                // BUSCA DE CONTRATO (AJAX)
+                // ============================================
+                var buscaTimeoutId = null;
+                var buscaHelpdeskEmAndamento = false;
+                var ultimaBuscaHelpdesk = '';
+
                 function buscarContratoHelpdesk() {
                     const tipoContrato = $('#id_tipo_contrato').val();
                     if (tipoContrato !== '1') return;
-
                     const contrato = $('#inputCodigoContrato').val().trim();
                     const equipamento = $('#codigo_equipamento').val().trim();
+                    if (!contrato || !equipamento) return;
 
-                    if (!contrato && !equipamento) return;
+                    const buscaAtual = contrato + '|' + equipamento;
+                    if (buscaAtual === ultimaBuscaHelpdesk && (buscaHelpdeskEmAndamento || ($('#id_contrato').val() !== '0' && $('#id_equipamento').val() !== '0'))) return;
+                    ultimaBuscaHelpdesk = buscaAtual;
+                    buscaHelpdeskEmAndamento = true;
+
+                    limparCamposFormulario();
+                    limparResultados();
+
+                    if (buscaTimeoutId) {
+                        clearTimeout(buscaTimeoutId);
+                        buscaTimeoutId = null;
+                    }
 
                     $.ajax({
-                        url: 'buscar-contrato',
+                        url: 'index.php?page=buscar-contrato',
                         type: 'POST',
                         dataType: 'json',
                         data: {
@@ -752,46 +881,70 @@
                         },
                         beforeSend: function() {
                             $('#inputCodigoContrato, #codigo_equipamento').css('opacity', '0.6');
-                            limparCamposFormulario();
+                            buscaTimeoutId = setTimeout(function() {
+                                if ($.active > 0) {
+                                    showErrorAlert('Tempo esgotado', 'A busca está demorando muito. Tente novamente.');
+                                    $('#inputCodigoContrato, #codigo_equipamento').css('opacity', '1');
+                                    limparResultados();
+                                    aplicarValidacaoCampos();
+                                }
+                            }, 30000);
                         },
                         success: function(resposta) {
+                            if (buscaTimeoutId) {
+                                clearTimeout(buscaTimeoutId);
+                                buscaTimeoutId = null;
+                            }
                             if (resposta.erro) {
                                 showErrorAlert('Nenhum contrato encontrado', resposta.erro);
                                 limparCamposFormulario();
                             } else if (resposta.success) {
-                                var nome = resposta.nome || '';
-                                var email = resposta.email || '';
-                                var telefone = resposta.telefone || '';
-
-                                if (verificarDadosVazios(nome, email, telefone)) {
-                                    limparCamposFormulario();
-                                } else {
-                                    $('#nome').val(nome);
-                                    $('#email').val(email);
-                                    $('#telefone').val(telefone);
-                                    showSuccessAlert('Dados encontrados!', 'Contrato carregado com sucesso');
-                                }
+                                var dados = {
+                                    id_contrato: resposta.id_contrato || 0,
+                                    id_contato: resposta.id_contato || 0,
+                                    id_pessoa: resposta.id_pessoa || 0,
+                                    id_equipamento: resposta.id_equipamento || 0,
+                                    nome: resposta.nome || '',
+                                    email: resposta.email || '',
+                                    telefone: resposta.telefone || '',
+                                    codigo_contrato: resposta.codigo_contrato || '',
+                                    descricao_contrato: resposta.descricao_contrato || ''
+                                };
+                                preencherDadosContrato(dados);
+                                showSuccessAlert('Contrato encontrado!', 'Dados carregados com sucesso');
                             }
-                            limparResultados();
+                            aplicarValidacaoCampos();
                         },
                         error: function(xhr) {
+                            if (buscaTimeoutId) {
+                                clearTimeout(buscaTimeoutId);
+                                buscaTimeoutId = null;
+                            }
                             console.error(xhr.responseText);
                             showErrorAlert('Erro na busca', 'Verifique o console');
                             limparResultados();
+                            aplicarValidacaoCampos();
                         },
                         complete: function() {
                             $('#inputCodigoContrato, #codigo_equipamento').css('opacity', '1');
+                            buscaHelpdeskEmAndamento = false;
+                            if (buscaTimeoutId) {
+                                clearTimeout(buscaTimeoutId);
+                                buscaTimeoutId = null;
+                            }
                         }
                     });
                 }
 
-                // ============================================
-                // FUNÇÃO PARA ENVIAR BUSCA (TIPOS 2-7)
-                // ============================================
                 function enviarBusca() {
                     const tipoContrato = $('#id_tipo_contrato').val();
                     const searchType = $('#selectSearchType').val();
                     let valorBusca = $('#inputSearchContext').val().trim();
+
+                    if (!tipoContrato || tipoContrato === '0' || tipoContrato === '') {
+                        showErrorAlert('Selecione o tipo de contrato', 'Escolha um tipo de contrato antes de buscar.');
+                        return;
+                    }
 
                     if (searchType === 'CNPJ' || searchType === 'CPF') {
                         valorBusca = apenasNumeros(valorBusca);
@@ -799,14 +952,35 @@
 
                     if (!valorBusca) {
                         showErrorAlert('Campo vazio', 'Informe um valor para busca');
+                        aplicarValidacaoCampos();
+                        return;
+                    }
+
+                    if (searchType === 'CPF' && valorBusca.length !== 11) {
+                        showErrorAlert('CPF inválido', 'O CPF deve ter 11 dígitos.');
+                        return;
+                    }
+
+                    if (searchType === 'CNPJ' && valorBusca.length !== 14) {
+                        showErrorAlert('CNPJ inválido', 'O CNPJ deve ter 14 dígitos.');
+                        return;
+                    }
+
+                    if (searchType === 'ID' && !/^\d+$/.test(valorBusca)) {
+                        showErrorAlert('ID inválido', 'Por favor, informe um número válido para busca.');
                         return;
                     }
 
                     limparCamposFormulario();
                     limparResultados();
 
+                    if (buscaTimeoutId) {
+                        clearTimeout(buscaTimeoutId);
+                        buscaTimeoutId = null;
+                    }
+
                     $.ajax({
-                        url: 'buscar-contrato',
+                        url: 'index.php?page=buscar-contrato',
                         type: 'POST',
                         dataType: 'json',
                         data: {
@@ -816,65 +990,194 @@
                         },
                         beforeSend: function() {
                             $('#inputSearchContext').css('opacity', '0.6');
+                            $resultadoBuscaContainer.html(
+                                '<div class="text-center p-2"><span class="loading-spinner"></span> Buscando...</div>'
+                            ).show();
+                            buscaTimeoutId = setTimeout(function() {
+                                if ($.active > 0) {
+                                    showErrorAlert('Tempo esgotado', 'A busca está demorando muito. Tente novamente.');
+                                    $('#inputSearchContext').css('opacity', '1');
+                                    limparResultados();
+                                    aplicarValidacaoCampos();
+                                }
+                            }, 30000);
                         },
                         success: function(resposta) {
-                            console.log('RESPOSTA COMPLETA:', resposta);
+                            if (buscaTimeoutId) {
+                                clearTimeout(buscaTimeoutId);
+                                buscaTimeoutId = null;
+                            }
+                            console.log('RESPOSTA DA BUSCA:', resposta);
 
                             if (resposta.erro) {
-                                showErrorAlert('Nenhum resultado encontrado', resposta.erro);
+                                showErrorAlert('Nenhum resultado', resposta.erro);
                                 limparCamposFormulario();
                                 limparResultados();
-                            } else if (resposta.success) {
+                                aplicarValidacaoCampos();
+                                return;
+                            }
+
+                            if (resposta.success) {
                                 if (resposta.select_html) {
-                                    $resultadoBuscaContainer.show().find('.col-md-12').html(resposta.select_html);
-                                    showSuccessAlert('Dados encontrados!', 'Múltiplos resultados. Selecione um abaixo.');
-                                    limparCamposFormulario();
-                                } else if (resposta.input_html) {
-                                    $resultadoBuscaContainer.show().find('.col-md-12').html(resposta.input_html);
-                                    setTimeout(function() {
-                                        var $input = $('#resultadoBusca');
-                                        var nome = $input.data('nome') || resposta.nome || '';
-                                        var email = $input.data('email') || resposta.email || '';
-                                        var telefone = $input.data('telefone') || resposta.telefone || '';
-                                        $('#nome').val(nome);
-                                        $('#email').val(email);
-                                        $('#telefone').val(telefone);
-                                        if (nome || email || telefone) {
-                                            showSuccessAlert('Dados encontrados!', 'Contato carregado com sucesso');
-                                        } else {
-                                            showWarningAlert('Dados de cadastro vazios!', 'Este contrato não possui informações de contato cadastradas.');
-                                        }
-                                    }, 100);
-                                } else if (resposta.nome || resposta.email || resposta.telefone) {
-                                    var nome = resposta.nome || '';
-                                    var email = resposta.email || '';
-                                    var telefone = resposta.telefone || '';
-                                    if (verificarDadosVazios(nome, email, telefone)) {
-                                        limparCamposFormulario();
+                                    $resultadoBuscaContainer.html(resposta.select_html).show();
+
+                                    var $select = $('#contrato_selecionado');
+                                    var totalOptions = $select.find('option').length;
+
+                                    if (totalOptions <= 2) {
+                                        showSuccessAlert('Contrato encontrado', 'Selecione o contrato na lista abaixo para continuar.');
                                     } else {
-                                        $('#nome').val(nome);
-                                        $('#email').val(email);
-                                        $('#telefone').val(telefone);
-                                        showSuccessAlert('Dados encontrados!', 'Contrato carregado com sucesso');
+                                        showSuccessAlert('Encontrados ' + (totalOptions - 1) + ' contratos', 'Selecione um na lista abaixo');
                                     }
+                                    limparCamposFormulario();
+                                } else {
+                                    const dados = {
+                                        id_contrato: parseInt(resposta.id_contrato, 10) || (searchType === 'ID' ? parseInt(valorBusca, 10) : 0),
+                                        id_contato: parseInt(resposta.id_contato, 10) || 0,
+                                        id_equipamento: parseInt(resposta.id_equipamento, 10) || 0,
+                                        id_dominio: parseInt(resposta.id_dominio, 10) || 0,
+                                        id_backup: parseInt(resposta.id_backup, 10) || 0,
+                                        id_suporte: parseInt(resposta.id_suporte, 10) || 0,
+                                        nome: resposta.nome || '',
+                                        email: resposta.email || '',
+                                        telefone: resposta.telefone || ''
+                                    };
+                                    const itemEncontrado = resposta.dominio || resposta.backup || resposta.suporte || resposta.locacao || '';
                                     limparResultados();
+                                    preencherDadosContrato(dados);
+                                    if (itemEncontrado) {
+                                        $resultadoBuscaContainer.text(itemEncontrado).show();
+                                    }
                                 }
                             }
+                            aplicarValidacaoCampos();
                         },
                         error: function(xhr) {
-                            console.error(xhr.responseText);
-                            showErrorAlert('Erro na busca', 'Verifique o console');
+                            if (buscaTimeoutId) {
+                                clearTimeout(buscaTimeoutId);
+                                buscaTimeoutId = null;
+                            }
+                            console.error('ERRO AJAX:', xhr.responseText);
+                            showErrorAlert('Erro na busca', 'Não foi possível conectar ao servidor');
                             limparResultados();
+                            aplicarValidacaoCampos();
                         },
                         complete: function() {
                             $('#inputSearchContext').css('opacity', '1');
+                            if (buscaTimeoutId) {
+                                clearTimeout(buscaTimeoutId);
+                                buscaTimeoutId = null;
+                            }
                         }
                     });
                 }
 
                 // ============================================
-                // BUSCA AUTOMÁTICA (sem botão)
+                // PROCESSAR SELEÇÃO DO SELECT
                 // ============================================
+                $(document).on('change', '#contrato_selecionado', function() {
+                    var optionSelected = $(this).find('option:selected');
+
+                    if (!optionSelected.val() || optionSelected.val() === '' || optionSelected.val() === '0') {
+                        var id = extrairIdContrato(optionSelected);
+                        if (id > 0) {
+                            var dados = {
+                                id_contrato: id,
+                                id_dominio: parseInt(optionSelected.data('id-dominio'), 10) || 0,
+                                id_backup: parseInt(optionSelected.data('id-backup'), 10) || 0,
+                                id_suporte: parseInt(optionSelected.data('id-suporte'), 10) || 0,
+                                id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
+                                id_equipamento: parseInt(optionSelected.data('id-equipamento'), 10) || 0,
+                                id_pessoa: parseInt(optionSelected.data('id-pessoa'), 10) || 0,
+                                nome: optionSelected.data('nome') || '',
+                                email: optionSelected.data('email') || '',
+                                telefone: optionSelected.data('telefone') || '',
+                                codigo_contrato: optionSelected.data('codigo') || '',
+                                descricao_contrato: optionSelected.data('descricao') || '',
+                                dominio: optionSelected.data('dominio') || ''
+                            };
+                            preencherDadosContrato(dados);
+                            $resultadoBuscaContainer.hide().empty();
+                            aplicarValidacaoCampos();
+                            return;
+                        }
+
+                        limparCamposFormulario();
+                        aplicarValidacaoCampos();
+                        return;
+                    }
+
+                    var idContrato = parseInt(optionSelected.val(), 10);
+
+                    var dados = {
+                        id_contrato: idContrato,
+                        id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
+                        id_pessoa: parseInt(optionSelected.data('id-pessoa'), 10) || 0,
+                        id_dominio: parseInt(optionSelected.data('id-dominio'), 10) || 0,
+                        id_backup: parseInt(optionSelected.data('id-backup'), 10) || 0,
+                        id_suporte: parseInt(optionSelected.data('id-suporte'), 10) || 0,
+                        nome: optionSelected.data('nome') || '',
+                        email: optionSelected.data('email') || '',
+                        telefone: optionSelected.data('telefone') || '',
+                        codigo_contrato: optionSelected.data('codigo') || '',
+                        descricao_contrato: optionSelected.data('descricao') || '',
+                        dominio: optionSelected.data('dominio') || '',
+                        cpf: optionSelected.data('cpf') || '',
+                        cnpj: optionSelected.data('cnpj') || ''
+                    };
+
+                    preencherDadosContrato(dados);
+                    $resultadoBuscaContainer.hide().empty();
+                    aplicarValidacaoCampos();
+                });
+
+                $(document).on('change', '#resultadoBusca', function() {
+                    var optionSelected = $(this).find('option:selected');
+                    var id = extrairIdContrato(optionSelected);
+
+                    if (id > 0) {
+                        var $select = $('#contrato_selecionado');
+                        if ($select.length) {
+                            $select.val(id);
+                            $select.trigger('change');
+                        } else {
+                            var dados = {
+                                id_contrato: id,
+                                id_dominio: parseInt(optionSelected.data('id-dominio'), 10) || 0,
+                                id_backup: parseInt(optionSelected.data('id-backup'), 10) || 0,
+                                id_suporte: parseInt(optionSelected.data('id-suporte'), 10) || 0,
+                                id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
+                                id_equipamento: parseInt(optionSelected.data('id-equipamento'), 10) || 0,
+                                id_pessoa: parseInt(optionSelected.data('id-pessoa'), 10) || 0,
+                                nome: optionSelected.data('nome') || '',
+                                email: optionSelected.data('email') || '',
+                                telefone: optionSelected.data('telefone') || '',
+                                codigo_contrato: optionSelected.data('codigo') || '',
+                                descricao_contrato: optionSelected.data('descricao') || '',
+                                dominio: optionSelected.data('dominio') || ''
+                            };
+                            preencherDadosContrato(dados);
+                            $resultadoBuscaContainer.hide().empty();
+                            aplicarValidacaoCampos();
+                        }
+                    } else {
+                        limparCamposFormulario();
+                    }
+                });
+
+                // ============================================
+                // EVENTOS DO FORMULÁRIO
+                // ============================================
+                $tipoContrato.on('change', function() {
+                    showBlocksByType(this.value);
+                    gerenciarCamposRequired();
+                    limparCamposFormulario();
+                    limparResultados();
+                    $('#inputSearchContext').val('');
+                    $('#inputCodigoContrato, #codigo_equipamento').val('');
+                    aplicarValidacaoCampos();
+                });
+
                 $('#inputCodigoContrato, #codigo_equipamento').on('keypress', function(e) {
                     if (e.which === 13) {
                         e.preventDefault();
@@ -888,61 +1191,191 @@
                     if (contrato !== '' || equipamento !== '') {
                         buscarContratoHelpdesk();
                     }
+                    aplicarValidacaoCampos();
                 });
 
                 $('#inputSearchContext').on('keypress', function(e) {
                     if (e.which === 13) {
                         e.preventDefault();
-                        enviarBusca();
+                        const valor = $(this).val().trim();
+                        if (valor !== '') {
+                            enviarBusca();
+                        }
                     }
                 });
 
                 $('#inputSearchContext').on('blur', function() {
                     const valor = $(this).val().trim();
                     if (valor !== '') {
-                        enviarBusca();
+                        const searchType = $('#selectSearchType').val();
+                        let valorLimpo = valor;
+                        if (searchType === 'CNPJ' || searchType === 'CPF') {
+                            valorLimpo = apenasNumeros(valor);
+                        }
+                        if (valorLimpo.length >= 1) {
+                            enviarBusca();
+                        }
                     }
+                    aplicarValidacaoCampos();
                 });
 
-                // ============================================
-                // QUANDO MUDAR O TIPO DE BUSCA
-                // ============================================
                 $('#selectSearchType').on('change', function() {
                     limparCamposFormulario();
                     $('#inputSearchContext').val('');
                     limparResultados();
-                    console.log('Tipo de busca alterado para:', $(this).val());
+                    aplicarValidacaoCampos();
                 });
 
                 // ============================================
-                // PREENCHER FORMULÁRIO AO SELECIONAR RESULTADO
+                // MÁSCARA DOS CAMPOS
                 // ============================================
-                $(document).on('change', '#resultadoBusca', function() {
-                    if (this.tagName === 'SELECT') {
-                        var optionSelected = $(this).find('option:selected');
-                        var id_contato = $(this).val();
-                        if (!id_contato) {
-                            limparCamposFormulario();
-                            return;
-                        }
-                        $('#nome').val('Carregando...');
-                        $('#email').val('Carregando...');
-                        $('#telefone').val('Carregando...');
-                        console.log('Selecionado:', optionSelected.text(), 'ID Contato:', id_contato);
-                        buscarDadosContato(id_contato);
+                $('#selectSearchType').on('change', function() {
+                    const tipo = $(this).val();
+                    const $campoBusca = $('#inputSearchContext');
+                    $campoBusca.val('');
+                    if (tipo === 'CNPJ') {
+                        $campoBusca.mask('00.000.000/0000-00', {
+                            reverse: true
+                        });
+                        $campoBusca.attr('placeholder', 'Digite o CNPJ');
+                    } else if (tipo === 'CPF') {
+                        $campoBusca.mask('000.000.000-00', {
+                            reverse: true
+                        });
+                        $campoBusca.attr('placeholder', 'Digite o CPF');
+                    } else {
+                        $campoBusca.unmask();
+                        $campoBusca.attr('placeholder', 'Digite o ID do contrato');
                     }
+                    aplicarValidacaoCampos();
+                });
+                $('#selectSearchType').trigger('change');
+
+                if ($.fn.mask) {
+                    $('#telefone').mask('(00) 00000-0000');
+                }
+
+                // ============================================
+                // VALIDAÇÃO DOS CAMPOS EM TEMPO REAL - COM ONCHANGE E ONINPUT
+                // ============================================
+
+                // --- CAMPOS PRINCIPAIS ---
+                // Evento 'input' - dispara enquanto digita
+                $('#nome, #email, #telefone, #selectTipoSolicitacao, select[name="urgencia"], textarea[name="solicitacao"]')
+                    .on('input change', function() {
+                        aplicarValidacaoCampos();
+                    });
+
+                // Evento 'blur' - dispara quando perde o foco
+                $('#nome, #email, #telefone, #selectTipoSolicitacao, select[name="urgencia"], textarea[name="solicitacao"]')
+                    .on('blur', function() {
+                        aplicarValidacaoCampos();
+                    });
+
+                // --- CAMPOS DO HELPDESK ---
+                $('#inputCodigoContrato, #codigo_equipamento')
+                    .on('input change', function() {
+                        aplicarValidacaoCampos();
+                    });
+
+                $('#inputCodigoContrato, #codigo_equipamento')
+                    .on('blur', function() {
+                        aplicarValidacaoCampos();
+                    });
+
+                // --- CAMPO DE BUSCA ---
+                $('#inputSearchContext')
+                    .on('input change', function() {
+                        aplicarValidacaoCampos();
+                    })
+                    .on('blur', function() {
+                        aplicarValidacaoCampos();
+                    });
+
+                // --- SELECT DE TIPO DE CONTRATO ---
+                $('#id_tipo_contrato').on('change', function() {
+                    aplicarValidacaoCampos();
+                });
+
+                // --- SELECT DE TIPO DE BUSCA ---
+                $('#selectSearchType').on('change', function() {
+                    aplicarValidacaoCampos();
                 });
 
                 // ============================================
-                // VALIDAÇÃO DO FORMULÁRIO ANTES DE ENVIAR
+                // VALIDAÇÃO FINAL NO ENVIO
                 // ============================================
                 $('#formChamado').on('submit', function(e) {
-                    const tipoContrato = $('#id_tipo_contrato').val();
+                    var tipoContrato = $('#id_tipo_contrato').val();
+                    var searchType = $('#selectSearchType').val();
+
+                    if (searchType === 'ID') {
+                        var idDigitado = $('#inputSearchContext').val().trim();
+                        if (idDigitado) {
+                            var idNum = parseInt(idDigitado.replace(/[^0-9]/g, ''), 10);
+                            if (idNum > 0) {
+                                $('#id_contrato').val(idNum);
+                            } else {
+                                var numeros = idDigitado.match(/\d+/g);
+                                if (numeros && numeros.length > 0) {
+                                    idNum = parseInt(numeros[0], 10);
+                                    if (idNum > 0) {
+                                        $('#id_contrato').val(idNum);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (searchType === 'CPF' || searchType === 'CNPJ') {
+                        var $select = $('#contrato_selecionado');
+                        if ($select.length && $select.val() && $select.val() !== '' && $select.val() !== '0') {
+                            $('#id_contrato').val($select.val());
+                        } else {
+                            var $selectOld = $('#resultadoBusca');
+                            if ($selectOld.length) {
+                                var optionSelected = $selectOld.find('option:selected');
+                                var id = extrairIdContrato(optionSelected);
+                                if (id > 0) {
+                                    $('#id_contrato').val(id);
+                                }
+                            }
+                        }
+                    }
+
+                    var camposInvalidos = [];
+
+                    if (!$('#nome').val().trim()) {
+                        camposInvalidos.push('Nome');
+                    }
+
+                    if (!$('#email').val().trim()) {
+                        camposInvalidos.push('E-mail');
+                    }
+
+                    if (!$('#selectTipoSolicitacao').val()) {
+                        camposInvalidos.push('Tipo de Solicitação');
+                    }
+
+                    if (!$('textarea[name="solicitacao"]').val().trim()) {
+                        camposInvalidos.push('Descrição da solicitação');
+                    }
 
                     if (!tipoContrato || tipoContrato === '0' || tipoContrato === '') {
                         e.preventDefault();
-                        showErrorAlert('Selecione um tipo de contrato', 'Por favor, selecione um tipo de contrato válido.');
+                        showErrorAlert('Selecione um tipo de contrato',
+                            'Por favor, selecione um tipo de contrato válido.');
                         return false;
+                    }
+
+                    if (tipoContrato !== '1') {
+                        var idContratoFinalCheck = $('#id_contrato').val();
+                        if (!idContratoFinalCheck || idContratoFinalCheck === '0') {
+                            e.preventDefault();
+                            showErrorAlert('Contrato não selecionado',
+                                'Por favor, busque e selecione um contrato antes de abrir o chamado.');
+                            return false;
+                        }
                     }
 
                     if (tipoContrato === '1') {
@@ -950,20 +1383,37 @@
                         const equipamento = $('#codigo_equipamento').val().trim();
                         if (!contrato || !equipamento) {
                             e.preventDefault();
-                            showErrorAlert('Campos obrigatórios', 'Por favor, preencha o Contrato e o Equipamento.');
+                            showErrorAlert('Campos obrigatórios',
+                                'Por favor, preencha o Contrato e o Equipamento.');
                             return false;
                         }
-                    } else if (tipoContrato >= 2 && tipoContrato <= 7) {
-                        const searchContext = $('#inputSearchContext').val().trim();
-                        if (!searchContext) {
+
+                        const idContratoHelpdesk = $('#id_contrato').val();
+                        if (!idContratoHelpdesk || idContratoHelpdesk === '0') {
                             e.preventDefault();
-                            showErrorAlert('Campo obrigatório', 'Por favor, informe um valor para busca.');
+                            showErrorAlert('Contrato não encontrado',
+                                'Por favor, aguarde a validação automática do contrato.');
                             return false;
                         }
                     }
 
+                    if (camposInvalidos.length > 0) {
+                        e.preventDefault();
+                        showErrorAlert('Campos obrigatórios',
+                            'Por favor, preencha os seguintes campos:\n• ' + camposInvalidos.join('\n• '));
+                        return false;
+                    }
+
                     return true;
                 });
+
+                // ============================================
+                // INICIALIZAÇÃO
+                // ============================================
+                showBlocksByType($tipoContrato.val());
+                gerenciarCamposRequired();
+                aplicarValidacaoCampos();
+
             });
         })(jQuery);
     </script>

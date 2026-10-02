@@ -1,139 +1,258 @@
 <?php
+// ============================================
+// chamados_interacoes.php - VERSÃO FUNCIONAL
+// ============================================
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-require_once __DIR__ . '/../../helpers/httpHelpers.php';
-require_once __DIR__ . '/../../helpers/contratoHelpers.php';
-require_once __DIR__ . '/../../helpers/sessionDataHelpers.php';
+// ============================================
+// CAPTURA OS PARÂMETROS
+// ============================================
+$idChamado = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$seguranca = isset($_GET['seguranca']) ? trim($_GET['seguranca']) : '';
 
-require_once __DIR__ . '/../../models/contrato.php';
-require_once __DIR__ . '/../../models/chamado.php';
+// ============================================
+// CONEXÃO COM O BANCO
+// ============================================
+try {
+    $dsn = 'mysql:host=bhcloud.com.br;dbname=bhcloud_bhinfor;charset=utf8';
+    $user = 'bhcloud_admin';
+    $pass = '$Qnv3hf@BeBL';
+    $pdo = new PDO($dsn, $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Erro de conexão: " . $e->getMessage());
+}
 
-require_once __DIR__ . '/../../services/uploadFileService.php';
-require_once __DIR__ . '/../../services/chamadoInteracoesService.php';
-
-$menu   = 'Chamados';
-$pagina = '';
-
-$chamado = null;
-
-$idChamado = $_GET['id'] ?? 0;
-$seguranca = $_GET['seguranca'] ?? 0;
-
-// $formName = 'form_interacao';
-// $formHash = '';
-
-$formName = 'form_nova_msg';
-$formHash = makeFormCSRF($formName);
-
+// ============================================
+// BUSCA O CHAMADO
+// ============================================
 $viewData = [
     'idChamado' => 0,
-    'seguranca' => 0,
+    'seguranca' => '',
     'idTipoContrato' => 0,
-    'idContatoCliente' => 0,
-    'idEqpto' => 0,
     'tipoContrato' => '',
     'situacao' => '',
+    'dataAbertura' => '',
+    'nome' => '',
+    'email' => '',
+    'telefone' => '',
+    'urgencia' => '',
+    'solicitacao' => '',
     'interacoes' => [],
-    'ultEventoNomeTecnico' => null,
-    'ultEventoDataEhHora' => null,
-    'ultEventoDescrEqpto' => null,
-    'mensagem' => null,
-    'tipoMensagem' => null,
-    'maxUploadFileSize' => UPLOAD_FILE_MAX_SIZE,
-    'acceptsUploadFileExts' => json_encode(UPLOAD_FILE_ACCEPT_EXTENSIONS, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE)
+    'error' => null
 ];
 
-function loadViewData($id, $seguranca, $viewData, $dbh=null) {
+if ($idChamado > 0 && !empty($seguranca)) {
+    try {
+        // Busca o chamado
+        $sql = "SELECT * FROM bhcloud_bhinfor.contrato_chamado WHERE id = ? AND seguranca = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idChamado, $seguranca]);
+        $chamado = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($chamado) {
+            $viewData['idChamado'] = $chamado['id'];
+            $viewData['seguranca'] = $chamado['seguranca'];
+            $viewData['idTipoContrato'] = $chamado['id_tipo_contrato'] ?? 0;
+            $viewData['situacao'] = $chamado['id_situacao'] ?? '';
+            $viewData['nome'] = $chamado['nome'] ?? '';
+            $viewData['email'] = $chamado['email'] ?? '';
+            $viewData['telefone'] = $chamado['telefone'] ?? '';
+            $viewData['urgencia'] = $chamado['urgencia'] ?? '';
+            
+            // Formata data
+            if (!empty($chamado['data_abertura'])) {
+                $viewData['dataAbertura'] = date('d/m/Y H:i:s', strtotime($chamado['data_abertura']));
+            }
+            
+            // Busca interações do chamado
+            $sqlInteracoes = "SELECT * FROM bhcloud_bhinfor.contrato_chamado_eventos WHERE id_chamado = ? ORDER BY data DESC, hora DESC";
+            $stmtInteracoes = $pdo->prepare($sqlInteracoes);
+            $stmtInteracoes->execute([$idChamado]);
+            $viewData['interacoes'] = $stmtInteracoes->fetchAll(PDO::FETCH_ASSOC);
+            
+        } else {
+            $viewData['error'] = 'Chamado não encontrado.';
+        }
+    } catch (PDOException $e) {
+        $viewData['error'] = 'Erro ao buscar chamado: ' . $e->getMessage();
+    }
+} else {
+    $viewData['error'] = 'Parâmetros inválidos.';
+}
 
-    if (!isset($id) || !isset($seguranca)) {
-        $viewData['error'] = 'Parametros inválidos.';
-        include 'views/visitante/chamados_interacoes.php';
+if (isset($_GET['endpoint'])) {
+    header('Content-Type: application/json; charset=utf-8');
+
+    if ($viewData['error']) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => $viewData['error']]);
         exit;
     }
 
-    $chamado = obterChamadoPorIdEhCodSeguranca($id, $seguranca);
+    $endpoint = $_GET['endpoint'];
 
-    if (!isset($chamado) || !arrayHasKeys($chamado, ['id', 'seguranca', 'id_situacao'])) {
-        $viewData['error'] = 'Chamado inválido.';
-        return $viewData;
-    }
-
-    $idChamado = $chamado['id'] ?? 0;
-    $viewData['idChamado'] = $idChamado;
-    $viewData['seguranca'] = $chamado['seguranca'] ?? 0;
-
-    $viewData['idTipoContrato'] = $chamado['id_tipo_contrato'] ?? 0;
-    $viewData['tipoContrato'] = $chamado['tipo_contrato'] ?? '';
-
-    if ($chamado['id_situacao'] == CHAMADO_EVENTO_STATUS_FINALIZADO) {
-        $viewData['error'] = 'Esse chamado ja foi finalizado.';
-        $viewData['situacao'] = 'finalizado';
-        return $viewData;
-    }
-
-    $viewData['situacao'] = $chamado['situacao'] ?? '';
-
-    $interacoes = comporChamadoEventosComPessoas($idChamado);
-    $viewData['interacoes'] = $interacoes ?? [];
-
-    $primeiraInteracao = $interacoes[0];
-    $ultimaInteracao = $interacoes[sizeof($interacoes) - 1];
-
-    $viewData['idEqpto'] = $primeiraInteracao['id_equipamento'] ?? 0;
-
-    $idRespAbertura = $chamado['resp_abertura'] ?? 0;
-
-    $idContato = $primeiraInteracao['id_contato'] ?? 0;
-    $viewData['idContatoCliente'] = isValidInteger($idContato) ? $idContato : $idRespAbertura;
-    if (empty($viewData['idContatoCliente'])) {
-        $viewData['idContatoCliente'] = $primeiraInteracao['id_pessoa_contato'] ?? ($primeiraInteracao['id_pessoa_cliente'] ?? 0);
-    }
-
-    $idContrato = getSafeArrayKeyValue($primeiraInteracao, 'id_contrato');
-    $idTipoContrato = getSafeArrayKeyValue($primeiraInteracao, 'id_tipo_contrato');
-
-    $viewData['dataAbertura'] = data_brasil(substr($chamado['data_abertura'], 0, 10));
-
-    $dadosTecnicoSuporte = obterDadosTecnicoSuporteDeChamadoEventos($interacoes, $dbh);
-
-    $viewData['ultEventoNomeTecnico'] = $dadosTecnicoSuporte
-        ? $dadosTecnicoSuporte['nome_pessoa']
-        : '';
-
-    $viewData['ultEventoDataEhHora'] = data_brasil($ultimaInteracao['data']) . " às " . $ultimaInteracao['hora'];
-    $viewData['ultEventoDescrEqpto'] = '';
-
-    $idEqpto = 0;
-
-    if (isContratoTipoOutsourcing($idTipoContrato)) {
-        $idEqpto = $primeiraInteracao['id_equipamento'] ?? 0;
-
-        $eqptoData = obterContratoOutsrcEqptoPorIdEqptoEhIdContrato($idEqpto, $idContrato);
-
-        $idPessoaContato = getSafeArrayKeyValue($eqptoData, 'id_pessoa_contato', 0);
-        $tipoEqpto = getSafeArrayKeyValue($eqptoData, 'tipo_equipamento');
-
-        $etiquetaCodigoContrato = getSafeArrayKeyValue($eqptoData, 'etiqueta_codigo_contrato', 0);
-        $etiquetaCodigoEqpto = getSafeArrayKeyValue($eqptoData, 'etiqueta_codigo_equipamento', 0);
-
-        $codigoEtiqueta = sprintf('[%s|%s]',
-            str_pad($etiquetaCodigoContrato, 2, '0', STR_PAD_LEFT),
-            str_pad($etiquetaCodigoEqpto, 4, '0', STR_PAD_LEFT)
+    if ($endpoint === 'info') {
+        $tiposContrato = [
+            1 => 'Helpdesk (Outsourcing)',
+            2 => 'Hospedagem',
+            4 => 'Domínio',
+            5 => 'Backup',
+            6 => 'Suporte Produtos',
+            7 => 'Locação'
+        ];
+        $situacoes = [
+            1 => 'Aberto',
+            2 => 'Em Atendimento',
+            3 => 'Aguardando Cliente',
+            4 => 'Aguardando Terceiros',
+            5 => 'Resolvido',
+            6 => 'Fechado',
+            7 => 'Cancelado'
+        ];
+        $ultimaInteracao = $viewData['interacoes'][0] ?? null;
+        $stmtTecnico = $pdo->prepare(
+            'SELECT p.nome_pessoa FROM bhcloud_bhinfor.contrato_chamado_eventos e
+             JOIN bhcloud_bhinfor.pessoa p ON p.id = e.id_pessoa
+             WHERE e.id_chamado = ? AND e.id_pessoa > 0
+             ORDER BY e.id_evento DESC LIMIT 1'
         );
+        $stmtTecnico->execute([$idChamado]);
+        $tecnico = $stmtTecnico->fetchColumn();
 
-        $pessoaContatoEqpto = obterPerfilPessoaJuridicaContato($idPessoaContato);
-        $pessoaContatoEqptoNome = getSafeArrayKeyValue($pessoaContatoEqpto, 'nome_pessoa');
-
-        $viewData['ultEventoDescrEqpto'] = sprintf('%s %s - %s', $tipoEqpto, $codigoEtiqueta, $pessoaContatoEqptoNome);
+        echo json_encode([
+            'success' => true,
+            'info' => [
+                'id_chamado' => $idChamado,
+                'tipo_chamado' => $tiposContrato[(int) $viewData['idTipoContrato']] ?? 'Chamado',
+                'tecnico_responsavel' => $tecnico ?: 'Não informado',
+                'data_abertura' => $chamado['data_abertura'] ?? '',
+                'equipamento' => 'Não informado',
+                'situacao' => $situacoes[(int) $viewData['situacao']] ?? 'Não informado',
+                'ultima_interacao' => $ultimaInteracao ? [
+                    'data' => $ultimaInteracao['data'] ?? '',
+                    'hora' => $ultimaInteracao['hora'] ?? ''
+                ] : null
+            ]
+        ]);
+        exit;
     }
 
-    return $viewData;
+    if ($endpoint === 'eventos') {
+        $stmt = $pdo->prepare(
+            'SELECT e.id_evento, e.id_chamado, e.id_pessoa, e.data, e.hora,
+                    e.descricao, e.status, e.link, p.nome_pessoa AS nome_tecnico
+             FROM bhcloud_bhinfor.contrato_chamado_eventos e
+             LEFT JOIN bhcloud_bhinfor.pessoa p ON p.id = e.id_pessoa
+             WHERE e.id_chamado = ?
+             ORDER BY e.id_evento ASC'
+        );
+        $stmt->execute([$idChamado]);
+        echo json_encode(['success' => true, 'eventos' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        exit;
+    }
+
+    if ($endpoint === 'enviar') {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método inválido.']);
+            exit;
+        }
+
+        $payload = json_decode(file_get_contents('php://input'), true);
+        $payload = is_array($payload) ? $payload : $_POST;
+        $descricao = trim((string) ($payload['descricao'] ?? ''));
+        $idPost = (int) ($payload['id_chamado'] ?? 0);
+
+        if ($idPost !== $idChamado || $descricao === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Informe uma mensagem válida.']);
+            exit;
+        }
+
+        if ((int) ($chamado['id_situacao'] ?? 0) === 7) {
+            http_response_code(409);
+            echo json_encode(['success' => false, 'message' => 'Este chamado está finalizado.']);
+            exit;
+        }
+
+        $stmtEquipamento = $pdo->prepare(
+            'SELECT id_equipamento FROM bhcloud_bhinfor.contrato_chamado_eventos
+             WHERE id_chamado = ? AND id_equipamento > 0
+             ORDER BY id_evento ASC LIMIT 1'
+        );
+        $stmtEquipamento->execute([$idChamado]);
+        $idEquipamento = (int) ($stmtEquipamento->fetchColumn() ?: 0);
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO bhcloud_bhinfor.contrato_chamado_eventos
+                (id_chamado, id_pessoa, id_equipamento, data, hora, descricao, status)
+             VALUES (?, 0, ?, CURDATE(), CURTIME(), ?, 7)'
+        );
+        $stmt->execute([$idChamado, $idEquipamento, $descricao]);
+
+        echo json_encode(['success' => true, 'id_evento' => (int) $pdo->lastInsertId()]);
+        exit;
+    }
+
+    http_response_code(404);
+    echo json_encode(['success' => false, 'message' => 'Operação não encontrada.']);
+    exit;
 }
 
-$viewData = loadViewData($idChamado, $seguranca, $viewData);
+// Extrai variáveis para a view
 extract($viewData);
 
-header('Cache-Control: max-age=3600, must-revalidate');
-header('Expires: Fri, 30 Oct 1998 14:19:41 GMT');
-header('Last-Modified: Mon, 29 Jun 1998 02:28:12 GMT');
+// ============================================
+// DEBUG (remover depois que funcionar)
+//echo "<h2>📊 Dados do Chamado</h2>";
+//echo "<pre>";
+//print_r($viewData);
+//echo "</pre>";
+// ============================================
+if ($viewData['error']) {
+    echo "<h2 style='color:red;'>❌ " . htmlspecialchars($viewData['error']) . "</h2>";
+    die();
+}
+// ============================================
 
-include __DIR__ . '/../../views/visitante/chamados_interacoes.php';
+// ============================================
+// TENTA CARREGAR A VIEW ORIGINAL
+// ============================================
+$viewPath = __DIR__ . '/../../views/visitante/chamados_interacoes.php';
+
+if (file_exists($viewPath)) {
+    //echo "<h2>✅ View encontrada: " . $viewPath . "</h2>";
+    include $viewPath;
+} else {
+    // Se a view não existir, mostra os dados diretamente
+    echo "<h1>Chamado #{$viewData['idChamado']}</h1>";
+    echo "<h3>Dados do Chamado</h3>";
+    echo "<table border='1' cellpadding='10'>";
+    echo "<tr><th>Campo</th><th>Valor</th></tr>";
+    echo "<tr><td>ID</td><td>{$viewData['idChamado']}</td></tr>";
+    echo "<tr><td>Nome</td><td>{$viewData['nome']}</td></tr>";
+    echo "<tr><td>Email</td><td>{$viewData['email']}</td></tr>";
+    echo "<tr><td>Telefone</td><td>{$viewData['telefone']}</td></tr>";
+    echo "<tr><td>Data Abertura</td><td>{$viewData['dataAbertura']}</td></tr>";
+    echo "<tr><td>Situação</td><td>{$viewData['situacao']}</td></tr>";
+    echo "</table>";
+    
+    if (!empty($viewData['interacoes'])) {
+        echo "<h3>Interações ({$viewData['interacoes']})</h3>";
+        echo "<table border='1' cellpadding='10'>";
+        echo "<tr><th>Data</th><th>Hora</th><th>Tipo</th><th>Descrição</th></tr>";
+        foreach ($viewData['interacoes'] as $interacao) {
+            echo "<tr>";
+            echo "<td>" . ($interacao['data'] ?? '') . "</td>";
+            echo "<td>" . ($interacao['hora'] ?? '') . "</td>";
+            echo "<td>" . ($interacao['tipo'] ?? '') . "</td>";
+            echo "<td>" . ($interacao['descricao'] ?? '') . "</td>";
+            echo "</tr>";
+        }
+        echo "</table>";
+    }
+}
