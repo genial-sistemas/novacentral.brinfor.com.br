@@ -9,12 +9,13 @@ $pagina = 'Início';
 $mes_atual = date('m');
 $ano_atual = date('Y');
 
-$selectPeriodo = isset($_POST['periodo']) ? $_POST['periodo'] : null;
+$selectPeriodo = isset($_POST['periodo']) && $_POST['periodo'] !== ''
+    ? $_POST['periodo']
+    : $mes_atual . '-' . $ano_atual;
 
-if (empty($selectPeriodo)){
-    $selectPeriodo = $mes_atual-$ano_atual;
-    $mes_select = $mes_atual;
-    $ano_select = $ano_atual;
+if ($selectPeriodo === 'todos') {
+    $mes_select = 0;
+    $ano_select = 0;
 }else{
     $periodo = explode("-", $selectPeriodo);
     if(count($periodo)>1){
@@ -25,6 +26,8 @@ if (empty($selectPeriodo)){
         $mes_select = 0;
     }
 }
+
+$peridoDados = [['valor' => 'todos', 'descricao' => 'Todo o período']];
 
 for ($x=1; $x<=12; $x++){
     if($mes_atual!=0){
@@ -47,7 +50,6 @@ $maquinas_inativas = obterMaquinasInativas($_SESSION['contratos']);
 $horas_trabalhadas = obterHorasTrabalhadas($mes_select, $ano_select, $_SESSION['contratos']);
 $resultado_pesquisa = obterResultadoPesquisa($mes_select, $ano_select, $_SESSION['contratos']);
 $interacao_tecnico = obterInteracaoPorTecnico($_SESSION['contratos'], $mes_select, $ano_select);
-$etiqueta = obterEtiqueta($_SESSION['contratos']);
 $contratosAtivos = obterContratosAtivos($_SESSION['contratos']);
 $obterUltimosChamados = obterUltimosChamadosDashboard($_SESSION['contratos']);
 

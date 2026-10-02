@@ -35,7 +35,7 @@ include 'header.php'
                                         $contato_email = $contato_info["email"];
                                         $contato_telefone = $contato_info["cel"];
                                     ?>
-                                    <option value="<?=$co['id']?>" data-codigo="<?=$codigo?>" data-nome="<?=$contato_nome?>" data-email="<?=$contato_email?>" data-telefone="<?=$contato_telefone?>"<?php if($co['id']==$_POST['codigo_equipamento']){ echo "selected"; } ?>><?=$codigo?> - <?=$co['descricao']?> - <?php echo validaNomeContato($contato_nome); ?></option>
+                                    <option value="<?=$co['id']?>" data-codigo="<?=$codigo?>" data-nome="<?=$contato_nome?>" data-email="<?=$contato_email?>" data-telefone="<?=$contato_telefone?>"<?php if($co['id']==$frm_codigo_equipamento){ echo "selected"; } ?>><?=$codigo?> - <?=$co['descricao']?> - <?php echo validaNomeContato($contato_nome); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -171,13 +171,12 @@ include 'header.php'
             </div>
         </div>
     </form>
-<?php if($_POST['acao']=="abrir_chamado"): ?>
+<?php if (isset($_POST['acao']) && $_POST['acao'] === 'abrir_chamado'): ?>
 <?= $mensagem ?>
 <?php endif; ?>
 </div><!-- az-content-body -->
 <script>
 </script>
 <?php
-    echo var_dump($_POST);
     include 'footer.php';
 ?>

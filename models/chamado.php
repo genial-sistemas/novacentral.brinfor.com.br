@@ -79,10 +79,13 @@ function obterInteracaoPorTecnico($contratos, $mes_atual, $ano_atual) {
     $res = $sth->fetchAll();
 
     $contrato_string = implode(", ", $contratos);
-    if($mes_atual!=0){
-        $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
-    }else{
-        $options = "YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
+    $options = "id_contrato IN (".$contrato_string.")";
+    if ($ano_atual != 0) {
+        if($mes_atual!=0){
+            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }else{
+            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }
     }
     $interacoes = array();
 
@@ -108,10 +111,13 @@ function obterInteracaoPorTecnico($contratos, $mes_atual, $ano_atual) {
 
 function obterQtdChamados($mes_atual, $ano_atual, $contratos) {
     $contrato_string = implode(", ", $contratos);
-    if($mes_atual!=0){
-        $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
-    }else{
-        $options = "YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
+    $options = "id_contrato IN (".$contrato_string.")";
+    if ($ano_atual != 0) {
+        if($mes_atual!=0){
+            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }else{
+            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }
     }
     $consulta = "SELECT id FROM contrato_chamado WHERE $options";
     $dbh = getConexao();
@@ -123,10 +129,13 @@ function obterQtdChamados($mes_atual, $ano_atual, $contratos) {
 
 function obterQtdChamadosAbertos($mes_atual, $ano_atual, $contratos) {
     $contrato_string = implode(", ", $contratos);
-    if($mes_atual!=0){
-        $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.") AND id_situacao <= 6;";
-    }else{
-        $options = "YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.") AND id_situacao <= 6;";
+    $options = "id_contrato IN (".$contrato_string.") AND id_situacao <= 6";
+    if ($ano_atual != 0) {
+        if($mes_atual!=0){
+            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }else{
+            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }
     }
     $consulta = "SELECT id FROM contrato_chamado WHERE $options";
     $dbh = getConexao();
@@ -140,10 +149,13 @@ function obterHorasTrabalhadas($mes_atual, $ano_atual, $contratos) {
     $thoras = array();
     $segundos = 0;
     $contrato_string = implode(", ", $contratos);
-    if($mes_atual!=0){
-        $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
-    }else{
-        $options = "YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
+    $options = "id_contrato IN (".$contrato_string.")";
+    if ($ano_atual != 0) {
+        if($mes_atual!=0){
+            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }else{
+            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }
     }
     $consulta = "SELECT id FROM contrato_chamado WHERE $options";
     $dbh = getConexao();
@@ -194,10 +206,13 @@ function obterResultadoPesquisa($mes_atual, $ano_atual, $contratos) {
     );
 
     $contrato_string = implode(", ", $contratos);
-    if($mes_atual!=0){
-        $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
-    }else{
-        $options = "YEAR(data_abertura) = '".$ano_atual."' AND id_contrato IN (".$contrato_string.")";
+    $options = "id_contrato IN (".$contrato_string.")";
+    if ($ano_atual != 0) {
+        if($mes_atual!=0){
+            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }else{
+            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
+        }
     }
 
     $consulta = "SELECT *

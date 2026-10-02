@@ -6,6 +6,11 @@
 
     if (isset($_GET['page'])) {
         $pagina = addslashes($_GET["page"]);
+    } else {
+        $requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+        if ($requestPath !== '' && $requestPath !== 'index.php') {
+            $pagina = addslashes($requestPath);
+        }
     }
 
     switch($pagina) {

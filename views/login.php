@@ -23,6 +23,9 @@
             <div class="az-signin-header">
                 <h2>Central do cliente!</h2>
                 <h4>Por favor entre para continuar</h4>
+                <?php if (isset($_GET['erro']) && $_GET['erro'] === '1'): ?>
+                    <div class="alert alert-danger" role="alert">Usuário ou senha inválidos.</div>
+                <?php endif; ?>
                <form action="autenticacao" method="post">
                     <div class="form-group">
                         <label>Usuário</label>

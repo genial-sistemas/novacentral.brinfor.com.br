@@ -5,6 +5,17 @@ require "models/chamado.php";
 $menu   = 'Chamados';
 $pagina = 'Abrir';
 
+$contratos_hospedagem = array();
+$contratos_backup = array();
+$frm_tipo_contrato = 0;
+$frm_codigo_equipamento = 0;
+$frm_etiqueta_codigo_equipamento = '';
+$frm_nome = '';
+$frm_email = '';
+$frm_telefone = '';
+$frm_tipo_solicitacao = 0;
+$frm_descricao_solicitacao = '';
+
 $contratosAtivos = obterContratosAtivos($_SESSION['contratos']);
 $contratos_outsourcing_equipamentos = array();
 foreach ($contratosAtivos as $c) {
@@ -26,7 +37,7 @@ foreach ($contratosAtivos as $c) {
 }
 $tipos_solicitacao = obterTiposSolicitacao();
 
-if($_POST['acao']=="abrir_chamado") {
+if (isset($_POST['acao']) && $_POST['acao'] === 'abrir_chamado') {
     $frm_tipo_contrato = $_POST['id_tipo_contrato'];
     $frm_codigo_equipamento = $_POST['codigo_equipamento'];
     $frm_etiqueta_codigo_equipamento = $_POST['etiqueta_codigo_equipamento'];
