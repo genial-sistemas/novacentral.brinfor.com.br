@@ -1,5 +1,5 @@
     <?php
-        require_once __DIR__ . '/../../helpers/codecsHelpers.php';
+        require_once __DIR__ . '/../../controlers/funcoes.php';
         if (!isset($redirecionar)) { $redirecionar = null; }
         if (!isset($messages)) { $messages = []; }
     ?>
