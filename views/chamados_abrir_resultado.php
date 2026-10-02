@@ -4,8 +4,8 @@
 // ============================================================
 
 // Tenta capturar de $_GET primeiro
-$id_chamado = $_GET['id'] ?? null;
-$id_seguranca = $_GET['seguranca'] ?? null;
+$id_chamado = $_GET['id'] ?? $_SESSION['id_chamado'] ?? null;
+$id_seguranca = $_GET['seguranca'] ?? $_SESSION['id_seguranca'] ?? null;
 
 // Se falhou, tenta da query string manualmente
 if (!$id_chamado || !$id_seguranca) {
@@ -61,7 +61,10 @@ include 'header.php';
         </div>
         <div class="row">
             <div class="col-md-12">
-                <button class="btn btn-az-primary pd-x-20" onclick="window.location.href='<?= htmlspecialchars($urlInteragir) ?>'">Interagir com Chamado</button>
+                <form action="/chamados_interagir" method="post" class="d-inline">
+                    <input type="hidden" name="chamado_id" value="<?= htmlspecialchars($id_chamado, ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit" class="btn btn-az-primary pd-x-20">Interagir com Chamado</button>
+                </form>
                 <button class="btn btn-az-primary pd-x-20" onclick="window.location.href='chamados_abrir'">Novo Chamado</button>
             </div>
         </div>

@@ -14,8 +14,9 @@ include 'header.php'
                     <label>Tipo de Contrato</label>
                     <select class="form-control" name="id_tipo_contrato" id="id_tipo_contrato">
                         <option value="0">Selecione:</option>
-                        <?php foreach($contratosAtivos as $c): ?>
-                            <option value="<?=$c['id_tipo']?>"  <?php if($c['id_tipo']==$frm_tipo_contrato){ echo "selected"; } ?>><?=$c['tipo_contrato'] ?></option>
+                        <?php foreach($tipos_contrato_visitante as $id_tipo => $tipo_descricao): ?>
+                            <?php $tipo_habilitado = in_array($id_tipo, $tipos_contrato_habilitados, true); ?>
+                            <option value="<?=$id_tipo?>" <?php if(!$tipo_habilitado){ echo 'disabled'; } ?> <?php if($id_tipo==$frm_tipo_contrato){ echo "selected"; } ?>><?=htmlspecialchars($tipo_descricao, ENT_QUOTES, 'UTF-8')?><?php if(!$tipo_habilitado){ echo ' (sem contrato ativo)'; } ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -67,46 +68,17 @@ include 'header.php'
                     </div>
                 </div>
             </div>
-            <div id="hospedagem" style="display: none;">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Domínio</label>
-                            <select class="form-control" name="dominio">
-                                <option value="0">Selecione:</option>
-                            <?php foreach($contratos_hospedagem as $ch): ?>
-                                <option value="<?=$ch['id']?>"><?=$ch['dominio']?></option>
-                            <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="backup" style="display: none;">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Plano</label>
-                            <select class="form-control" name="backup_plano">
-                                <option value="0">Selecione:</option>
-                            <?php foreach($contratos_backup as $cb): ?>
-                                <option value="<?=$cb['id']?>"><?=$cb['plano']?></option>
-                            <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="bhclouderp" style="display: none;">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Plano</label>
-                            <select class="form-control" name="bhclouderp_plano">
-                                <option value="0">Selecione:</option>
-                            </select>
-                        </div>
-                    </div>
+            <div id="contrato-referencia" style="display: none;" class="col-md-6">
+                <div class="form-group">
+                    <label for="contrato_id">Contrato ativo</label>
+                    <select class="form-control" name="contrato_id" id="contrato_id" disabled>
+                        <option value="0">Selecione:</option>
+                        <?php foreach($contratosAtivos as $contrato): ?>
+                            <?php if(array_key_exists((int)$contrato['id_tipo'], $tipos_contrato_visitante)): ?>
+                                <option value="<?=$contrato['id']?>" data-tipo="<?=$contrato['id_tipo']?>" <?php if($contrato['id']==$frm_contrato_id){ echo 'selected'; } ?>><?=$contrato['id']?> - <?=htmlspecialchars($contrato['tipo_contrato'], ENT_QUOTES, 'UTF-8')?></option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
             </div>
         </div>

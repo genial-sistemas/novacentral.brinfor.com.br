@@ -48,6 +48,20 @@ include 'header.php'
                         <?php
                     endforeach; ?>
                     </div><!-- content-inner -->
+                    <?php if (isset($erro_interacao)): ?>
+                        <div class="alert alert-danger" role="alert"><?=htmlspecialchars($erro_interacao, ENT_QUOTES, 'UTF-8')?></div>
+                    <?php endif; ?>
+                    <?php if ((int)$chamado['id_situacao'] !== 7): ?>
+                        <form action="/chamados_interagir?id=<?=$chamado['id']?>" method="post" class="mt-3">
+                            <input type="hidden" name="chamado_id" value="<?=$chamado['id']?>">
+                            <input type="hidden" name="id_equipamento" value="<?=$ultima_interacao_equipamento?>">
+                            <div class="form-group">
+                                <label for="nova-msg">Nova interação</label>
+                                <textarea class="form-control" id="nova-msg" name="nova-msg" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-az-primary">Enviar interação</button>
+                        </form>
+                    <?php endif; ?>
                 </div><!-- az-chat-body -->
             </div>
         </div>

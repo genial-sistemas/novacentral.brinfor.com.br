@@ -9,7 +9,7 @@ include 'header.php'; ?>
 <div class="az-content-body">
     <div class="row row-sm">
         <div class="col-md-12">
-            <form action="chamado_interagir" method="post">
+            <form action="/chamados_interagir" method="post">
                 <div class="table-responsive">
                     <table class="table mg-b-0">
                         <thead>

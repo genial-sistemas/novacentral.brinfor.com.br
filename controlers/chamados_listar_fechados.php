@@ -27,12 +27,7 @@ if (isset($_POST['chamado_id'])) {
 }else{
 
 	$chamados_fechados = obterUltimosChamados($_SESSION['contratos'], 200, 'fechado');
-
-	$chamados_fechados_ultima_interacao =  array();
-	foreach($chamados_fechados as $cf) {
-		$interacoes = obterInteracoesPorChamados($cf['id']);
-		$chamados_fechados_ultima_interacao[$cf['id']] = $interacoes[sizeof($interacoes)-1];
-	}
+	$chamados_fechados_ultima_interacao = obterUltimasInteracoesPorChamados($chamados_fechados);
 
 	include 'views/chamados_listar_fechados.php';
 }

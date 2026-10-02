@@ -1,24 +1,32 @@
 
 const map = {
     '1': '#helpdesk',
-    '2': '#hospedagem',
-    '3': '#bhclouderp',
-    '4': '#dominio',
-    '5': '#backup',
-    '6': '#suporte',
-    '7': '#locacao'
+    '2': '#contrato-referencia',
+    '4': '#contrato-referencia',
+    '5': '#contrato-referencia',
+    '6': '#contrato-referencia',
+    '7': '#contrato-referencia'
 };
 
 $(document).ready(function() {
-    const allSections = $(Object.values(map).join(', '));
+    const allSections = $('#helpdesk, #contrato-referencia');
 
     $('#id_tipo_contrato').change(function(){
         const val = $(this).val();
 
-        allSections.hide().find('select').attr('required', false);
+        allSections.hide().find('select').prop('required', false);
+        const $contrato = $('#contrato_id');
+        $contrato.prop('disabled', true).val('0');
+        $contrato.find('option[data-tipo]').each(function() {
+            const correspondeAoTipo = $(this).data('tipo').toString() === val;
+            $(this).prop('hidden', !correspondeAoTipo);
+        });
 
         if (map[val]) {
-            $(map[val]).show().find('select').attr('required', true);
+            $(map[val]).show().find('select').prop('required', true);
+            if (val !== '1') {
+                $contrato.prop('disabled', false);
+            }
         }
     });
 

@@ -27,18 +27,25 @@ if ($selectPeriodo === 'todos') {
     }
 }
 
-$peridoDados = [['valor' => 'todos', 'descricao' => 'Todo o período']];
+$peridoDados = [
+    ['valor' => 'todos', 'descricao' => 'Todo o período'],
+    ['valor' => (string)$ano_atual, 'descricao' => "Ano $ano_atual"],
+    ['valor' => (string)((int)$ano_atual - 1), 'descricao' => 'Ano ' . ((int)$ano_atual - 1)]
+];
 
-for ($x=1; $x<=12; $x++){
-    if($mes_atual!=0){
-        $mes_atual = str_pad($mes_atual, 2, "0", STR_PAD_LEFT);    
-        $periodo_mes = "$mes_atual-$ano_atual";
-        $peridoDados[$x] = ['valor' => $periodo_mes, 'descricao' => $mes_atual.'/'.$ano_atual];
-        $mes_atual = $mes_atual-1;
-    }else{
-        $peridoDados[$x] = ['valor' => $ano_atual, 'descricao' => "Ano $ano_atual"];
-        $ano_atual = $ano_atual-1;
-        $mes_atual = 12;
+$mes_opcao = (int)$mes_atual;
+$ano_opcao = (int)$ano_atual;
+for ($x = 0; $x < 12; $x++) {
+    $mes_formatado = str_pad((string)$mes_opcao, 2, '0', STR_PAD_LEFT);
+    $peridoDados[] = [
+        'valor' => $mes_formatado . '-' . $ano_opcao,
+        'descricao' => $mes_formatado . '/' . $ano_opcao
+    ];
+
+    $mes_opcao--;
+    if ($mes_opcao === 0) {
+        $mes_opcao = 12;
+        $ano_opcao--;
     }
 }
 

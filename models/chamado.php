@@ -270,6 +270,47 @@ function obterInteracoesPorChamados($id_chamado) {
     return $sth->fetchAll();
 }
 
+function obterUltimasInteracoesPorChamados($chamados) {
+    $ids_chamados = array();
+    foreach ($chamados as $chamado) {
+        $id_chamado = (int)($chamado['id'] ?? 0);
+        if ($id_chamado > 0) {
+            $ids_chamados[] = $id_chamado;
+        }
+    }
+
+    $ids_chamados = array_values(array_unique($ids_chamados));
+    if (!$ids_chamados) {
+        return array();
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($ids_chamados), '?'));
+    $consulta = "SELECT ultima.id_chamado, ultima.id_pessoa, ultima.id_equipamento,
+                        ultima.data, ultima.hora, pessoa.nome_pessoa
+    FROM (
+        SELECT evento.id_chamado, evento.id_pessoa, evento.id_equipamento,
+               evento.data, evento.hora,
+               ROW_NUMBER() OVER (
+                   PARTITION BY evento.id_chamado
+                   ORDER BY evento.data DESC, evento.hora DESC, evento.id_evento DESC
+               ) AS ordem
+        FROM contrato_chamado_eventos evento
+        WHERE evento.id_chamado IN ($placeholders)
+    ) ultima
+    LEFT JOIN pessoa ON pessoa.id = ultima.id_pessoa
+    WHERE ultima.ordem = 1";
+
+    $dbh = getConexao();
+    $sth = $dbh->prepare($consulta);
+    $sth->execute($ids_chamados);
+
+    $interacoes = array();
+    foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $interacao) {
+        $interacoes[(int)$interacao['id_chamado']] = $interacao;
+    }
+    return $interacoes;
+}
+
 function criarInteracao($chamado_id, $id_pessoa, $id_equipamento, $descricao, $status) {
     $data = date('Y-m-d');
     $hora = date('H:i:s');
