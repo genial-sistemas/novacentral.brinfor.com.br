@@ -190,6 +190,11 @@ $urlInteragir = 'index.php?' . http_build_query([
         <div class="row">
             <div class="col-md-12">
                 <p class="mb-5 mt-3" style="font-size: 30px;">Chamado <b id="chamadoIdText"><?=$idChamado?></b> aberto com sucesso!!</p>
+                <?php if (($_GET['email'] ?? '') === 'failed'): ?>
+                    <div class="alert alert-warning" role="alert">
+                        O chamado foi aberto, mas não foi possível enviar o e-mail de confirmação. Avise o suporte informando o número do chamado.
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <div class="row">

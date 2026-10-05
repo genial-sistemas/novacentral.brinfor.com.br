@@ -1,4 +1,22 @@
 <?php
+    if (PHP_SAPI === 'cli-server') {
+        $caminho_solicitado = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $arquivo_solicitado = realpath(__DIR__ . $caminho_solicitado);
+        $arquivo_roteador = realpath(__FILE__);
+        $raiz_projeto = realpath(__DIR__) . DIRECTORY_SEPARATOR;
+
+        // Eu deixo o index.php processar suas rotas e sirvo os outros arquivos estáticos direto.
+        if (
+            $arquivo_solicitado !== false
+            && is_file($arquivo_solicitado)
+            && strpos($arquivo_solicitado, $raiz_projeto) === 0
+            && $arquivo_solicitado !== $arquivo_roteador
+            && strtolower(pathinfo($arquivo_solicitado, PATHINFO_EXTENSION)) !== 'php'
+        ) {
+            return false;
+        }
+    }
+
     include 'controlers/autenticacao.php';
     include_once 'controlers/funcoes.php';
     
@@ -37,6 +55,10 @@
             break;
         case 'chamados_abrir':
             include 'controlers/chamados_abrir.php';
+            break;
+        case 'interagir-chamado':
+        case 'visitante-interagir-chamado':
+            include 'controlers/chamados_interagir.php';
             break;
         case 'chamados_abrir-resultado':
             include 'views/chamados_abrir_resultado.php';

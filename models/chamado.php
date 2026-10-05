@@ -1,6 +1,8 @@
 <?php
 require_once 'conexao.php';
 
+const CHAMADO_STATUS_RESP_CLIENTE = 6;
+
 function obterTiposSolicitacao() {
     $consulta = "SELECT * FROM `contrato_chamado_tipo_solicitacao`";
     $dbh = getConexao();
@@ -72,41 +74,38 @@ function obterUltimosChamadosDashboard($contratos) {
 }
 
 function obterInteracaoPorTecnico($contratos, $mes_atual, $ano_atual) {
-    $consulta = "SELECT * FROM funcionario WHERE id_cargo >=5 AND id_cargo <=7 AND status = 'a'";
+    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
+    if (!$contratos) {
+        return array();
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
+    $condicoes = array("chamado.id_contrato IN ($placeholders)");
+    $parametros = $contratos;
+
+    if ((int)$ano_atual !== 0) {
+        if ((int)$mes_atual !== 0) {
+            $condicoes[] = 'MONTH(evento.data) = ?';
+            $parametros[] = (int)$mes_atual;
+        }
+        $condicoes[] = 'YEAR(evento.data) = ?';
+        $parametros[] = (int)$ano_atual;
+    }
+
+    // Eu conto pela data da interação e mantenho técnicos que atuaram antes de ficarem inativos.
+    $consulta = "SELECT pessoa.nome_pessoa AS tecnico, COUNT(*) AS total
+    FROM contrato_chamado AS chamado
+    INNER JOIN contrato_chamado_eventos AS evento ON evento.id_chamado = chamado.id
+    INNER JOIN funcionario ON funcionario.id_pessoa = evento.id_pessoa
+    INNER JOIN pessoa ON pessoa.id = funcionario.id_pessoa
+    WHERE " . implode(' AND ', $condicoes) . "
+    GROUP BY funcionario.id_pessoa, pessoa.nome_pessoa
+    ORDER BY total DESC, pessoa.nome_pessoa";
+
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
-
-    $contrato_string = implode(", ", $contratos);
-    $options = "id_contrato IN (".$contrato_string.")";
-    if ($ano_atual != 0) {
-        if($mes_atual!=0){
-            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }else{
-            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }
-    }
-    $interacoes = array();
-
-    foreach ($res as $r) {
-        $id_funcionario = $r['id_pessoa'];
-
-        $consulta2 = "SELECT count(*) as total                       
-        FROM contrato_chamado as c
-        INNER JOIN contrato_chamado_eventos as e
-        on c.id = e.id_chamado
-        WHERE  $options and id_pessoa=$id_funcionario";
-        $dbh = getConexao();
-        $sth = $dbh->prepare($consulta2);
-        $sth->execute();
-        $res2 = $sth->fetchAll()[0];
-        array_push($interacoes, array(
-            "tecnico" => obterNome($id_funcionario),
-            "total" => $res2['total']
-        ));
-    }
-    return $interacoes;
+    $sth->execute($parametros);
+    return $sth->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function obterQtdChamados($mes_atual, $ano_atual, $contratos) {
@@ -235,6 +234,39 @@ function obterResultadoPesquisa($mes_atual, $ano_atual, $contratos) {
     return $resultado;
 }
 
+function obterChamadosPorSituacao($mes_atual, $ano_atual, $contratos) {
+    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
+    if (!$contratos) {
+        return array();
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
+    $condicoes = array('chamado.id_contrato IN (' . $placeholders . ')');
+    $parametros = $contratos;
+
+    if ((int)$ano_atual !== 0) {
+        if ((int)$mes_atual !== 0) {
+            $condicoes[] = 'MONTH(chamado.data_abertura) = ?';
+            $parametros[] = (int)$mes_atual;
+        }
+        $condicoes[] = 'YEAR(chamado.data_abertura) = ?';
+        $parametros[] = (int)$ano_atual;
+    }
+
+    // Eu agrupo os chamados pelo status e aplico o mesmo período selecionado no dashboard.
+    $consulta = "SELECT status.status AS situacao, COUNT(*) AS total
+    FROM contrato_chamado chamado
+    JOIN contrato_chamado_status status ON status.id = chamado.id_situacao
+    WHERE " . implode(' AND ', $condicoes) . "
+    GROUP BY status.id, status.status
+    ORDER BY status.id";
+
+    $dbh = getConexao();
+    $sth = $dbh->prepare($consulta);
+    $sth->execute($parametros);
+    return $sth->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function obterChamado($id_chamado) {
     $consulta = "SELECT a.*, b.status as 'situacao', c.descricao as 'tipo_contrato'
     FROM contrato_chamado a
@@ -263,11 +295,54 @@ function obterInteracoesPorChamados($id_chamado) {
     FROM contrato_chamado_eventos a
     LEFT JOIN pessoa b ON a.id_pessoa=b.id
     WHERE a.id_chamado=$id_chamado
-    ORDER BY a.data ASC, a.hora ASC";
+    ORDER BY a.data ASC, a.hora ASC, a.id_evento ASC";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
     $sth->execute();
     return $sth->fetchAll();
+}
+
+function obterRotuloEquipamentoChamado($id_tipo_contrato, $id_contrato, $id_equipamento) {
+    $id_tipo_contrato = (int)$id_tipo_contrato;
+    $id_contrato = (int)$id_contrato;
+    $id_equipamento = (int)$id_equipamento;
+    if ($id_equipamento <= 0) {
+        return 'Não informado';
+    }
+
+    $dbh = getConexao();
+    if ($id_tipo_contrato === 1) {
+        $consulta = $dbh->prepare('SELECT equipamento.codigo, tipo.tipo AS tipo_equipamento, contato.nome, contrato.etiqueta
+            FROM contrato_outsourcing_equipamentos equipamento
+            LEFT JOIN contrato_outsourcing_equipamentos_tipo tipo ON tipo.id = equipamento.tipo
+            LEFT JOIN pessoa_juridica_contatos contato ON contato.id = equipamento.contato
+            LEFT JOIN contrato_outsourcing contrato ON contrato.id_contrato = equipamento.contrato
+            WHERE equipamento.id = :id AND equipamento.contrato = :contrato');
+        $consulta->execute(array(':id' => $id_equipamento, ':contrato' => $id_contrato));
+        $equipamento = $consulta->fetch(PDO::FETCH_ASSOC);
+        if ($equipamento) {
+            // Eu monto a identificação do equipamento com tipo, etiqueta, código e contato.
+            $tipo = trim((string)($equipamento['tipo_equipamento'] ?? 'Equipamento'));
+            $etiqueta = str_pad(trim((string)($equipamento['etiqueta'] ?? '')), 2, '0', STR_PAD_LEFT);
+            $codigo = str_pad((string)$equipamento['codigo'], 4, '0', STR_PAD_LEFT);
+            $contato = trim((string)($equipamento['nome'] ?? ''));
+            return $tipo . ' [' . $etiqueta . '|' . $codigo . ']' . ($contato !== '' ? ' - ' . $contato : '');
+        }
+    } elseif ($id_tipo_contrato === 7) {
+        $consulta = $dbh->prepare('SELECT equipamento.descricao, equipamento.patrimonio
+            FROM contrato_locacao_equipamentos_locados locado
+            JOIN contrato_locacao_equipamentos equipamento ON equipamento.id = locado.id_equipamento
+            WHERE locado.id_contrato = :contrato AND equipamento.id = :id_equipamento
+            LIMIT 1');
+        $consulta->execute(array(':contrato' => $id_contrato, ':id_equipamento' => $id_equipamento));
+        $equipamento = $consulta->fetch(PDO::FETCH_ASSOC);
+        if ($equipamento) {
+            $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
+            return ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao'];
+        }
+    }
+
+    return 'Equipamento ' . $id_equipamento;
 }
 
 function obterUltimasInteracoesPorChamados($chamados) {
@@ -311,14 +386,38 @@ function obterUltimasInteracoesPorChamados($chamados) {
     return $interacoes;
 }
 
-function criarInteracao($chamado_id, $id_pessoa, $id_equipamento, $descricao, $status) {
+function criarInteracao($chamado_id, $id_pessoa, $id_equipamento, $descricao, $status, $situacao_chamado = null) {
     $data = date('Y-m-d');
     $hora = date('H:i:s');
-    $consulta = "INSERT INTO contrato_chamado_eventos(id_chamado, id_pessoa, id_equipamento, data, hora, descricao, status)
-    VALUES ('$chamado_id', '$id_pessoa', '$id_equipamento', '$data', '$hora', '$descricao', '$status');";
     $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    return $sth->execute();
+    try {
+        $dbh->beginTransaction();
+        $consulta = $dbh->prepare('INSERT INTO contrato_chamado_eventos(id_chamado, id_pessoa, id_equipamento, data, hora, descricao, status)
+            VALUES (:chamado, :pessoa, :equipamento, :data, :hora, :descricao, :status)');
+        $consulta->execute(array(
+            ':chamado' => (int)$chamado_id,
+            ':pessoa' => (int)$id_pessoa,
+            ':equipamento' => (int)$id_equipamento,
+            ':data' => $data,
+            ':hora' => $hora,
+            ':descricao' => $descricao,
+            ':status' => (int)$status
+        ));
+
+        if ($situacao_chamado !== null) {
+            // Eu registro a resposta e devolvo o chamado ao cliente na mesma transação.
+            $atualizacao = $dbh->prepare('UPDATE contrato_chamado SET id_situacao = :situacao WHERE id = :chamado AND id_situacao <> 7');
+            $atualizacao->execute(array(':situacao' => (int)$situacao_chamado, ':chamado' => (int)$chamado_id));
+        }
+
+        $dbh->commit();
+        return true;
+    } catch (Throwable $erro) {
+        if ($dbh->inTransaction()) {
+            $dbh->rollBack();
+        }
+        return false;
+    }
 }
 
 function abrirChamado($contrato_id, $id_tipo_contrato,  $tipo_solicitacao, $frm_nome, $frm_email, $frm_telefone, $frm_codigo_equipamento, $frm_descricao_solicitacao) {
@@ -329,8 +428,9 @@ function abrirChamado($contrato_id, $id_tipo_contrato,  $tipo_solicitacao, $frm_
     $resp_abertura = 0;
     $urgencia = 4;
     $seguranca = random_bytes(13);
-    $consulta = "INSERT INTO contrato_chamado(id_contrato, id_tipo_contrato, resp_abertura, tipo_abertura, tipo_solicitacao, tipo_atendimento, urgencia, data_abertura, id_situacao, seguranca, nome, email, telefone)
-    VALUES('$contrato_id', '$id_tipo_contrato', '$resp_abertura', '$tipo_abertura', '$tipo_solicitacao', '$tipo_atendimento', '$urgencia', '$data_abertura', '$id_situacao', '$seguranca', '$frm_nome', '$frm_email', '$frm_telefone')";  
+    // Eu gravo a hora de abertura em data_saida e deixo data_entrada vazia.
+    $consulta = "INSERT INTO contrato_chamado(id_contrato, id_tipo_contrato, resp_abertura, tipo_abertura, tipo_solicitacao, tipo_atendimento, urgencia, data_abertura, data_entrada, data_saida, id_situacao, seguranca, nome, email, telefone)
+    VALUES('$contrato_id', '$id_tipo_contrato', '$resp_abertura', '$tipo_abertura', '$tipo_solicitacao', '$tipo_atendimento', '$urgencia', '$data_abertura', NULL, '$data_abertura', '$id_situacao', '$seguranca', '$frm_nome', '$frm_email', '$frm_telefone')";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
     $sth->execute();

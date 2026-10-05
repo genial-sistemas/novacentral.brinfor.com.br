@@ -46,6 +46,7 @@
         <div class="alert alert-danger" role="alert"><?=htmlspecialchars($erro_relatorio, ENT_QUOTES, 'UTF-8')?></div>
     <?php endif; ?>
 
+    <?php if ($relatorio_executado): ?>
     <div class="table-responsive">
         <table class="table mg-b-0">
             <thead>
@@ -80,6 +81,7 @@
             </tbody>
         </table>
     </div>
+    <?php endif; ?>
 </div>
 
 <?php include 'footer.php'; ?>

@@ -12,8 +12,15 @@
 }
 
 .btn-az-primary,
-.az-chat-body .media.flex-row-reverse .az-msg-wrapper {
+.az-chat-body .media.message-client .az-msg-wrapper {
     background-color: #dd9933;
+    color: #fff;
+}
+
+/* Eu mantenho as mensagens do técnico neutras e as do cliente destacadas. */
+.az-chat-body .media.message-technician .az-msg-wrapper {
+    background-color: #dee2e6;
+    color: #494c57;
 }
 .btn-az-primary:hover,
 .btn-az-primary:not(:disabled):not(.disabled):active,
@@ -110,4 +117,97 @@ th.width-170, td.width-170 {
     right: 20px;
     z-index: 1050; /* Ensures it sits above navigation/content */
     min-width: 350px;
+}
+
+/* Eu compacto o dashboard para mostrar mais indicadores sem perder a leitura. */
+.dashboard-compact-header {
+    padding: 10px 10px 0 !important;
+}
+
+.dashboard-compact-header .az-content-title {
+    margin-bottom: 0;
+    font-size: 20px;
+}
+
+.dashboard-compact-header p {
+    font-size: 10px;
+}
+
+.dashboard-compact-header select {
+    height: 30px;
+    padding: 3px 8px;
+    font-size: 10px;
+}
+
+.dashboard-compact {
+    padding: 8px !important;
+}
+
+.dashboard-compact .row {
+    margin-right: -5px;
+    margin-left: -5px;
+}
+
+.dashboard-compact .row > [class*="col-"] {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.dashboard-compact .mg-t-15,
+.dashboard-compact .mg-t-20 {
+    margin-top: 8px !important;
+}
+
+.dashboard-compact .row.mg-b-10 {
+    margin-bottom: 4px !important;
+}
+
+.dashboard-compact .card-dashboard-fifteen {
+    padding: 8px 10px 6px;
+}
+
+.dashboard-compact .card-dashboard-fifteen h1 {
+    font-size: 22px;
+}
+
+.dashboard-compact .card-dashboard-fifteen label {
+    margin-bottom: 0;
+    font-size: 10px;
+    line-height: 1.1;
+}
+
+.dashboard-compact .card-header {
+    padding: 8px 10px 0;
+}
+
+.dashboard-compact .card-body {
+    padding: 6px 10px;
+}
+
+.dashboard-chart {
+    width: 100%;
+    height: 100px;
+}
+
+.dashboard-compact .table-talk-time thead > tr th,
+.dashboard-compact .table-talk-time tbody > tr td {
+    padding: 4px 6px;
+    font-size: 10px;
+    line-height: 1.15;
+}
+
+.dashboard-compact .table-talk-time thead > tr th:first-child,
+.dashboard-compact .table-talk-time tbody > tr td:first-child {
+    padding-left: 10px;
+}
+
+.dashboard-compact .card-dashboard-sixteen .table tbody > tr td {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+@media (max-width: 767px) {
+    .dashboard-chart {
+        height: 125px;
+    }
 }

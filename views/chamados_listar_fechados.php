@@ -7,73 +7,43 @@ include 'header.php'; ?>
     </div>
 </div><!-- az-content-header -->
 <div class="az-content-body">
-    <div class="row row-sm">
-        <div class="col-md-12">
-            <form action="chamados_listar_fechados" id="chamados_fechados" method="post">
-                <div id="carregando">
-                    <p>Carregando dados aguarde...</p>
-                </div>
-                <table id="datatable1" class="display responsive nowrap">
-                    <thead>
+    <form action="chamados_listar_fechados" id="chamados_fechados" method="post">
+        <div class="table-responsive">
+            <table class="table mg-b-0">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Última Interação</th>
+                        <th scope="col">Técnico</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($chamados_fechados as $cf): ?>
+                        <?php
+                        $ultima_interacao = $chamados_fechados_ultima_interacao[$cf['id']] ?? array();
+                        $data_hora_interacao = trim(($ultima_interacao['data'] ?? '') . ' ' . ($ultima_interacao['hora'] ?? ''));
+                        ?>
                         <tr>
-                            <th>ID</th>
-                            <th>Tipo</th>
-                            <th>Última Interação</th>
-                            <th>Técnico</th>
-                            <th>Status</th>
-                            <th>Opções</th>
+                            <th scope="row"><?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?></th>
+                            <td><?=htmlspecialchars((string)$cf['tipo_contrato'], ENT_QUOTES, 'UTF-8')?></td>
+                            <td><?=htmlspecialchars($data_hora_interacao !== '' ? data_brasil_datetime($data_hora_interacao) : '-', ENT_QUOTES, 'UTF-8')?></td>
+                            <td><?=htmlspecialchars((string)($ultima_interacao['nome_pessoa'] ?? '-'), ENT_QUOTES, 'UTF-8')?></td>
+                            <td><?=htmlspecialchars((string)$cf['situacao'], ENT_QUOTES, 'UTF-8')?></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        foreach ($chamados_fechados as $cf) : ?>
-                            <tr>
-                                <th scope="row"><?= $cf['id'] ?></th>
-                                <td><?= $cf['tipo_contrato'] ?></td>
-                                <td><?= data_brasil_datetime($chamados_fechados_ultima_interacao[$cf['id']]['data'] . ' ' . $chamados_fechados_ultima_interacao[$cf['id']]['hora']) ?></td>
-                                <td><?= $chamados_fechados_ultima_interacao[$cf['id']]['nome_pessoa'] ?></td>
-                                <td><?= $cf['situacao'] ?></td>
-                                <td>
-									<button class="btn btn-az-primary" name="chamado_id" value="<?= $cf['id'] ?>">Interacoes</button>
-								</td>
-                            </tr>
-                        <?php
-                        endforeach; ?>
-                    </tbody>
-                </table>
-                <input type="hidden" name="acao" value="interacoes">
-            </form>
+                    <?php endforeach; ?>
+                    <?php if (!$chamados_fechados): ?>
+                        <tr>
+                            <td colspan="5">Nenhum chamado fechado encontrado.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
-    </div>
+        <input type="hidden" name="acao" value="interacoes">
+    </form>
 </div><!-- az-content-body -->
-<link href="views/lib/datatables.net-dt/css/jquery.dataTables.min.css" rel="stylesheet">
-<link href="views/lib/datatables.net-responsive-dt/css/responsive.dataTables.min.css" rel="stylesheet">
-<link href="views/lib/select2/css/select2.min.css" rel="stylesheet">
-<script src="views/lib/datatables.net/js/jquery.dataTables.min.js"></script>
-<script src="views/lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
-<script src="views/lib/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
-<script src="views/lib/datatables.net-responsive-dt/js/responsive.dataTables.min.js"></script>
-<script src="views/lib/select2/js/select2.min.js"></script>
-<script>
-    $(document).ready(function() {
-        'use strict';
-
-        $('#datatable1').DataTable({
-            responsive: true,
-            language: {
-                searchPlaceholder: 'Buscar...',
-                sSearch: '',
-                lengthMenu: '_MENU_ items/página',
-            },
-            "order": [[ 1, "desc" ]]
-        });
-
-        // Select2
-        $('.dataTables_length select').select2({ minimumResultsForSearch: Infinity });
-
-        $('#carregando').hide();
-    });
-</script>
 
 <?php
 include 'footer.php'; ?>

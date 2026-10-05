@@ -1,7 +1,7 @@
 <?php
     include 'header.php';
 ?>
-<div class="az-content-header d-block d-md-flex">
+<div class="az-content-header d-block d-md-flex dashboard-compact-header">
     <div>
         <h2 class="az-content-title mg-b-5 mg-b-lg-8">Dashboard</h2>
         <p class="mg-b-0 tx-danger">Bem Vindo <?= $_SESSION['nome_cliente'] ?></p>
@@ -20,7 +20,7 @@
         </div>
     </div>
 </div><!-- az-content-header -->
-<div class="az-content-body">
+<div class="az-content-body dashboard-compact">
     <div class="row row-sm mg-b-10">
         <div class="col-sm-6 col-lg-4 col-xl-3 mg-t-20 mg-sm-t-0">
             <div class="card card-body card-dashboard-fifteen">
@@ -99,19 +99,25 @@
         </div>
     </div>
     <div class="row row-sm">
-        <!-- col-3 -->
-        <div class="col-xl-6 mg-t-15 mg-t-20">
-            <div class="card">
+        <div class="col-md-5 col-lg-5 col-xl-5 mg-t-15 mg-t-20">
+            <div class="card h-100">
                 <div class="card-header">
-                    <h6 class="card-title tx-14 mg-b-5">Avaliação de chamados</h6>
-                    <!--O chart acontece dentro da div piechart_3d--->
-                    <div id="piechart_3d" style="width: 500px; height: 300px; margin-left: 9%;"></div>
+                    <h6 class="card-title tx-14 mg-b-5">Análise de chamados</h6>
+                </div>
+                <div class="card-body">
+                    <!-- Eu deixo as duas análises juntas para comparar situação e avaliação. -->
+                    <div class="mg-b-10">
+                        <h6 class="tx-12 mg-b-0">Chamados por situação</h6>
+                        <div id="grafico_situacao" class="dashboard-chart"></div>
+                    </div>
+                    <div>
+                        <h6 class="tx-12 mg-b-0">Chamados por avaliação</h6>
+                        <div id="grafico_avaliacao" class="dashboard-chart"></div>
+                    </div>
                 </div>
             </div>
-            <!-- card -->
         </div>
-        <!-- col -->
-        <div class="col-gl-5 col-xl-6 mg-t-20">
+        <div class="col-md-7 col-lg-7 col-xl-7 mg-t-20">
             <div class="card" style="height: 100%;">
                 <div class="card-header">
                     <h6 class="card-title tx-14 mg-b-5">Últimos chamados</h6>
@@ -146,7 +152,7 @@
             <!-- card -->
         </div>
         <!-- col -->
-        <div class="col-md-5 col-lg-5 col-xl-4 mg-t-20">
+        <div class="col-md-5 col-lg-5 col-xl-5 mg-t-20">
             <div class="card card-dashboard-sixteen">
                 <div class="card-header">
                     <h6 class="card-title tx-14 mg-b-0">Interação por técnico nos Chamados</h6>
@@ -157,13 +163,17 @@
                         <table class="table mg-b-0">
                             <tbody>
                             <?php foreach($interacao_tecnico as $t): ?>
+                                <?php
+                                // Eu identifico os registros sem nome sem descartar as interações contadas.
+                                $nome_tecnico = trim((string)($t['tecnico'] ?? '')) ?: 'Técnico não identificado';
+                                ?>
                                 <tr>
                                     <td>
                                         <div class="az-img-user"><i class="fa fa-2x fa-user-circle-o" aria-hidden="true" style="color: #FF8C00;"></i></div>
                                     </td>
                                     <td>
-                                        <h6 class="mg-b-0 tx-inverse"><?=$t['tecnico'];?></h6>
-                                        <small class="tx-11 tx-gray-500">Agent ID: </small>
+                                        <h6 class="mg-b-0 tx-inverse"><?=htmlspecialchars($nome_tecnico, ENT_QUOTES, 'UTF-8')?></h6>
+                                        <small class="tx-11 tx-gray-500">Técnico</small>
                                     </td>
                                     <td>
                                         <h6 class="mg-b-0 tx-inverse"><?=$t['total']?></h6>
@@ -181,7 +191,7 @@
             <!-- card -->
         </div>
         <!-- col -->
-        <div class="col-md-7 col-lg-7 col-xl-8 mg-t-20">
+        <div class="col-md-7 col-lg-7 col-xl-7 mg-t-20">
             <div class="card" style="height: 100%;">
                 <div class="card-header">
                     <h6 class="card-title tx-14 mg-b-5">Contratos Ativos</h6>
@@ -220,24 +230,41 @@
     google.charts.load("current", {
         packages: ["corechart"]
     });
-    google.charts.setOnLoadCallback(drawChart);
+    google.charts.setOnLoadCallback(desenharGraficos);
 
-    function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-            ['opcoes', 'satisfação'],
+    function desenharGraficos() {
+        // Eu mostro avaliação e situação em pizzas 3D com a porcentagem de cada fatia.
+        const opcoesGraficosPizza = {
+            is3D: true,
+            pieSliceText: 'percentage',
+            legend: {position: 'right'},
+            chartArea: {width: '90%', height: '85%'}
+        };
+
+        const dadosAvaliacao = google.visualization.arrayToDataTable([
+            ['Avaliação', 'Chamados'],
             ['Satisfeito', <?=$resultado_pesquisa['satisfeito']?>],
             ['Não satisfeito', <?=$resultado_pesquisa['nao_satisfeito']?>],
             ['Não avaliados', <?=$resultado_pesquisa['nao_avaliados']?>],
             ['Muito satisfeito', <?=$resultado_pesquisa['muito_satisfeito']?>]
         ]);
 
-        var options = {
-            title: '',
-            is3D: true,
-        };
+        const graficoAvaliacao = new google.visualization.PieChart(document.getElementById('grafico_avaliacao'));
+        graficoAvaliacao.draw(dadosAvaliacao, opcoesGraficosPizza);
 
-        var chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
-        chart.draw(data, options);
+        const dadosSituacao = google.visualization.arrayToDataTable([
+            ['Situação', 'Chamados'],
+            <?php if ($chamados_por_situacao): ?>
+                <?php foreach ($chamados_por_situacao as $situacao): ?>
+                    [<?=json_encode((string)$situacao['situacao'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT)?>, <?= (int)$situacao['total']?>],
+                <?php endforeach; ?>
+            <?php else: ?>
+                ['Sem chamados', 0]
+            <?php endif; ?>
+        ]);
+
+        const graficoSituacao = new google.visualization.PieChart(document.getElementById('grafico_situacao'));
+        graficoSituacao.draw(dadosSituacao, opcoesGraficosPizza);
     }
 </script>
 <script>

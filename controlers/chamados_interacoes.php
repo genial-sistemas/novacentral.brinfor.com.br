@@ -6,7 +6,7 @@ $menu   = 'Chamados';
 $pagina = '';
 
 if (isset($_POST['nova-msg'])) {
-    criarInteracao($_POST['chamado_id'], 0, $_POST['id_equipamento'], $_POST['nova-msg'], 1);
+    criarInteracao($_POST['chamado_id'], 0, $_POST['id_equipamento'], $_POST['nova-msg'], 1, CHAMADO_STATUS_RESP_CLIENTE);
     unset($_POST['nova-msg']);
 }
 

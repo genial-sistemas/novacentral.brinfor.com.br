@@ -35,13 +35,19 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     $('#codigo_equipamento').on('change', function() {
-        // Get the selected option
         const selected = $(this).find('option:selected');
-        // Set input value to data-codigo (or empty if undefined)
+        const nome = selected.data('nome') || '';
+        const email = selected.data('email') || '';
+        const telefone = selected.data('telefone') || '';
+
         $('#etiqueta_codigo_equipamento').val(selected.data('codigo') || '');
-        $('#nome').val(selected.data('nome') || '');
-        $('#email').val(selected.data('email') || '');
-        $('#telefone').val(selected.data('telefone') || '');
+        $('#nome').val(nome);
+        $('#email').val(email);
+        $('#telefone').val(telefone);
+
+        // Eu aviso quando faltam dados de contato para a pessoa completar o que ficou vazio.
+        const contatoIncompleto = !nome || !email || !telefone;
+        $('#aviso-contato-equipamento').prop('hidden', selected.val() === '0' || !contatoIncompleto);
     });
 
     // Trigger once on page load in case something is pre-selected

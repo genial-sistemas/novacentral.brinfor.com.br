@@ -110,7 +110,7 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'abrir_chamado') {
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>';  
-    }elseif ($frm_email == false){
+    }elseif (!filter_var(trim((string)$frm_email), FILTER_VALIDATE_EMAIL)) {
         $mensagem = '<div class="alert alert-danger alert-dismissible fade show floating-alert" role="alert">
                         <p>O email informado parece inválido! Favor digitar novamente!</p>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">

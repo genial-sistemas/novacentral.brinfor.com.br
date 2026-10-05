@@ -695,7 +695,7 @@
             // ============================================================
             // CONFIGURAÇÕES
             // ============================================================
-            const POLLING_INTERVAL = 30000;
+            const POLLING_INTERVAL = 5000;
             const ID_CHAMADO = <?= (int) $idChamado ?>;
 
             // ============================================================
@@ -1149,6 +1149,22 @@
                         timeoutPolling = setTimeout(polling, 5000);
                     });
             }
+
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    if (timeoutPolling) {
+                        clearTimeout(timeoutPolling);
+                    }
+                    polling();
+                }
+            });
+
+            window.addEventListener('focus', function() {
+                if (timeoutPolling) {
+                    clearTimeout(timeoutPolling);
+                }
+                polling();
+            });
 
             // ============================================================
             // FUNÇÃO: ENVIAR MENSAGEM

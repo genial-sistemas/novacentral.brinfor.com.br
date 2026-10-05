@@ -15,8 +15,9 @@ include 'header.php'
                     <select class="form-control" name="id_tipo_contrato" id="id_tipo_contrato">
                         <option value="0">Selecione:</option>
                         <?php foreach($tipos_contrato_visitante as $id_tipo => $tipo_descricao): ?>
-                            <?php $tipo_habilitado = in_array($id_tipo, $tipos_contrato_habilitados, true); ?>
-                            <option value="<?=$id_tipo?>" <?php if(!$tipo_habilitado){ echo 'disabled'; } ?> <?php if($id_tipo==$frm_tipo_contrato){ echo "selected"; } ?>><?=htmlspecialchars($tipo_descricao, ENT_QUOTES, 'UTF-8')?><?php if(!$tipo_habilitado){ echo ' (sem contrato ativo)'; } ?></option>
+                            <?php if (in_array($id_tipo, $tipos_contrato_habilitados, true)): ?>
+                                <option value="<?=$id_tipo?>" <?php if($id_tipo==$frm_tipo_contrato){ echo "selected"; } ?>><?=htmlspecialchars($tipo_descricao, ENT_QUOTES, 'UTF-8')?></option>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -37,9 +38,10 @@ include 'header.php'
                                         $contato_telefone = $contato_info["cel"];
                                         $numero_serie = trim((string)($co['sn'] ?? ''));
                                     ?>
-                                    <option value="<?=$co['id']?>" data-codigo="<?=$codigo?>" data-nome="<?=$contato_nome?>" data-email="<?=$contato_email?>" data-telefone="<?=$contato_telefone?>"<?php if($co['id']==$frm_codigo_equipamento){ echo "selected"; } ?>><?=$codigo?> - <?=$co['descricao']?> - <?php echo validaNomeContato($contato_nome); ?><?php if ($numero_serie !== ''): ?> -- S/N: <?=htmlspecialchars($numero_serie, ENT_QUOTES, 'UTF-8')?><?php endif; ?></option>
+                                    <option value="<?=htmlspecialchars((string)$co['id'], ENT_QUOTES, 'UTF-8')?>" data-codigo="<?=htmlspecialchars((string)$codigo, ENT_QUOTES, 'UTF-8')?>" data-nome="<?=htmlspecialchars((string)$contato_nome, ENT_QUOTES, 'UTF-8')?>" data-email="<?=htmlspecialchars((string)$contato_email, ENT_QUOTES, 'UTF-8')?>" data-telefone="<?=htmlspecialchars((string)$contato_telefone, ENT_QUOTES, 'UTF-8')?>"<?php if($co['id']==$frm_codigo_equipamento){ echo "selected"; } ?>><?=htmlspecialchars((string)$codigo, ENT_QUOTES, 'UTF-8')?> - <?=htmlspecialchars((string)$co['descricao'], ENT_QUOTES, 'UTF-8')?> - <?=htmlspecialchars((string)validaNomeContato($contato_nome), ENT_QUOTES, 'UTF-8')?><?php if ($numero_serie !== ''): ?> -- S/N: <?=htmlspecialchars($numero_serie, ENT_QUOTES, 'UTF-8')?><?php endif; ?></option>
                                 <?php endforeach; ?>
                             </select>
+                            <small id="aviso-contato-equipamento" class="form-text text-muted" role="status" hidden>Confira os dados de contato; preencha manualmente os campos que estiverem vazios.</small>
                         </div>
                     </div>
                     <div class="col-md-4">

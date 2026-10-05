@@ -20,7 +20,7 @@ $chamados = array();
 $chamados_primeira_interacao = array();
 $equipamento_selecionado = $equipamentos_por_referencia[$referencia] ?? null;
 $erro_relatorio = null;
-$relatorio_executado = true;
+$relatorio_executado = false;
 
 $parse_data = static function ($valor) {
     $data = DateTimeImmutable::createFromFormat('!d/m/Y', $valor);
@@ -31,49 +31,55 @@ $parse_data = static function ($valor) {
     return $data;
 };
 
-$data_inicial = $parse_data($data_inicial_texto);
-$data_final = $parse_data($data_final_texto);
+$data_inicial = null;
+$data_final = null;
 
-if ($data_inicial === null || $data_final === null) {
-    $erro_relatorio = 'Informe as duas datas no formato DD/MM/AAAA.';
-} elseif ($data_inicial > $data_final) {
-    $erro_relatorio = 'A data inicial deve ser anterior ou igual à data final.';
-} elseif ($referencia !== 'todos' && $equipamento_selecionado === null) {
-    $erro_relatorio = 'Selecione um equipamento ativo vinculado à sua conta.';
-} else {
-    if ($referencia === 'todos') {
-        $contratos_com_equipamentos = array();
-        foreach ($contratos as $contrato) {
-            if (in_array((int)$contrato['id_tipo'], array(1, 7), true)) {
-                $contratos_com_equipamentos[] = (int)$contrato['id'];
-            }
-        }
-        $chamados = obterChamadosTodosEquipamentosPeriodo(
-            $contratos_com_equipamentos,
-            $data_inicial->format('Y-m-d'),
-            $data_final->format('Y-m-d')
-        );
-        foreach ($chamados as &$chamado) {
-            $referencia_chamado = (int)$chamado['id_contrato'] . ':' . (int)$chamado['id_equipamento'];
-            $chamado['equipamento_rotulo'] = $equipamentos_por_referencia[$referencia_chamado]['rotulo'] ?? 'Equipamento ' . (int)$chamado['id_equipamento'];
-        }
-        unset($chamado);
+if (isset($_POST['acao']) && $_POST['acao'] === 'filtrar') {
+    $data_inicial = $parse_data($data_inicial_texto);
+    $data_final = $parse_data($data_final_texto);
+
+    if ($data_inicial === null || $data_final === null) {
+        $erro_relatorio = 'Informe as duas datas no formato DD/MM/AAAA.';
+    } elseif ($data_inicial > $data_final) {
+        $erro_relatorio = 'A data inicial deve ser anterior ou igual à data final.';
+    } elseif ($referencia !== 'todos' && $equipamento_selecionado === null) {
+        $erro_relatorio = 'Selecione um equipamento ativo vinculado à sua conta.';
     } else {
-        $chamados = obterChamadosPorEquipamentoPeriodo(
-            $equipamento_selecionado['id_contrato'],
-            $equipamento_selecionado['id'],
-            $data_inicial->format('Y-m-d'),
-            $data_final->format('Y-m-d')
-        );
-        foreach ($chamados as &$chamado) {
-            $chamado['equipamento_rotulo'] = $equipamento_selecionado['rotulo'];
+        $relatorio_executado = true;
+        if ($referencia === 'todos') {
+            $contratos_com_equipamentos = array();
+            foreach ($contratos as $contrato) {
+                if (in_array((int)$contrato['id_tipo'], array(1, 7), true)) {
+                    $contratos_com_equipamentos[] = (int)$contrato['id'];
+                }
+            }
+            $chamados = obterChamadosTodosEquipamentosPeriodo(
+                $contratos_com_equipamentos,
+                $data_inicial->format('Y-m-d'),
+                $data_final->format('Y-m-d')
+            );
+            foreach ($chamados as &$chamado) {
+                $referencia_chamado = (int)$chamado['id_contrato'] . ':' . (int)$chamado['id_equipamento'];
+                $chamado['equipamento_rotulo'] = $equipamentos_por_referencia[$referencia_chamado]['rotulo'] ?? 'Equipamento ' . (int)$chamado['id_equipamento'];
+            }
+            unset($chamado);
+        } else {
+            $chamados = obterChamadosPorEquipamentoPeriodo(
+                $equipamento_selecionado['id_contrato'],
+                $equipamento_selecionado['id'],
+                $data_inicial->format('Y-m-d'),
+                $data_final->format('Y-m-d')
+            );
+            foreach ($chamados as &$chamado) {
+                $chamado['equipamento_rotulo'] = $equipamento_selecionado['rotulo'];
+            }
+            unset($chamado);
         }
-        unset($chamado);
-    }
 
-    foreach ($chamados as $indice => $chamado) {
-        $interacoes = obterInteracoesPorChamados($chamado['id']);
-        $chamados_primeira_interacao[$indice] = $interacoes[0] ?? array();
+        foreach ($chamados as $indice => $chamado) {
+            $interacoes = obterInteracoesPorChamados($chamado['id']);
+            $chamados_primeira_interacao[$indice] = $interacoes[0] ?? array();
+        }
     }
 }
 

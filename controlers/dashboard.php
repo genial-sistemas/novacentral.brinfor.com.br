@@ -56,6 +56,7 @@ $maquinas_ativas = obterMaquinasAtivas($_SESSION['contratos']);
 $maquinas_inativas = obterMaquinasInativas($_SESSION['contratos']);
 $horas_trabalhadas = obterHorasTrabalhadas($mes_select, $ano_select, $_SESSION['contratos']);
 $resultado_pesquisa = obterResultadoPesquisa($mes_select, $ano_select, $_SESSION['contratos']);
+$chamados_por_situacao = obterChamadosPorSituacao($mes_select, $ano_select, $_SESSION['contratos']);
 $interacao_tecnico = obterInteracaoPorTecnico($_SESSION['contratos'], $mes_select, $ano_select);
 $contratosAtivos = obterContratosAtivos($_SESSION['contratos']);
 $obterUltimosChamados = obterUltimosChamadosDashboard($_SESSION['contratos']);

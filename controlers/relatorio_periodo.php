@@ -7,14 +7,17 @@ $menu   = 'Relatórios';
 $pagina = 'Por período';
 
 $contratos = obterContratos($_SESSION['contratos']);
+$primeiro_dia_mes = new DateTimeImmutable('first day of this month');
+$data_inicial_texto = trim($_POST['data_inicial'] ?? $primeiro_dia_mes->format('d/m/Y'));
+$data_final_texto = trim($_POST['data_final'] ?? $primeiro_dia_mes->modify('last day of this month')->format('d/m/Y'));
+$contrato_id_texto = $_POST['contrato'] ?? '';
 $chamados = array();
 $chamados_primeira_interacao = array();
 $erro_relatorio = null;
+$relatorio_executado = false;
 
 if (isset($_POST['acao']) && $_POST['acao'] === 'filtrar') {
-    $data_inicial_texto = trim($_POST['data_inicial'] ?? '');
-    $data_final_texto = trim($_POST['data_final'] ?? '');
-    $contrato_id = filter_var($_POST['contrato'] ?? null, FILTER_VALIDATE_INT);
+    $contrato_id = filter_var($contrato_id_texto, FILTER_VALIDATE_INT);
     $contratos_ids = array_map('intval', $_SESSION['contratos'] ?? array());
     $parse_data = static function ($valor) {
         $data = DateTimeImmutable::createFromFormat('!d/m/Y', $valor);
@@ -35,6 +38,7 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'filtrar') {
     } elseif ($contrato_id === false || !in_array($contrato_id, $contratos_ids, true)) {
         $erro_relatorio = 'Selecione um contrato válido.';
     } else {
+        $relatorio_executado = true;
         $chamados = obterChamadosPorPeriodo(
             $contrato_id,
             $data_inicial->format('Y-m-d'),

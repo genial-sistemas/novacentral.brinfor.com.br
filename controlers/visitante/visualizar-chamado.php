@@ -94,17 +94,37 @@ try {
     exit;
 }
 
-// ============================================
-// VERIFICAÇÃO DA PASTA DE UPLOAD
-// ============================================
-$pasta_upload = '/home/novacentral/public_html/chamados/eventos/';
-if (!file_exists($pasta_upload)) {
-    if (!mkdir($pasta_upload, 0777, true)) {
-        error_log("❌ Erro crítico: Não foi possível criar a pasta base de uploads: " . $pasta_upload);
-    } else {
-        chmod($pasta_upload, 0777);
-        error_log("📁 Pasta base de uploads criada: " . $pasta_upload);
+function obterPastaBaseUploadsChamados()
+{
+    $raiz_publica = trim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''));
+    if ($raiz_publica === '') {
+        $raiz_publica = dirname(__DIR__, 2);
     }
+
+    return rtrim($raiz_publica, '/\\') . DIRECTORY_SEPARATOR . 'chamados' . DIRECTORY_SEPARATOR . 'eventos';
+}
+
+function tamanhoIniParaBytes($valor)
+{
+    $valor = trim((string)$valor);
+    $unidade = strtolower(substr($valor, -1));
+    $tamanho = (float)$valor;
+
+    if ($unidade === 'g') {
+        $tamanho *= 1024 * 1024 * 1024;
+    } elseif ($unidade === 'm') {
+        $tamanho *= 1024 * 1024;
+    } elseif ($unidade === 'k') {
+        $tamanho *= 1024;
+    }
+
+    return (int)$tamanho;
+}
+
+// Eu salvo os anexos dentro da raiz pública desta instalação, local ou oficial.
+$pasta_upload = obterPastaBaseUploadsChamados() . DIRECTORY_SEPARATOR;
+if (!is_dir($pasta_upload) && !mkdir($pasta_upload, 0775, true) && !is_dir($pasta_upload)) {
+    error_log('Não foi possível criar a pasta base de uploads: ' . $pasta_upload);
 }
 
 // ============================================
@@ -200,6 +220,15 @@ define('UPLOAD_FILE_RELATIVE_BASE_PATH', 'chamados/eventos');
 
 // Verifica se o formulário foi enviado
 $dados_submetidos = isset($_POST['acao']) && $_POST['acao'] === 'abrir_chamado';
+
+$tamanho_requisicao = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+$limite_post = tamanhoIniParaBytes(ini_get('post_max_size'));
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $tamanho_requisicao > $limite_post && empty($_POST) && empty($_FILES)) {
+    $erro = 'O envio ultrapassou o limite total do servidor (' . ini_get('post_max_size') . '). Reduza o tamanho do arquivo e tente novamente.';
+    // Eu devolvo ao formulário quando o PHP descarta um POST acima do limite configurado.
+    include __DIR__ . '/../../views/visitante/chamados_abrir.php';
+    exit;
+}
 
 // Se não houver dados submetidos, redireciona para o formulário
 if (!$dados_submetidos && empty($_FILES['arquivo'])) {
@@ -460,10 +489,11 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
         $extensao = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
 
         $tipo_permitido = in_array($tipo_mime, $tipos_permitidos) || in_array($extensao, $extensoes_permitidas);
-        $tamanho_maximo = 10 * 1024 * 1024;
+        $limite_php_upload = tamanhoIniParaBytes(ini_get('upload_max_filesize'));
+        $tamanho_maximo = min(10 * 1024 * 1024, $limite_php_upload);
 
         if ($tamanho > $tamanho_maximo) {
-            $arquivo_erro = 'Arquivo muito grande. Tamanho máximo permitido: 10MB';
+            $arquivo_erro = 'Arquivo muito grande. Limite atual por arquivo: ' . formatarTamanho($tamanho_maximo) . '.';
         } elseif (!$tipo_permitido) {
             $arquivo_erro = 'Tipo de arquivo não permitido.';
         } else {
@@ -533,16 +563,24 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
     }
 }
 
+if ($arquivo_erro !== null) {
+    $erro = $arquivo_erro;
+    // Eu interrompo a abertura para não criar chamado sem o anexo selecionado.
+    include __DIR__ . '/../../views/visitante/chamados_abrir.php';
+    exit;
+}
+
 // ============================================
 // FUNÇÃO PARA SALVAR ARQUIVO ANEXADO
 // ============================================
 function salvarArquivoChamado($arquivo_temp, $id_chamado, $nome_original)
 {
-    $pasta_base = '/home/novacentral/public_html/chamados/eventos/';
+    global $pasta_upload;
+    $pasta_base = rtrim($pasta_upload, '/\\') . DIRECTORY_SEPARATOR;
     $pasta_chamado = $pasta_base . $id_chamado . '/';
 
-    if (!file_exists($pasta_chamado)) {
-        if (!mkdir($pasta_chamado, 0777, true)) {
+    if (!is_dir($pasta_chamado)) {
+        if (!mkdir($pasta_chamado, 0775, true) && !is_dir($pasta_chamado)) {
             error_log("❌ Erro ao criar pasta: " . $pasta_chamado);
             return ['status' => 'erro', 'mensagem' => 'Não foi possível criar a pasta do chamado: ' . $pasta_chamado];
         }
@@ -580,25 +618,18 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 {
     global $pdo;
 
-    $phpmailer_base = '/home/novacentral/public_html/bibliotecas/phpmailer/';
-
-    if (!file_exists($phpmailer_base . 'class.phpmailer.php')) {
-        error_log("PHPMailer não encontrado em: " . $phpmailer_base);
-        return ['resultados' => [], 'logs' => ['❌ PHPMailer não encontrado'], 'total_destinatarios' => 0, 'destinatarios_lista' => []];
-    }
-
+    $phpmailer_base = __DIR__ . '/../../bibliotecas/phpmailer/';
     require_once $phpmailer_base . 'class.phpmailer.php';
-    require_once $phpmailer_base . 'class.smtp.php';
-    require_once $phpmailer_base . 'class.pop3.php';
 
     $destinatarios = [];
     $logs_busca = [];
 
-    if (!empty($dados['email'])) {
-        $destinatarios[] = $dados['email'];
-        $logs_busca[] = "📧 E-mail do formulário: " . $dados['email'];
+    $email_solicitante = trim((string)($dados['email'] ?? ''));
+    if (filter_var($email_solicitante, FILTER_VALIDATE_EMAIL)) {
+        $destinatarios[] = $email_solicitante;
+        $logs_busca[] = "📧 E-mail do formulário: " . $email_solicitante;
     } else {
-        $logs_busca[] = "⚠️ Nenhum e-mail informado no formulário";
+        $logs_busca[] = "❌ E-mail do formulário ausente ou inválido";
     }
 
     $tipo_contrato = $dados['id_tipo_contrato'] ?? '0';
@@ -646,12 +677,18 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 
     $destinatarios = array_unique($destinatarios);
     $destinatarios = array_filter($destinatarios, function ($email) {
-        return filter_var($email, FILTER_VALIDATE_EMAIL);
+        return is_string($email) && filter_var(trim($email), FILTER_VALIDATE_EMAIL);
     });
 
     if (empty($destinatarios)) {
-        $destinatarios = ['matheus-willams-dev@outlook.com'];
-        $logs_busca[] = "⚠️ Nenhum destinatário válido. Usando fallback";
+        $erro_destinatario = 'Nenhum destinatário válido para o e-mail de abertura do chamado.';
+        error_log($erro_destinatario);
+        return [
+            'resultados' => [['destinatario' => $email_solicitante, 'enviado' => false, 'erro' => $erro_destinatario]],
+            'logs' => array_merge($logs_busca, [$erro_destinatario]),
+            'total_destinatarios' => 0,
+            'destinatarios_lista' => []
+        ];
     }
 
     $logs_busca[] = "📨 DESTINATÁRIOS FINAIS (" . count($destinatarios) . "): " . implode(", ", $destinatarios);
@@ -666,16 +703,13 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
         'password' => 'bhbm2915',
         'secure' => 'tls'
     ];
-
     $from_email = 'sistema@bhcloud.com.br';
     $from_name = 'BRInfor Soluções em TI';
-
     $resultados = [];
 
     foreach ($destinatarios as $destinatario) {
         try {
             $mail = new PHPMailer(true);
-
             $mail->isSMTP();
             $mail->Host = $config_smtp['host'];
             $mail->Port = $config_smtp['port'];
@@ -683,25 +717,17 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
             $mail->Username = $config_smtp['username'];
             $mail->Password = $config_smtp['password'];
             $mail->SMTPSecure = $config_smtp['secure'];
-
-            $mail->SMTPOptions = [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true
-                ]
-            ];
-
             $mail->setFrom($from_email, $from_name);
             $mail->addAddress($destinatario);
             $mail->isHTML(true);
             $mail->CharSet = 'UTF-8';
             $mail->Subject = $assunto;
             $mail->Body = $html_email;
+            $app_url = rtrim(getenv('APP_URL') ?: ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
             $mail->AltBody = "Chamado #" . $proximo_id_chamado . "\n" .
                 "🔑 Código de Segurança: " . $dados['codigoSeguranca'] . "\n" .
                 "Data: " . date('d/m/Y H:i:s') . "\n" .
-                "Acesse: https://novacentral.brinfor.com.br/index.php?page=visitante-interagir-chamado&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca'];
+                "Acesse: " . $app_url . "/index.php?page=visitante-chamados-interacoes&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca'];
             $mail->send();
 
             $resultados[] = ['destinatario' => $destinatario, 'enviado' => true, 'erro' => null];
@@ -773,10 +799,11 @@ function gerarQueryChamado($dados, $proximo_id_chamado)
     $valores[] = 'NOW()';
 
     $campos[] = 'data_entrada';
-    $valores[] = 'NOW()';
+    $valores[] = 'NULL';
 
     $campos[] = 'data_saida';
-    $valores[] = 'NULL';
+    // Eu registro a data e hora da abertura em data_saida, não em data_entrada.
+    $valores[] = 'NOW()';
 
     if (temValor($dados['codigoSeguranca'])) {
         $campos[] = 'seguranca';
@@ -1059,7 +1086,7 @@ function renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquiv
             </div>' : '') . '
             
             <div class="btn-container">
-<a style="text-decoration:none;border-top:#dd9933 10px solid;border-right:#dd9933 20px solid;background:#dd9933;border-bottom:#dd9933 10px solid;font-weight:bold;color:white;border-left:#dd9933 20px solid;display:inline-block;" href="https://novacentral.brinfor.com.br/index.php?page=visitante-interagir-chamado&id=' . $proximo_id_chamado . '&seguranca=' . $dados['codigoSeguranca'] . '">Nova Interação</a>            </div>
+<a style="text-decoration:none;border-top:#dd9933 10px solid;border-right:#dd9933 20px solid;background:#dd9933;border-bottom:#dd9933 10px solid;font-weight:bold;color:white;border-left:#dd9933 20px solid;display:inline-block;" href="' . htmlspecialchars(rtrim(getenv('APP_URL') ?: ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/') . '/index.php?page=visitante-chamados-interacoes&id=' . $proximo_id_chamado . '&seguranca=' . $dados['codigoSeguranca']) . '">Nova Interação</a>            </div>
             
             <h2 style="font-size:18px;margin:20px 0 15px 0;">Eventos</h2>
             <table class="event-table">
@@ -1171,12 +1198,16 @@ if ($dados_submetidos) {
         // ============================================
         $html_email = renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquivo_info, $eventos_para_visualizar);
         $email_resultados = enviarEmailChamado($html_email, $dados, $proximo_id_chamado);
-        $email_enviado = true;
+        $email_enviado = !empty($email_resultados['resultados'])
+            && count(array_filter($email_resultados['resultados'], static function ($resultado) {
+                return !empty($resultado['enviado']);
+            })) === count($email_resultados['resultados']);
 
         // ============================================
         // 4. REDIRECIONA PARA chamados_abrir_resultado COM O ID
         // ============================================
-        header("Location: index.php?page=visitante-abrir-chamado-resultado&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca']);
+        $parametro_email = $email_enviado ? '' : '&email=failed';
+        header("Location: index.php?page=visitante-abrir-chamado-resultado&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca'] . $parametro_email);
         exit;
     } catch (PDOException $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();

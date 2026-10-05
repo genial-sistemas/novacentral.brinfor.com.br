@@ -13,23 +13,23 @@ include 'header.php'; ?>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="data_inicial">Data Inicial</label>
-                    <input type="text" class="form-control" id="data_inicial" name="data_inicial" value="<?=htmlspecialchars($_POST['data_inicial'] ?? '', ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric">
+                    <input type="text" class="form-control" id="data_inicial" name="data_inicial" value="<?=htmlspecialchars($data_inicial_texto, ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric" required>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="data_final">Data Final</label>
-                    <input type="text" class="form-control" id="data_final" name="data_final" value="<?=htmlspecialchars($_POST['data_final'] ?? '', ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric">
+                    <input type="text" class="form-control" id="data_final" name="data_final" value="<?=htmlspecialchars($data_final_texto, ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric" required>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-group">
                     <label>Contrato</label>
-                    <select class="form-control" name="contrato">
-                        <option value="0">Selecione:</option>
+                    <select class="form-control" name="contrato" required>
+                        <option value="" <?=($contrato_id_texto === '' ? 'selected' : '')?>>Selecione:</option>
                     <?php
                     foreach($contratos as $c): ?>
-                        <option value="<?=$c['id']?>" <?=(isset($_POST['contrato'])&&$c['id']==$_POST['contrato']?'selected':'')?>>
+                        <option value="<?=$c['id']?>" <?=(string)$c['id'] === (string)$contrato_id_texto ? 'selected' : ''?>>
                             <?=$c['id'].' - '.$c['tipo_nome'];?>
                         </option>
                     <?php
@@ -48,10 +48,10 @@ include 'header.php'; ?>
     <?php if ($erro_relatorio !== null): ?>
         <div class="alert alert-danger" role="alert"><?=htmlspecialchars($erro_relatorio, ENT_QUOTES, 'UTF-8')?></div>
     <?php endif; ?>
+    <?php if ($relatorio_executado): ?>
     <div class="row row-sm">
         <div class="col-md-12">
-            <form action="/chamados_interagir" method="post">
-                <div class="table-responsive">
+            <div class="table-responsive">
                     <table class="table mg-b-0">
                         <thead>
                             <tr>
@@ -69,19 +69,22 @@ include 'header.php'; ?>
                             <tr>
                                 <td><?=$c['id'];?></td>
                                 <td><?=data_brasil_datetime($c['data_abertura']);?></td>
-                                <td><?=$chamados_primeira_interacao[$k]['horas_total']?></td>
+                                <td><?=$chamados_primeira_interacao[$k]['horas_total'] ?? ''?></td>
                                 <td><?=$c['nome_pessoa'];?></td>
                                 <!--<td><?=$chamados_primeira_interacao[$k]['nome_pessoa']?></td>-->
                                 <td><?=$chamados_primeira_interacao[$k]['descricao']?></td>
                             </tr>
                         <?php
                         endforeach;?>
+                        <?php if (!$chamados): ?>
+                            <tr><td colspan="5">Nenhum chamado encontrado para o contrato e período selecionados.</td></tr>
+                        <?php endif; ?>
                         </tbody>
                     </table>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
+    <?php endif; ?>
 </div><!-- az-content-body -->
 
 <?php

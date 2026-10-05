@@ -527,7 +527,8 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <label>Anexo:</label>
-                            <input type="file" name="arquivo">
+                            <input type="file" name="arquivo" accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z,.json,.xml">
+                            <small class="form-text text-muted">Limite por arquivo neste servidor: <?=htmlspecialchars(ini_get('upload_max_filesize'), ENT_QUOTES, 'UTF-8')?>.</small>
                         </div>
                     </div>
                 </div>
@@ -548,7 +549,7 @@
                     <div class="col-md-12">
                         <div class="alert alert-danger">
                             <i class="fa fa-exclamation-circle"></i>
-                            <?= $erro ?>
+                            <?=htmlspecialchars((string)$erro, ENT_QUOTES, 'UTF-8')?>
                         </div>
                     </div>
                 </div>
