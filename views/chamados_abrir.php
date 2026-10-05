@@ -78,7 +78,12 @@ include 'header.php'
                         <option value="0">Selecione:</option>
                         <?php foreach($contratosAtivos as $contrato): ?>
                             <?php if(array_key_exists((int)$contrato['id_tipo'], $tipos_contrato_visitante)): ?>
-                                <option value="<?=$contrato['id']?>" data-tipo="<?=$contrato['id_tipo']?>" <?php if($contrato['id']==$frm_contrato_id){ echo 'selected'; } ?>><?=$contrato['id']?> - <?=htmlspecialchars($contrato['tipo_contrato'], ENT_QUOTES, 'UTF-8')?></option>
+                                <?php
+                                    $descricaoContrato = (int)$contrato['id_tipo'] === 2 && !empty($contrato['dominio'])
+                                        ? $contrato['id'] . ' - ' . $contrato['dominio']
+                                        : 'Contrato #' . $contrato['id'];
+                                ?>
+                                <option value="<?=$contrato['id']?>" data-tipo="<?=$contrato['id_tipo']?>" <?php if($contrato['id']==$frm_contrato_id){ echo 'selected'; } ?>><?=htmlspecialchars($descricaoContrato, ENT_QUOTES, 'UTF-8')?></option>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </select>

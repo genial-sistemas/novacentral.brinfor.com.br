@@ -618,8 +618,7 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 {
     global $pdo;
 
-    $phpmailer_base = __DIR__ . '/../../bibliotecas/phpmailer/';
-    require_once $phpmailer_base . 'class.phpmailer.php';
+    require_once __DIR__ . '/../../models/email.php';
 
     $destinatarios = [];
     $logs_busca = [];
@@ -695,46 +694,17 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 
     $assunto = '🔒 Chamado #' . $proximo_id_chamado . ' - ' . $dados['nome'] . ' (Seg: ' . $dados['codigoSeguranca'] . ')';
 
-    $config_smtp = [
-        'host' => 'mail.bhcloud.com.br',
-        'port' => 587,
-        'auth' => true,
-        'username' => 'sistema@bhcloud.com.br',
-        'password' => 'bhbm2915',
-        'secure' => 'tls'
-    ];
-    $from_email = 'sistema@bhcloud.com.br';
-    $from_name = 'BRInfor Soluções em TI';
     $resultados = [];
 
     foreach ($destinatarios as $destinatario) {
-        try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = $config_smtp['host'];
-            $mail->Port = $config_smtp['port'];
-            $mail->SMTPAuth = $config_smtp['auth'];
-            $mail->Username = $config_smtp['username'];
-            $mail->Password = $config_smtp['password'];
-            $mail->SMTPSecure = $config_smtp['secure'];
-            $mail->setFrom($from_email, $from_name);
-            $mail->addAddress($destinatario);
-            $mail->isHTML(true);
-            $mail->CharSet = 'UTF-8';
-            $mail->Subject = $assunto;
-            $mail->Body = $html_email;
-            $app_url = rtrim(getenv('APP_URL') ?: ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
-            $mail->AltBody = "Chamado #" . $proximo_id_chamado . "\n" .
+        $app_url = rtrim(getenv('APP_URL') ?: ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
+        $alt_body = "Chamado #" . $proximo_id_chamado . "\n" .
                 "🔑 Código de Segurança: " . $dados['codigoSeguranca'] . "\n" .
                 "Data: " . date('d/m/Y H:i:s') . "\n" .
                 "Acesse: " . $app_url . "/index.php?page=visitante-chamados-interacoes&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca'];
-            $mail->send();
-
-            $resultados[] = ['destinatario' => $destinatario, 'enviado' => true, 'erro' => null];
-        } catch (Exception $e) {
-            $resultados[] = ['destinatario' => $destinatario, 'enviado' => false, 'erro' => $e->getMessage()];
-            error_log("Erro ao enviar e-mail para $destinatario: " . $e->getMessage());
-        }
+        $resultado = enviarEmailHtml($destinatario, $assunto, $html_email, $alt_body);
+        $resultado['destinatario'] = $destinatario;
+        $resultados[] = $resultado;
     }
 
     return [
@@ -850,6 +820,23 @@ function gerarQueryEvento($dados, $tipo, $descricao, $proximo_id_chamado, $arqui
 {
     $campos = [];
     $valores = [];
+    $id_recurso = (int)($dados['id_equipamento'] ?? 0);
+    if ($id_recurso <= 0) {
+        switch ((int)($dados['id_tipo_contrato'] ?? 0)) {
+            case 2:
+                $id_recurso = (int)($dados['id_dominio'] ?? 0);
+                break;
+            case 4:
+                $id_recurso = (int)($dados['id_dominio'] ?? 0);
+                break;
+            case 5:
+                $id_recurso = (int)($dados['id_backup'] ?? 0);
+                break;
+            case 6:
+                $id_recurso = (int)($dados['id_suporte'] ?? 0);
+                break;
+        }
+    }
 
     $campos[] = 'id_chamado';
     $valores[] = intval($proximo_id_chamado);
@@ -864,9 +851,9 @@ function gerarQueryEvento($dados, $tipo, $descricao, $proximo_id_chamado, $arqui
         $valores[] = intval($dados['id_contato']);
     }
 
-    if (temValor($dados['id_equipamento']) && $dados['id_equipamento'] > 0) {
+    if ($id_recurso > 0) {
         $campos[] = 'id_equipamento';
-        $valores[] = intval($dados['id_equipamento']);
+        $valores[] = $id_recurso;
     }
 
     $campos[] = 'id_evento';

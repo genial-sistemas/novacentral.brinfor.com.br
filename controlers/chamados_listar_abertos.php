@@ -5,6 +5,8 @@ require "models/chamado.php";
 $menu   = 'Chamados';
 $pagina = 'Listar Abertos';
 
+$chamado_reaberto = ($_GET['reaberto'] ?? '') === '1';
+$email_reabertura_falhou = ($_GET['email'] ?? '') === 'failed';
 $chamados_abertos = obterUltimosChamados($_SESSION['contratos'], 0, 'aberto');
 
 $chamados_abertos_ultima_interacao =  array();

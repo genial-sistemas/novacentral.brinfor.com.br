@@ -12,7 +12,9 @@ function obterContratosTiposAtivos() {
 function obterContratosAtivos($ids_contatos) {
 
     $contratos_string = implode(", ", $ids_contatos);
-    $consulta = "SELECT c.id, p.nome_pessoa as gerente, t.id as id_tipo, t.descricao as tipo_contrato, c.dia_vencimento, c.valor FROM contrato as c
+    $consulta = "SELECT c.id, p.nome_pessoa as gerente, t.id as id_tipo, t.descricao as tipo_contrato, c.dia_vencimento, c.valor,
+    (SELECT GROUP_CONCAT(DISTINCT h.dominio ORDER BY h.dominio SEPARATOR ', ') FROM contrato_hosting h WHERE h.id_contrato=c.id) AS dominio
+    FROM contrato as c
     LEFT JOIN contrato_tipo as t ON c.id_tipo=t.id
     JOIN pessoa as p ON c.vendedor=p.id
     WHERE c.id IN ($contratos_string) AND c.status=2";
