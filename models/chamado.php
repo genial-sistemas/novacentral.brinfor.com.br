@@ -146,51 +146,40 @@ function obterQtdChamadosAbertos($mes_atual, $ano_atual, $contratos) {
 }
 
 function obterHorasTrabalhadas($mes_atual, $ano_atual, $contratos) {
-    $thoras = array();
-    $segundos = 0;
-    $contrato_string = implode(", ", $contratos);
-    $options = "id_contrato IN (".$contrato_string.")";
-    if ($ano_atual != 0) {
-        if($mes_atual!=0){
-            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }else{
-            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }
+    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos), static function ($id) {
+        return $id > 0;
+    })));
+    if (!$contratos) {
+        return '0:00:00';
     }
-    $consulta = "SELECT id FROM contrato_chamado WHERE $options";
+
+    $condicoes = array('chamado.id_contrato IN (' . implode(', ', array_fill(0, count($contratos), '?')) . ')');
+    $parametros = $contratos;
+    if ((int)$ano_atual !== 0) {
+        if ((int)$mes_atual !== 0) {
+            $condicoes[] = 'MONTH(chamado.data_abertura) = ?';
+            $parametros[] = (int)$mes_atual;
+        }
+        $condicoes[] = 'YEAR(chamado.data_abertura) = ?';
+        $parametros[] = (int)$ano_atual;
+    }
+
+    // Cada horas_total registrada em um evento é uma duração; soma em segundos para preservar totais acima de 24 horas.
+    $consulta = "SELECT COALESCE(SUM(TIME_TO_SEC(evento.horas_total)), 0)
+    FROM contrato_chamado chamado
+    JOIN contrato_chamado_eventos evento ON evento.id_chamado = chamado.id
+    WHERE evento.horas_total IS NOT NULL
+      AND " . implode(' AND ', $condicoes);
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
+    $sth->execute($parametros);
+    $segundos = (int)$sth->fetchColumn();
 
-    foreach($res as $r) {
-        $id_chamado = $r['id'];
-        $consulta2 = "SELECT horas_total FROM contrato_chamado_eventos WHERE id_chamado=$id_chamado AND horas_total IS NOT NULL";
-        $sth = $dbh->prepare($consulta2);
-        $sth->execute();
-        $res2 = $sth->fetchAll();
-        foreach($res2 as $r2) {
-            $horas = $r2['horas_total'];
-            $thoras[] = $horas;
-        }
-    }
+    $horas = intdiv($segundos, 3600);
+    $minutos = intdiv($segundos % 3600, 60);
+    $segundos = $segundos % 60;
 
-    foreach($thoras as $tempo) { //percorre o array $tempo
-        list ($h,$m,$s) = explode( ':', $tempo ); //explode a variavel tempo e coloca as horas em $h, minutos em $m, e os segundos em $s
-
-        if(!empty($h)){
-            $segundos += $h * 3600;
-        }
-        $segundos += $m * 60;
-        $segundos += $s;
-    }
-    
-    $horas = floor( $segundos / 3600 ); //converte os segundos em horas e arredonda caso nescessario
-    $segundos %= 3600;                  // pega o restante dos segundos subtraidos das horas
-    $minutos = floor( $segundos / 60 ); //converte os segundos em minutos e arredonda caso nescessario
-    $segundos %= 60;                    // pega o restante dos segundos subtraidos dos minutos
-    
-    return "$horas:$minutos:$segundos";
+    return sprintf('%d:%02d:%02d', $horas, $minutos, $segundos);
 }
 
 /**
@@ -744,19 +733,25 @@ function obterChamadosPorPeriodo($contrato, $data_inicial, $data_final) {
 }
 
 function obterChamadosPorEquipamentoPeriodo($contrato, $equipamento, $data_inicial, $data_final) {
-    $consulta = "SELECT chamado.*, pessoa.nome_pessoa
+    $consulta = "SELECT chamado.*, pessoa.nome_pessoa, fechamento.data_fechamento
     FROM contrato_chamado chamado
     JOIN pessoa ON pessoa.id = chamado.resp_abertura
+    JOIN (
+        SELECT id_chamado, MAX(CONCAT(data, ' ', hora)) AS data_fechamento
+        FROM contrato_chamado_eventos
+        GROUP BY id_chamado
+    ) fechamento ON fechamento.id_chamado = chamado.id
     WHERE chamado.id_contrato = :contrato
-      AND chamado.data_abertura >= :data_inicial
-      AND chamado.data_abertura < DATE_ADD(:data_final, INTERVAL 1 DAY)
+      AND chamado.id_situacao = 7
+      AND fechamento.data_fechamento >= :data_inicial
+      AND fechamento.data_fechamento < DATE_ADD(:data_final, INTERVAL 1 DAY)
       AND EXISTS (
           SELECT 1
           FROM contrato_chamado_eventos evento
           WHERE evento.id_chamado = chamado.id
             AND evento.id_equipamento = :equipamento
       )
-    ORDER BY chamado.data_abertura DESC";
+    ORDER BY fechamento.data_fechamento DESC";
 
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
@@ -776,15 +771,21 @@ function obterChamadosTodosEquipamentosPeriodo($contratos, $data_inicial, $data_
     }
 
     $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
-    $consulta = "SELECT DISTINCT chamado.*, pessoa.nome_pessoa, evento.id_equipamento
+    $consulta = "SELECT DISTINCT chamado.*, pessoa.nome_pessoa, evento.id_equipamento, fechamento.data_fechamento
     FROM contrato_chamado chamado
     JOIN pessoa ON pessoa.id = chamado.resp_abertura
     JOIN contrato_chamado_eventos evento ON evento.id_chamado = chamado.id
+    JOIN (
+        SELECT id_chamado, MAX(CONCAT(data, ' ', hora)) AS data_fechamento
+        FROM contrato_chamado_eventos
+        GROUP BY id_chamado
+    ) fechamento ON fechamento.id_chamado = chamado.id
     WHERE chamado.id_contrato IN ($placeholders)
-      AND chamado.data_abertura >= ?
-      AND chamado.data_abertura < DATE_ADD(?, INTERVAL 1 DAY)
+      AND chamado.id_situacao = 7
+      AND fechamento.data_fechamento >= ?
+      AND fechamento.data_fechamento < DATE_ADD(?, INTERVAL 1 DAY)
       AND evento.id_equipamento > 0
-    ORDER BY chamado.data_abertura DESC";
+    ORDER BY fechamento.data_fechamento DESC";
 
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);

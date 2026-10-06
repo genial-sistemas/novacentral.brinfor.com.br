@@ -264,7 +264,16 @@
         ]);
 
         const graficoSituacao = new google.visualization.PieChart(document.getElementById('grafico_situacao'));
-        graficoSituacao.draw(dadosSituacao, opcoesGraficosPizza);
+        const opcoesSituacao = {...opcoesGraficosPizza, slices: {}};
+        for (let linha = 0; linha < dadosSituacao.getNumberOfRows(); linha++) {
+            const situacao = String(dadosSituacao.getValue(linha, 0)).toLocaleLowerCase('pt-BR');
+            if (situacao.includes('finaliz') || situacao.includes('fechad')) {
+                opcoesSituacao.slices[linha] = {color: '#28a745'};
+            } else if (situacao.includes('cliente') && (situacao.includes('aguard') || situacao.includes('respost') || situacao.includes('retorno'))) {
+                opcoesSituacao.slices[linha] = {color: '#fd7e14'};
+            }
+        }
+        graficoSituacao.draw(dadosSituacao, opcoesSituacao);
     }
 </script>
 <script>

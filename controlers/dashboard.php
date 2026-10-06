@@ -16,7 +16,7 @@ $ano_atual = date('Y');
 
 $selectPeriodo = isset($_POST['periodo']) && $_POST['periodo'] !== ''
     ? $_POST['periodo']
-    : $mes_atual . '-' . $ano_atual;
+    : 'todos';
 
 if ($selectPeriodo === 'todos') {
     $mes_select = 0;

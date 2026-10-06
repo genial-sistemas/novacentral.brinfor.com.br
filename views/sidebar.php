@@ -28,6 +28,14 @@
                     <a href="/chamados_listar_fechados" class="nav-sub-link <?=($pagina=='Listar Fechados'?'active':'')?>">Listar Fechados</a>
                 </nav>
             </li>
+            <li class="nav-item <?=($menu=='Funcionários'?'active show':'')?>">
+                <a href="/funcionarios_listar" class="nav-link with-sub"><i class="typcn typcn-group"></i>Funcionários</a>
+                <nav class="nav-sub">
+                    <!-- Os nomes das páginas correspondem aos valores definidos nos controladores. -->
+                    <a href="/funcionarios_cadastrar" class="nav-sub-link <?=($pagina=='Cadastrar'?'active':'')?>">Cadastrar</a>
+                    <a href="/funcionarios_listar" class="nav-sub-link <?=($pagina=='Listar'?'active':'')?>">Listar</a>
+                </nav>
+            </li>
             <li class="nav-item <?=($menu=='Relatórios'?'active show':'')?>">
                 <a href="/relatorio_periodo" class="nav-link with-sub"><i class="typcn typcn-tabs-outline"></i>Relatórios</a>
                 <nav class="nav-sub">
