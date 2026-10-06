@@ -2,13 +2,16 @@
 date_default_timezone_set('America/Sao_Paulo');
 
 function getConexao(){
-    $dsn = getenv('BHCLOUD_DSN');
-    $user = getenv('BHCLOUD_USER');
-    $pass = getenv('BHCLOUD_PASSWORD');
+    $dsn  = 'mysql:host=bhcloud.com.br;dbname=bhcloud_bhinfor;charset=utf8';
+    $user = 'bhcloud_admin';
+    $pass = '$Qnv3hf@BeBL';
 
-    if ($dsn === false || $user === false || $pass === false) {
-        throw new RuntimeException('Configure as variáveis de conexão do banco bhcloud.');
+    try{
+        $pdo = new PDO($dsn, $user, $pass);
+        return $pdo;
+
+    } catch (PDOException $ex) {
+        echo 'Error: '.$ex->getMessage();
     }
 
-    return new PDO($dsn, $user, $pass, array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 }
