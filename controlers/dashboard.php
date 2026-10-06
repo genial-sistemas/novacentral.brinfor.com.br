@@ -1,4 +1,9 @@
 <?php
+if (empty($_SESSION['id_pessoa']) || !isset($_SESSION['contratos']) || !is_array($_SESSION['contratos'])) {
+    header('Location: login');
+    exit;
+}
+
 require "models/pessoa.php";
 require "models/contrato.php";
 require "models/chamado.php";

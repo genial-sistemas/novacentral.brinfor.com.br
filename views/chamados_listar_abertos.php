@@ -7,6 +7,12 @@ include 'header.php'; ?>
     </div>
 </div><!-- az-content-header -->
 <div class="az-content-body">
+    <?php if ($chamado_reaberto): ?>
+        <div class="alert alert-success" role="status">Chamado reaberto com sucesso.</div>
+    <?php endif; ?>
+    <?php if ($email_reabertura_falhou): ?>
+        <div class="alert alert-warning" role="alert">O chamado foi reaberto, mas não foi possível enviar todas as notificações por e-mail.</div>
+    <?php endif; ?>
     <div class="row row-sm">
         <div class="col-md-12">
             <form action="/chamados_interagir" method="post">
@@ -23,8 +29,12 @@ include 'header.php'; ?>
                             </tr>
                         </thead>
                         <tbody>
-                        <?php
-                        foreach($chamados_abertos as $ca): ?>
+                        <?php if (empty($chamados_abertos)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Não existem chamados em aberto.</td>
+                            </tr>
+                        <?php else: ?>
+                        <?php foreach($chamados_abertos as $ca): ?>
                             <tr>
                                 <th scope="row"><?=$ca['id']?></th>
                                 <td><?=$ca['tipo_contrato']?></td>
@@ -33,8 +43,8 @@ include 'header.php'; ?>
                                 <td><?=$ca['situacao']?></td>
                                 <td><button class="btn btn-az-primary" name="chamado_id" value="<?=$ca['id']?>">Interagir</button></td>
                             </tr>
-                        <?php
-                        endforeach; ?>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
