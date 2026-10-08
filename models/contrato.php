@@ -16,7 +16,7 @@ function obterContratosAtivos($ids_contatos) {
     (SELECT GROUP_CONCAT(DISTINCT h.dominio ORDER BY h.dominio SEPARATOR ', ') FROM contrato_hosting h WHERE h.id_contrato=c.id) AS dominio
     FROM contrato as c
     LEFT JOIN contrato_tipo as t ON c.id_tipo=t.id
-    JOIN pessoa as p ON c.vendedor=p.id
+    LEFT JOIN pessoa as p ON c.vendedor=p.id
     WHERE c.id IN ($contratos_string) AND c.status=2";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
@@ -27,14 +27,41 @@ function obterContratosAtivos($ids_contatos) {
 }
 
 function obterContratoOutsourcingEquipamentosaAtivos($id_contato) {
-    $consulta = "SELECT * FROM contrato_outsourcing_equipamentos 
-    WHERE contrato=$id_contato
-    AND status='a'
-    ORDER BY codigo ASC";
+    $consulta = "SELECT equipamento.*, contato.nome AS nome_contato
+    FROM contrato_outsourcing_equipamentos equipamento
+    LEFT JOIN pessoa_juridica_contatos contato ON contato.id = equipamento.contato
+    WHERE equipamento.contrato = :contrato
+    AND equipamento.status = 'a'
+    ORDER BY equipamento.codigo ASC";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
-    $sth->execute();
+    $sth->execute(array(':contrato' => (int)$id_contato));
     return $sth->fetchAll();
+}
+
+function obterEquipamentosLocacaoContratos($contratos) {
+    $ids = array_values(array_unique(array_filter(array_map('intval', $contratos))));
+    if (!$ids) {
+        return array();
+    }
+
+    $marcadores = implode(', ', array_fill(0, count($ids), '?'));
+    $consulta = getConexao()->prepare("
+        SELECT locado.id AS id_locacao, locado.id_contrato, locado.id_equipamento,
+               equipamento.descricao, equipamento.patrimonio,
+               contato.nome, contato.email, contato.cel AS telefone
+        FROM contrato_locacao_equipamentos_locados locado
+        JOIN contrato_locacao_equipamentos equipamento ON equipamento.id = locado.id_equipamento
+        JOIN contrato contrato ON contrato.id = locado.id_contrato
+        LEFT JOIN pessoa_juridica_contatos contato ON contato.id = locado.id_contato
+        WHERE locado.id_contrato IN ($marcadores)
+          AND contrato.id_tipo = 7
+          AND contrato.status = 2
+          AND equipamento.status = 1
+        ORDER BY locado.id_contrato, equipamento.descricao
+    ");
+    $consulta->execute($ids);
+    return $consulta->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function obterEquipamentosParaRelatorio($contratos) {
@@ -49,7 +76,14 @@ function obterEquipamentosParaRelatorio($contratos) {
             foreach (obterContratoOutsourcingEquipamentosaAtivos($id_contrato) as $equipamento) {
                 $equipamento['id_contrato'] = $id_contrato;
                 $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
+                $responsavel = trim((string)($equipamento['usuario'] ?? ''));
+                if ($responsavel === '') {
+                    $responsavel = trim((string)($equipamento['nome_contato'] ?? ''));
+                }
                 $equipamento['rotulo'] = $id_contrato . ' - ' . str_pad($equipamento['codigo'], 4, '0', STR_PAD_LEFT) . ' - ' . $equipamento['descricao'];
+                if ($responsavel !== '') {
+                    $equipamento['rotulo'] .= ' - ' . $responsavel;
+                }
                 $equipamentos[] = $equipamento;
             }
         } elseif ($id_tipo === 7) {

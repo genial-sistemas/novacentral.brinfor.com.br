@@ -5,11 +5,11 @@ const map = {
     '4': '#contrato-referencia',
     '5': '#contrato-referencia',
     '6': '#contrato-referencia',
-    '7': '#contrato-referencia'
+    '7': '#locacao'
 };
 
 $(document).ready(function() {
-    const allSections = $('#helpdesk, #contrato-referencia');
+    const allSections = $('#helpdesk, #contrato-referencia, #locacao');
 
     $('#id_tipo_contrato').change(function(){
         const val = $(this).val();
@@ -17,6 +17,8 @@ $(document).ready(function() {
         allSections.hide().find('select').prop('required', false);
         const $contrato = $('#contrato_id');
         $contrato.prop('disabled', true).val('0');
+        const $locacao = $('#locacao_id');
+        $locacao.prop('disabled', true).val('0');
         $contrato.find('option[data-tipo]').each(function() {
             const correspondeAoTipo = $(this).data('tipo').toString() === val;
             $(this).prop('hidden', !correspondeAoTipo);
@@ -25,7 +27,11 @@ $(document).ready(function() {
         if (map[val]) {
             $(map[val]).show().find('select').prop('required', true);
             if (val !== '1') {
-                $contrato.prop('disabled', false);
+                if (val !== '7') {
+                    $contrato.prop('disabled', false);
+                } else {
+                    $locacao.prop('disabled', false);
+                }
             }
         }
     });
@@ -44,6 +50,7 @@ $(document).ready(function() {
         $('#nome').val(nome);
         $('#email').val(email);
         $('#telefone').val(telefone);
+        $('#telefone').trigger('input');
 
         // Eu aviso quando faltam dados de contato para a pessoa completar o que ficou vazio.
         const contatoIncompleto = !nome || !email || !telefone;
@@ -52,6 +59,13 @@ $(document).ready(function() {
 
     // Trigger once on page load in case something is pre-selected
     $('#codigo_equipamento').trigger('change');
+
+    $('#locacao_id').on('change', function() {
+        const selected = $(this).find('option:selected');
+        $('#nome').val(selected.data('nome') || '');
+        $('#email').val(selected.data('email') || '');
+        $('#telefone').val(selected.data('telefone') || '').trigger('input');
+    });
 });
 
 

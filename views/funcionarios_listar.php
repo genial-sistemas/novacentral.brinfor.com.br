@@ -34,13 +34,25 @@ include 'header.php'; ?>
                                 <td style="vertical-align: middle;"><?=$ca['tel'] . ($ca['ramal'] != '' && $ca['ramal'] != null ? ' - Ramal: ' . $ca['ramal'] : '')?></td>
                                 <td style="vertical-align: middle;"><?=$ca['cel']?></td>
                                 <td style="vertical-align: middle;"><?=$ca['email']?></td>
-                                <td style="vertical-align: middle;">
-                                    <a href="funcionarios_cadastrar?id=<?=$ca['id']?>&acao=editar" style="font-size: 13px" class="btn btn-az-primary">
-                                        Editar
-                                    </a>
-                                    <a href="funcionarios_cadastrar?id=<?=$ca['id']?>&acao=apagar" style="font-size: 13px; background-color: #dd3333" class="btn btn-az-primary">
-                                        Apagar
-                                    </a>
+                                <td class="funcionario-acoes">
+                                    <div class="funcionario-acoes-grupo">
+                                        <a
+                                            href="funcionarios_cadastrar?id=<?=$ca['id']?>&acao=editar"
+                                            class="funcionario-acao funcionario-acao-editar"
+                                            title="Editar funcionário"
+                                            aria-label="Editar funcionário"
+                                        >
+                                            <i class="typcn typcn-edit" aria-hidden="true"></i>
+                                        </a>
+                                        <a
+                                            href="funcionarios_cadastrar?id=<?=$ca['id']?>&acao=apagar"
+                                            class="funcionario-acao funcionario-acao-apagar"
+                                            title="Apagar funcionário"
+                                            aria-label="Apagar funcionário"
+                                        >
+                                            <i class="typcn typcn-trash" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                     <?php endforeach; ?>

@@ -58,6 +58,24 @@ include 'header.php'; ?>
             </tbody>
         </table>
     </div>
+    <?php if ($total_chamados > 0): ?>
+        <nav class="mt-3" aria-label="Paginação dos chamados fechados">
+            <ul class="pagination justify-content-center">
+                <li class="page-item <?=$pagina_atual <= 1 ? 'disabled' : ''?>">
+                    <a class="page-link" href="/chamados_listar_fechados?pagina=<?=max(1, $pagina_atual - 1)?>" aria-label="Página anterior">Anterior</a>
+                </li>
+                <?php for ($pagina = 1; $pagina <= $total_paginas; $pagina++): ?>
+                    <li class="page-item <?=$pagina === $pagina_atual ? 'active' : ''?>">
+                        <a class="page-link" href="/chamados_listar_fechados?pagina=<?=$pagina?>" <?=$pagina === $pagina_atual ? 'aria-current="page"' : ''?>><?=$pagina?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?=$pagina_atual >= $total_paginas ? 'disabled' : ''?>">
+                    <a class="page-link" href="/chamados_listar_fechados?pagina=<?=min($total_paginas, $pagina_atual + 1)?>" aria-label="Próxima página">Próxima</a>
+                </li>
+            </ul>
+            <p class="text-center text-muted">Página <?=$pagina_atual?> de <?=$total_paginas?> · <?=$total_chamados?> chamados</p>
+        </nav>
+    <?php endif; ?>
 </div><!-- az-content-body -->
 
 <?php

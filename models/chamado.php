@@ -46,32 +46,74 @@ function obterUltimosChamados($contratos, $qtd, $filtro='todos') {
     return $sth->fetchAll();
 }
 
+function contarChamadosFechados($contratos) {
+    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
+    if (!$contratos) {
+        return 0;
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
+    $consulta = getConexao()->prepare("
+        SELECT COUNT(*)
+        FROM contrato_chamado
+        WHERE id_contrato IN ($placeholders) AND id_situacao = 7
+    ");
+    $consulta->execute($contratos);
+    return (int)$consulta->fetchColumn();
+}
+
+function obterChamadosFechadosPagina($contratos, $limite, $offset) {
+    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
+    if (!$contratos) {
+        return array();
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
+    $consulta = getConexao()->prepare("
+        SELECT chamado.*, status.status AS situacao, tipo.descricao AS tipo_contrato
+        FROM contrato_chamado chamado
+        JOIN contrato_chamado_status status ON status.id = chamado.id_situacao
+        JOIN contrato_tipo tipo ON tipo.id = chamado.id_tipo_contrato
+        WHERE chamado.id_contrato IN ($placeholders) AND chamado.id_situacao = 7
+        ORDER BY chamado.data_abertura DESC, chamado.id DESC
+        LIMIT ? OFFSET ?
+    ");
+    foreach ($contratos as $indice => $idContrato) {
+        $consulta->bindValue($indice + 1, $idContrato, PDO::PARAM_INT);
+    }
+    $consulta->bindValue(count($contratos) + 1, (int)$limite, PDO::PARAM_INT);
+    $consulta->bindValue(count($contratos) + 2, (int)$offset, PDO::PARAM_INT);
+    $consulta->execute();
+
+    return $consulta->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function obterUltimosChamadosDashboard($contratos) {
-    $contrato_string = implode(", ", $contratos);
-    $consulta = "SELECT a.id, a.data_abertura, 'finalizado' as situacao, t.descricao as tipo_contrato
-    FROM contrato_chamado a 
-    LEFT JOIN contrato_tipo as t ON a.id_tipo_contrato=t.id
-    WHERE id_contrato IN ($contrato_string) AND id_situacao=7
-    ORDER BY data_abertura DESC
-    LIMIT 10;";
+    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
+    if (!$contratos) {
+        return array();
+    }
+
+    $marcadores = implode(', ', array_fill(0, count($contratos), '?'));
+    $consulta = "SELECT chamado.id, chamado.data_abertura,
+        COALESCE(ultima.data_ultima_atualizacao, chamado.data_abertura) AS data_ultima_atualizacao,
+        CASE WHEN chamado.id_situacao = 7 THEN 'finalizado' ELSE 'aberto' END AS situacao,
+        tipo.descricao AS tipo_contrato
+    FROM contrato_chamado chamado
+    LEFT JOIN contrato_tipo tipo ON tipo.id = chamado.id_tipo_contrato
+    LEFT JOIN (
+        SELECT id_chamado, MAX(CONCAT(data, ' ', hora)) AS data_ultima_atualizacao
+        FROM contrato_chamado_eventos
+        GROUP BY id_chamado
+    ) ultima ON ultima.id_chamado = chamado.id
+    WHERE chamado.id_contrato IN ($marcadores)
+    ORDER BY data_ultima_atualizacao DESC, chamado.id DESC
+    LIMIT 8";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
+    $sth->execute($contratos);
 
-    $consulta = "SELECT b.id, b.data_abertura, 'aberto' as situacao, t.descricao as tipo_contrato
-    FROM contrato_chamado b
-    LEFT JOIN contrato_tipo t ON b.id_tipo_contrato = t.id
-    WHERE id_contrato IN ($contrato_string) AND id_situacao<7
-    ORDER BY b.data_saida DESC
-    LIMIT 10;";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res2 = $sth->fetchAll();
-
-    $array_merged = array_merge($res2, $res);
-    return array_slice($array_merged, 0, 8);
+    return $sth->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function obterInteracaoPorTecnico($contratos, $mes_atual, $ano_atual) {

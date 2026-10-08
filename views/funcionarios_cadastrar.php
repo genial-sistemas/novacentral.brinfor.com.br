@@ -31,7 +31,7 @@ include 'header.php' ?>
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="celular"><label style="color: #a40000; margin-bottom: 0px;">*</label> Celular</label>
-                    <input type="text" class="form-control" max="12" value="<?=($funcionario !== null ? $funcionario['cel'] : '')?>" id="celular" name="celular" placeholder="Digite o seu celular" required>
+                    <input type="tel" class="form-control" maxlength="15" data-telefone-br value="<?=($funcionario !== null ? $funcionario['cel'] : '')?>" id="celular" name="celular" placeholder="(00) 00000-0000" required>
                 </div>
             </div>
             <div class="col-md-4">
@@ -56,7 +56,7 @@ include 'header.php' ?>
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="telefone">Telefone</label>
-                    <input type="text" class="form-control" max="12" value="<?=($funcionario !== null ? $funcionario['tel'] : '')?>" id="telefone" name="telefone" placeholder="Digite o seu telefone">
+                    <input type="tel" class="form-control" maxlength="15" data-telefone-br value="<?=($funcionario !== null ? $funcionario['tel'] : '')?>" id="telefone" name="telefone" placeholder="(00) 0000-0000">
                 </div>
             </div>
             <div class="col-md-4">

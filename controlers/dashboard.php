@@ -16,7 +16,7 @@ $ano_atual = date('Y');
 
 $selectPeriodo = isset($_POST['periodo']) && $_POST['periodo'] !== ''
     ? $_POST['periodo']
-    : 'todos';
+    : (string)$ano_atual;
 
 if ($selectPeriodo === 'todos') {
     $mes_select = 0;
@@ -34,8 +34,7 @@ if ($selectPeriodo === 'todos') {
 
 $peridoDados = [
     ['valor' => 'todos', 'descricao' => 'Todo o período'],
-    ['valor' => (string)$ano_atual, 'descricao' => "Ano $ano_atual"],
-    ['valor' => (string)((int)$ano_atual - 1), 'descricao' => 'Ano ' . ((int)$ano_atual - 1)]
+    ['valor' => (string)$ano_atual, 'descricao' => "Ano $ano_atual"]
 ];
 
 $mes_opcao = (int)$mes_atual;
@@ -46,6 +45,11 @@ for ($x = 0; $x < 12; $x++) {
         'valor' => $mes_formatado . '-' . $ano_opcao,
         'descricao' => $mes_formatado . '/' . $ano_opcao
     ];
+
+    if ($mes_opcao === 1 && $ano_opcao === (int)$ano_atual) {
+        $ano_anterior = (string)((int)$ano_atual - 1);
+        $peridoDados[] = ['valor' => $ano_anterior, 'descricao' => "Ano $ano_anterior"];
+    }
 
     $mes_opcao--;
     if ($mes_opcao === 0) {

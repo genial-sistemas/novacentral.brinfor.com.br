@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../models/documentacao_cliente.php';
+$temContratoHelpdesk = obterContratoHelpdesk($_SESSION['contratos'] ?? array()) !== null;
+?>
 <div class="az-sidebar">
     <div class="az-sidebar-header">
         <a href="/dashboard" class="az-logo">
@@ -43,6 +47,11 @@
                     <a href="/relatorio_equipamento" class="nav-sub-link <?=($pagina=='Por equipamento'?'active':'')?>">Por equipamento</a>
                 </nav>
             </li>
+            <?php if ($temContratoHelpdesk): ?>
+                <li class="nav-item">
+                    <a href="/documentacao_cliente" class="nav-link"><i class="typcn typcn-document-text"></i>Documentação</a>
+                </li>
+            <?php endif; ?>
         </ul>
     </div>
 </div>

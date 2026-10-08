@@ -61,8 +61,17 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'detalhes') {
 	include 'views/chamados_interacoes.php';
 
 }else{
+    $itens_por_pagina = 30;
+    $total_chamados = contarChamadosFechados($contratos);
+    $total_paginas = max(1, (int)ceil($total_chamados / $itens_por_pagina));
+    $pagina_atual = filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT);
+    $pagina_atual = max(1, min($total_paginas, $pagina_atual ?: 1));
 
-	$chamados_fechados = obterUltimosChamados($contratos, 200, 'fechado');
+	$chamados_fechados = obterChamadosFechadosPagina(
+        $contratos,
+        $itens_por_pagina,
+        ($pagina_atual - 1) * $itens_por_pagina
+    );
 	$chamados_fechados_ultima_interacao = obterUltimasInteracoesPorChamados($chamados_fechados);
 
 	include 'views/chamados_listar_fechados.php';

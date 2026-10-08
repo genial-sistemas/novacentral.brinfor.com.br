@@ -128,7 +128,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Data Abertura</th>
+                                <th>Última atualização</th>
                                 <th>Contrato</th>
                                 <th>Situação</th>
                             </tr>
@@ -138,7 +138,7 @@
                         foreach($obterUltimosChamados as $uc): ?>
                             <tr>
                                 <td><?=$uc['id']?></td>
-                                <td><?=data_brasil_datetime($uc['data_abertura'])?></td>
+                                <td><?=data_brasil_datetime($uc['data_ultima_atualizacao'])?></td>
                                 <td><?=$uc['tipo_contrato']?></td>
                                 <td><?=$uc['situacao']?></td>
                             </tr>

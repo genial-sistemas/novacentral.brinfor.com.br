@@ -89,6 +89,25 @@ include 'header.php'
                     </select>
                 </div>
             </div>
+            <div id="locacao" style="display: none;" class="col-md-6">
+                <div class="form-group">
+                    <label for="locacao_id">Equipamento locado</label>
+                    <select class="form-control" name="locacao_id" id="locacao_id" disabled>
+                        <option value="0">Selecione um equipamento:</option>
+                        <?php foreach ($equipamentos_locacao as $equipamento): ?>
+                            <option
+                                value="<?=htmlspecialchars((string)$equipamento['id_locacao'], ENT_QUOTES, 'UTF-8')?>"
+                                data-nome="<?=htmlspecialchars((string)($equipamento['nome'] ?? ''), ENT_QUOTES, 'UTF-8')?>"
+                                data-email="<?=htmlspecialchars((string)($equipamento['email'] ?? ''), ENT_QUOTES, 'UTF-8')?>"
+                                data-telefone="<?=htmlspecialchars((string)($equipamento['telefone'] ?? ''), ENT_QUOTES, 'UTF-8')?>"
+                                <?php if ((int)$equipamento['id_locacao'] === $frm_locacao_id): ?>selected<?php endif; ?>
+                            >
+                                <?=htmlspecialchars('Contrato #' . $equipamento['id_contrato'] . ' - ' . ($equipamento['patrimonio'] ? $equipamento['patrimonio'] . ' - ' : '') . $equipamento['descricao'], ENT_QUOTES, 'UTF-8')?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="row">
             <div class="col-md-4">
@@ -106,7 +125,15 @@ include 'header.php'
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="telefone">Telefone</label>
-                    <input type="text" class="form-control" id="telefone" name="telefone" placeholder="Digite o seu telefone" value="">
+                    <input type="tel" class="form-control" maxlength="15" data-telefone-br id="telefone" name="telefone" placeholder="(00) 00000-0000" value="">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Urgência</label>
+                    <select class="form-control" name="urgencia">
+                         <option value="4">Padrão</option>
+                    </select>
                 </div>
             </div>
             <div class="col-md-4">
@@ -117,14 +144,6 @@ include 'header.php'
                     <?php foreach($tipos_solicitacao as $ts): ?>
                         <option value="<?=$ts['id']?>" <?php if($ts['id']==$frm_tipo_solicitacao){ echo "selected"; } ?>><?=$ts['tipo']?></option>
                     <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label>Urgência</label>
-                    <select class="form-control" name="urgencia">
-                         <option value="4">Padrão</option>
                     </select>
                 </div>
             </div>

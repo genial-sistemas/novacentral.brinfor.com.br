@@ -93,6 +93,58 @@ th.width-170, td.width-170 {
     width: 170px;
 }
 
+.funcionario-acoes {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.funcionario-acoes-grupo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.funcionario-acao {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 18px;
+    text-decoration: none;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.funcionario-acao-editar {
+    color: #a56800;
+    background-color: #fff7e6;
+    border-color: #ffe2ad;
+}
+
+.funcionario-acao-editar:hover,
+.funcionario-acao-editar:focus {
+    color: #fff;
+    background-color: #dd9933;
+    border-color: #dd9933;
+    text-decoration: none;
+}
+
+.funcionario-acao-apagar {
+    color: #b42318;
+    background-color: #fff1f0;
+    border-color: #ffd2cf;
+}
+
+.funcionario-acao-apagar:hover,
+.funcionario-acao-apagar:focus {
+    color: #fff;
+    background-color: #c9362b;
+    border-color: #c9362b;
+    text-decoration: none;
+}
+
 /* Estilo do overlay */
 #overlay {
     position: fixed;       /* cobre toda a tela */

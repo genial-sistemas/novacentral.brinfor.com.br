@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="views/css/custom.css">
     <!-- Jquery -->
     <script src="views/lib/jquery/jquery.min.js"></script>
+    <script src="views/js/telefone.js"></script>
     <script src="views/js/troca-senha.js"></script>
     <script src="views/js/abrir_chamado.js"></script>
     

@@ -78,6 +78,9 @@
         case 'relatorio_equipamento':
             include 'controlers/relatorio_equipamento.php';
             break;
+        case 'documentacao_cliente':
+            include 'controlers/documentacao_cliente.php';
+            break;
         // Rotas do módulo de funcionários: formulário de cadastro/edição e listagem.
         case 'funcionarios_cadastrar':
             include 'controlers/funcionarios_cadastrar.php';
