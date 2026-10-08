@@ -693,15 +693,16 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
     $logs_busca[] = "📨 DESTINATÁRIOS FINAIS (" . count($destinatarios) . "): " . implode(", ", $destinatarios);
 
     $assunto = '🔒 Chamado #' . $proximo_id_chamado . ' - ' . $dados['nome'] . ' (Seg: ' . $dados['codigoSeguranca'] . ')';
+    $url_interacao = 'https://central.brinfor.com.br/interagir-chamado?id=' . (int)$proximo_id_chamado
+        . '&seguranca=' . rawurlencode((string)$dados['codigoSeguranca']);
 
     $resultados = [];
 
     foreach ($destinatarios as $destinatario) {
-        $app_url = rtrim(getenv('APP_URL') ?: ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
         $alt_body = "Chamado #" . $proximo_id_chamado . "\n" .
                 "🔑 Código de Segurança: " . $dados['codigoSeguranca'] . "\n" .
                 "Data: " . date('d/m/Y H:i:s') . "\n" .
-                "Acesse: " . $app_url . "/index.php?page=visitante-chamados-interacoes&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca'];
+                "Acesse: " . $url_interacao;
         $resultado = enviarEmailHtml($destinatario, $assunto, $html_email, $alt_body);
         $resultado['destinatario'] = $destinatario;
         $resultados[] = $resultado;
@@ -955,6 +956,12 @@ function renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquiv
     $urgencia = $GLOBALS['urgencias'][$dados['urgencia']] ?? $dados['urgencia'];
     $situacao = $GLOBALS['situacoes'][$dados['id_situacao']] ?? $dados['id_situacao'];
     $tipo_solicitacao = $GLOBALS['tipos_solicitacao'][$dados['id_tipo_solicitacao']] ?? 'Não definido';
+    $url_interacao = htmlspecialchars(
+        'https://central.brinfor.com.br/interagir-chamado?id=' . (int)$proximo_id_chamado
+            . '&seguranca=' . rawurlencode((string)$dados['codigoSeguranca']),
+        ENT_QUOTES,
+        'UTF-8'
+    );
 
     $html = '<!DOCTYPE html>
 <html lang="pt-br">
@@ -1073,7 +1080,7 @@ function renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquiv
             </div>' : '') . '
             
             <div class="btn-container">
-<a style="text-decoration:none;border-top:#dd9933 10px solid;border-right:#dd9933 20px solid;background:#dd9933;border-bottom:#dd9933 10px solid;font-weight:bold;color:white;border-left:#dd9933 20px solid;display:inline-block;" href="' . htmlspecialchars(rtrim(getenv('APP_URL') ?: ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/') . '/index.php?page=visitante-chamados-interacoes&id=' . $proximo_id_chamado . '&seguranca=' . $dados['codigoSeguranca']) . '">Nova Interação</a>            </div>
+<a style="text-decoration:none;border-top:#dd9933 10px solid;border-right:#dd9933 20px solid;background:#dd9933;border-bottom:#dd9933 10px solid;font-weight:bold;color:white;border-left:#dd9933 20px solid;display:inline-block;" href="' . $url_interacao . '">Nova Interação</a>            </div>
             
             <h2 style="font-size:18px;margin:20px 0 15px 0;">Eventos</h2>
             <table class="event-table">
