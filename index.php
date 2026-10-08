@@ -81,6 +81,21 @@
         case 'documentacao_cliente':
             include 'controlers/documentacao_cliente.php';
             break;
+        case 'equipamentos_listar':
+            include 'controlers/equipamentos_listar.php';
+            break;
+        case 'equipamentos_listar_inativos':
+            include 'controlers/equipamentos_listar_inativos.php';
+            break;
+        case 'equipamentos_editar':
+            include 'controlers/equipamentos_editar.php';
+            break;
+        case 'equipamentos_status':
+            include 'controlers/equipamentos_status.php';
+            break;
+        case 'equipamentos_locacao':
+            include 'controlers/equipamentos_locacao.php';
+            break;
         // Rotas do módulo de funcionários: formulário de cadastro/edição e listagem.
         case 'funcionarios_cadastrar':
             include 'controlers/funcionarios_cadastrar.php';

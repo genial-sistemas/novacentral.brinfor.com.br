@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/../models/documentacao_cliente.php';
+require_once __DIR__ . '/../models/equipamentos_cliente.php';
 $temContratoHelpdesk = obterContratoHelpdesk($_SESSION['contratos'] ?? array()) !== null;
+$contratosLocacao = obterContratosLocacaoCliente(
+    $_SESSION['id_pessoa'] ?? null,
+    $_SESSION['contratos'] ?? array()
+);
 ?>
 <div class="az-sidebar">
     <div class="az-sidebar-header">
@@ -48,10 +53,25 @@ $temContratoHelpdesk = obterContratoHelpdesk($_SESSION['contratos'] ?? array()) 
                 </nav>
             </li>
             <?php if ($temContratoHelpdesk): ?>
-                <li class="nav-item">
+                <li class="nav-item <?=($menu=='Equipamentos'?'active show':'')?>">
+                    <a href="/equipamentos_listar" class="nav-link with-sub"><i class="typcn typcn-device-desktop"></i>Equipamentos</a>
+                    <nav class="nav-sub">
+                        <a href="/equipamentos_listar" class="nav-sub-link <?=($pagina=='Ativos'?'active':'')?>">Ativos</a>
+                        <a href="/equipamentos_listar_inativos" class="nav-sub-link <?=($pagina=='Inativos'?'active':'')?>">Inativos</a>
+                    </nav>
+                </li>
+            <?php endif; ?>
+            <?php if ($temContratoHelpdesk): ?>
+                <li class="nav-item <?=($pagina=='Documentação'?'active':'')?>">
                     <a href="/documentacao_cliente" class="nav-link"><i class="typcn typcn-document-text"></i>Documentação</a>
                 </li>
             <?php endif; ?>
+            <?php if ($contratosLocacao): ?>
+                <li class="nav-item <?=($pagina=='Locação'?'active':'')?>">
+                    <a href="/equipamentos_locacao" class="nav-link"><i class="typcn typcn-device-desktop"></i>Locação</a>
+                </li>
+            <?php endif; ?>
+
         </ul>
     </div>
 </div>

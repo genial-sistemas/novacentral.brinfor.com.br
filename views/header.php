@@ -28,7 +28,7 @@
 </head>
 <body class="az-body az-body-sidebar az-light">
     <?php include 'sidebar.php' ?>
-    <div class="az-content az-content-dashboard-five">
+    <div class="az-content az-content-dashboard-five <?=($pagina=='Listar Fechados'?'chamados-fechados-page':'')?>">
         <div class="az-header">
             <div class="container-fluid">
                 <div class="az-header-left">

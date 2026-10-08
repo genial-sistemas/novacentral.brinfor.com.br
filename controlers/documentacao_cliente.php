@@ -14,11 +14,51 @@ function documentacaoPdfTexto($texto)
     return mb_convert_encoding((string)$texto, 'ISO-8859-1', 'UTF-8');
 }
 
-$dbh = getConexao();
-$idContrato = obterContratoHelpdesk($_SESSION['contratos'], $dbh);
+function enviarDocumentacaoPdf($conteudo, $download)
+{
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: ' . ($download ? 'attachment' : 'inline') . '; filename="Documentacao de Rede.pdf"');
+    header('Content-Length: ' . strlen($conteudo));
+    header('Cache-Control: private, no-store');
+    echo $conteudo;
+    exit;
+}
 
-if (!$idContrato) {
-    header('Location: dashboard');
+$cachePdf = $_SESSION['documentacao_pdf_cache'] ?? array();
+$contratosSessao = array_map('intval', $_SESSION['contratos']);
+$cacheValido = isset($cachePdf['versao'], $cachePdf['id_pessoa'], $cachePdf['id_contrato'], $cachePdf['gerado_em'], $cachePdf['conteudo'])
+    && (int)$cachePdf['versao'] === 2
+    && (int)$cachePdf['id_pessoa'] === (int)$_SESSION['id_pessoa']
+    && (int)$cachePdf['id_contrato'] > 0
+    && in_array((int)$cachePdf['id_contrato'], $contratosSessao, true)
+    && (int)$cachePdf['gerado_em'] >= time() - 300
+    && is_string($cachePdf['conteudo'])
+    && $cachePdf['conteudo'] !== '';
+
+if ($cacheValido && isset($_GET['pdf'])) {
+    enviarDocumentacaoPdf($cachePdf['conteudo'], isset($_GET['download']));
+}
+
+if ($cacheValido) {
+    $idContrato = (int)$cachePdf['id_contrato'];
+    $dbh = null;
+} else {
+    $dbh = getConexao();
+    $idContrato = obterContratoHelpdesk($_SESSION['contratos'], $dbh);
+
+    if (!$idContrato) {
+        header('Location: dashboard');
+        exit;
+    }
+}
+
+$pdfUrl = '/documentacao_cliente?pdf=1#toolbar=0';
+$pdfDownloadUrl = '/documentacao_cliente?pdf=1&download=1';
+
+if (!isset($_GET['pdf'])) {
+    $menu = 'Documentação';
+    $pagina = 'Documentação';
+    include __DIR__ . '/../views/documentacao_cliente_visualizar.php';
     exit;
 }
 
@@ -53,11 +93,12 @@ $aps = $porCategoria(EQP_CATEGORIA_APS, EQP_STATUS_ATIVO);
 
 $backups = obterBackup($idContrato, $dbh);
 $volumetria = obterVolumetria($idContrato, $dbh);
-$licencas_so = obterLicencas($idContrato, 1, $dbh);
-$licencas_av = obterLicencas($idContrato, 2, $dbh);
-$licencas_app = obterLicencas($idContrato, 3, $dbh);
-$licencas_cloud = obterLicencas($idContrato, 4, $dbh);
-$licencas_outros = obterLicencas($idContrato, 5, $dbh);
+$licencas = obterLicencasPorCategorias($idContrato, array(1, 2, 3, 4, 5), $dbh);
+$licencas_so = $licencas[1] ?? array();
+$licencas_av = $licencas[2] ?? array();
+$licencas_app = $licencas[3] ?? array();
+$licencas_cloud = $licencas[4] ?? array();
+$licencas_outros = $licencas[5] ?? array();
 $contrato_helpdesk = obterContratoOutsourcingPorIdContrato($idContrato, $dbh);
 $contrato_internet = obterContratosInternet($idContrato, $dbh);
 $contrato_sistemas = obterContratosSistemas($idContrato, $dbh);
@@ -69,7 +110,7 @@ $nota_seguranca = obterNotaSeguranca($idContrato, $dbh);
 class myPDF extends FPDF
 {
     function header(){
-        $this->Image('views/img/brInfor_logo_mini.png',180,5,-300);
+        $this->Image('views/img/brInfor_logo_mini.png',180,5,-400);
     }
 
     function footer()
@@ -303,7 +344,7 @@ $pdf->SetMargins(10, 20, 10);
 $pdf->AliasNbPages();
 
 $pdf->AddPage('P', 'A4', 0);
-$pdf->Image('views/img/brInfor_logo_mini.png',70,100,0);
+$pdf->Image('views/img/brInfor_logo_mini.png',70,100,80.5);
 $pdf->SetTextColor(102,102,102);
 $pdf->SetFont('Arial', 'B', 32);
 $pdf->SetY(130);
@@ -1184,4 +1225,12 @@ $pdf->dadosinventarionotebook($inventario_notebook);
 $pdf->Ln();
 
 // Gerar PDF
-$pdf->Output('I', 'Documentação de Rede.pdf', true);
+$conteudoPdf = $pdf->Output('S');
+$_SESSION['documentacao_pdf_cache'] = array(
+    'versao' => 2,
+    'id_pessoa' => (int)$_SESSION['id_pessoa'],
+    'id_contrato' => (int)$idContrato,
+    'gerado_em' => time(),
+    'conteudo' => $conteudoPdf
+);
+enviarDocumentacaoPdf($conteudoPdf, isset($_GET['download']));

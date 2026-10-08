@@ -61,6 +61,60 @@
     overflow-wrap: anywhere;
 }
 
+.chamados-fechados-responsive {
+    width: 100%;
+    max-width: 100%;
+}
+
+.az-content.chamados-fechados-page {
+    min-width: 0;
+}
+
+.az-content.chamados-fechados-page .az-content-body {
+    width: 100%;
+    min-width: 0;
+}
+
+.chamados-fechados-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.chamados-fechados-table th,
+.chamados-fechados-table td {
+    overflow-wrap: anywhere;
+}
+
+.chamados-fechados-table th:nth-child(1) {
+    width: 7%;
+}
+
+.chamados-fechados-table th:nth-child(2) {
+    width: 17%;
+}
+
+.chamados-fechados-table th:nth-child(3) {
+    width: 20%;
+}
+
+.chamados-fechados-table th:nth-child(4) {
+    width: 24%;
+}
+
+.chamados-fechados-table th:nth-child(5) {
+    width: 16%;
+}
+
+.chamados-fechados-table th:nth-child(6) {
+    width: 16%;
+}
+
+.chamados-fechados-pagination {
+    flex-wrap: wrap;
+    max-width: 100%;
+    row-gap: 4px;
+}
+
 #chamados_fechados {
     position: relative;
 }
@@ -104,6 +158,11 @@ th.width-170, td.width-170 {
     gap: 8px;
 }
 
+.funcionario-acao-form {
+    display: inline-flex;
+    margin: 0;
+}
+
 .funcionario-acao {
     display: inline-flex;
     width: 36px;
@@ -131,14 +190,17 @@ th.width-170, td.width-170 {
     text-decoration: none;
 }
 
-.funcionario-acao-apagar {
+.funcionario-acao-apagar,
+.funcionario-acao-desativar {
     color: #b42318;
     background-color: #fff1f0;
     border-color: #ffd2cf;
 }
 
 .funcionario-acao-apagar:hover,
-.funcionario-acao-apagar:focus {
+.funcionario-acao-apagar:focus,
+.funcionario-acao-desativar:hover,
+.funcionario-acao-desativar:focus {
     color: #fff;
     background-color: #c9362b;
     border-color: #c9362b;

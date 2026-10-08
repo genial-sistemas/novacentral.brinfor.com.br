@@ -151,6 +151,36 @@ function obterLicencas($idContrato, $categoria, $dbh = null)
     ", array((int)$idContrato, (int)$categoria), $dbh ?: getConexao());
 }
 
+function obterLicencasPorCategorias($idContrato, $categorias, $dbh = null)
+{
+    $categorias = array_values(array_unique(array_filter(array_map('intval', (array)$categorias), static function ($categoria) {
+        return $categoria > 0;
+    })));
+    if (!$categorias) {
+        return array();
+    }
+
+    $marcadores = implode(', ', array_fill(0, count($categorias), '?'));
+    $licencas = documentacaoBuscar("
+        SELECT c.id, c.quantidade, c.vencimento, l.nome, ct.categoria, t.tipo,
+               (SELECT COUNT(*) FROM contrato_outsourcing_equipamentos_licenca el
+                WHERE el.id_licenca = c.id) AS soma,
+               l.categoria AS categoria_id
+        FROM contrato_outsourcing_licenca_cliente c
+        JOIN contrato_outsourcing_licencas l ON l.id = c.id_licenca
+        JOIN contrato_outsourcing_licencas_categorias ct ON ct.id = l.categoria
+        JOIN contrato_outsourcing_licencas_tipo t ON t.id = c.id_tipo
+        WHERE c.id_contrato = ? AND l.categoria IN ($marcadores)
+        ORDER BY l.nome
+    ", array_merge(array((int)$idContrato), $categorias), $dbh ?: getConexao());
+
+    $porCategoria = array();
+    foreach ($licencas as $licenca) {
+        $porCategoria[(int)$licenca['categoria_id']][] = $licenca;
+    }
+    return $porCategoria;
+}
+
 function obterBackup($idContrato, $dbh = null)
 {
     return documentacaoBuscar("

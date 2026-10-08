@@ -10,8 +10,8 @@ include 'header.php'; ?>
     <?php if (!empty($erro_reabrir)): ?>
         <div class="alert alert-danger" role="alert"><?=htmlspecialchars($erro_reabrir, ENT_QUOTES, 'UTF-8')?></div>
     <?php endif; ?>
-    <div class="table-responsive">
-        <table class="table mg-b-0">
+    <div class="table-responsive chamados-fechados-responsive">
+        <table class="table mg-b-0 chamados-fechados-table">
             <thead>
                 <tr>
                         <th scope="col">ID</th>
@@ -60,7 +60,7 @@ include 'header.php'; ?>
     </div>
     <?php if ($total_chamados > 0): ?>
         <nav class="mt-3" aria-label="Paginação dos chamados fechados">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination justify-content-center chamados-fechados-pagination">
                 <li class="page-item <?=$pagina_atual <= 1 ? 'disabled' : ''?>">
                     <a class="page-link" href="/chamados_listar_fechados?pagina=<?=max(1, $pagina_atual - 1)?>" aria-label="Página anterior">Anterior</a>
                 </li>
