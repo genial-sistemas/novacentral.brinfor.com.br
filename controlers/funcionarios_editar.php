@@ -1,5 +1,15 @@
 <?php
 
+chdir(dirname(__DIR__));
+
+include_once __DIR__ . '/autenticacao.php';
+include_once __DIR__ . '/funcoes.php';
+
+if (empty($_SESSION['id_pessoa'])) {
+    header('Location: /login');
+    exit;
+}
+
 require_once __DIR__ . '/../models/contato.php';
 
 $idFuncionario = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
