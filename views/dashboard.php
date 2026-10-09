@@ -4,7 +4,7 @@
 <div class="az-content-header d-block d-md-flex dashboard-compact-header">
     <div>
         <h2 class="az-content-title mg-b-5 mg-b-lg-8">Dashboard</h2>
-        <p class="mg-b-0 tx-danger">Bem Vindo <?= $_SESSION['nome_cliente'] ?></p>
+        <p class="mg-b-0 tx-primary">Bem Vindo <?=$nome_cliente_exibicao?></p>
     </div>
     <div style="margin:0;">
         <form id="formPeriodo" method="post" action="/dashboard">

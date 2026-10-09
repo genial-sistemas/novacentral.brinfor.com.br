@@ -774,6 +774,36 @@ function obterChamadosPorPeriodo($contrato, $data_inicial, $data_final) {
     return $sth->fetchAll();
 }
 
+function obterChamadosFechadosPorPeriodo($contrato, $data_inicial, $data_final) {
+    $consulta = "SELECT chamado.*, pessoa.nome_pessoa,
+        fechamento.data_fechamento,
+        fechamento.horas_totais_segundos
+    FROM contrato_chamado chamado
+    LEFT JOIN pessoa ON pessoa.id = chamado.resp_abertura
+    JOIN (
+        SELECT id_chamado,
+               MAX(CONCAT(data, ' ', hora)) AS data_fechamento,
+               COALESCE(SUM(TIME_TO_SEC(horas_total)), 0) AS horas_totais_segundos
+        FROM contrato_chamado_eventos
+        GROUP BY id_chamado
+    ) fechamento ON fechamento.id_chamado = chamado.id
+    WHERE chamado.id_contrato = :contrato
+      AND chamado.id_situacao = 7
+      AND fechamento.data_fechamento >= :data_inicial
+      AND fechamento.data_fechamento < DATE_ADD(:data_final, INTERVAL 1 DAY)
+    ORDER BY data_fechamento DESC, chamado.id DESC";
+
+    $dbh = getConexao();
+    $sth = $dbh->prepare($consulta);
+    $sth->execute(array(
+        ':contrato' => (int)$contrato,
+        ':data_inicial' => $data_inicial . ' 00:00:00',
+        ':data_final' => $data_final . ' 00:00:00'
+    ));
+
+    return $sth->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function obterChamadosPorEquipamentoPeriodo($contrato, $equipamento, $data_inicial, $data_final) {
     $consulta = "SELECT chamado.*, pessoa.nome_pessoa, fechamento.data_fechamento
     FROM contrato_chamado chamado

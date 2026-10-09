@@ -1,10 +1,11 @@
 <?php
 $menu   = 'Chamados';
 $pagina = 'Listar Abertos';
+$chat_fixo = true;
 include 'header.php'
 ?>
-<div class="az-content-body">
-    <div class="row row-sm">
+<div class="az-content-body chat-interacoes-page">
+    <div class="row row-sm chat-interacoes-info">
         <div class="col-md-12">
             <div class="card card-body card-dashboard-fifteen">
                 <div class="row mg-b-10">
@@ -24,8 +25,8 @@ include 'header.php'
             </div>
         </div>
     </div>
-    <div class="row row-sm">
-        <div class="col-md-12">
+    <div class="row row-sm chat-interacoes-conversa">
+        <div class="col-md-12 chat-interacoes-coluna">
             <div id="container-chat">
                 <div id="azChatBody" class="az-chat-body chat-chamados">
                     <div class="content-inner" id="lista-interacoes">
@@ -78,7 +79,6 @@ include 'header.php'
 (() => {
     const lista = document.getElementById('lista-interacoes');
     const campoMensagem = document.getElementById('nova-msg');
-    const container = document.getElementById('container-chat');
     const endpoint = new URL(window.location.href);
     endpoint.searchParams.set('atualizar', '1');
     let atualizando = false;
@@ -158,7 +158,7 @@ include 'header.php'
 
             const formulario = document.getElementById('form-nova-interacao');
             if (formulario && Number(dados.id_situacao) === 7) formulario.hidden = true;
-            if (adicionouEvento) container.scrollTop = container.scrollHeight;
+            if (adicionouEvento) lista.scrollTop = lista.scrollHeight;
         } catch (erro) {
             // Eu tento novamente no próximo ciclo se a consulta temporária falhar.
         } finally {
@@ -167,6 +167,7 @@ include 'header.php'
     };
 
     window.setInterval(atualizarConversa, 8000);
+    lista.scrollTop = lista.scrollHeight;
 })();
 </script>
 <?php

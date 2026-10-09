@@ -93,6 +93,9 @@
         case 'equipamentos_status':
             include 'controlers/equipamentos_status.php';
             break;
+        case 'equipamentos_desativacao_aprovar':
+            include 'controlers/equipamentos_desativacao_aprovar.php';
+            break;
         case 'equipamentos_locacao':
             include 'controlers/equipamentos_locacao.php';
             break;

@@ -29,7 +29,8 @@ if (isset($_POST['acao']) && $_POST['acao'] == 'logar') {
     }
 } else {
     // Verifica se o usuário está logado
-    if (!isset($_SESSION['id_pessoa'])) {
+    $rotaPublica = trim((string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/') === 'equipamentos_desativacao_aprovar';
+    if (!isset($_SESSION['id_pessoa']) && !$rotaPublica) {
         $pagina = 'login';
     }
 }

@@ -16,7 +16,7 @@ $contratosLocacao = obterContratosLocacaoCliente(
     <div class="az-sidebar-loggedin">
         <div class="az-img-user online"><img src="/views/img/icon_admin.png" alt=""></div>
         <div class="media-body">
-            <h6><?=$_SESSION['nome_cliente']?></h6>
+            <h6><?=$nome_cliente_exibicao?></h6>
             <span>Adminstrador</span>
         </div>
     </div>

@@ -17,6 +17,7 @@ if (obterContratoHelpdesk($_SESSION['contratos'], $dbh) === null) {
 
 $menu = 'Equipamentos';
 $pagina = 'Inativos';
+$csrfToken = tokenCsrfEquipamentos();
 $mensagemEquipamento = $_SESSION['mensagem_equipamentos'] ?? null;
 unset($_SESSION['mensagem_equipamentos']);
 $equipamentos = obterEquipamentosCliente(

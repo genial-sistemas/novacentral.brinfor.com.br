@@ -1,3 +1,10 @@
+<?php
+$nome_cliente_exibicao = htmlspecialchars(
+    (string)($_SESSION['nome_cliente'] ?? 'Cliente'),
+    ENT_QUOTES,
+    'UTF-8'
+);
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -27,9 +34,9 @@
     <script src="views/js/abrir_chamado.js"></script>
     
 </head>
-<body class="az-body az-body-sidebar az-light">
+<body class="az-body az-body-sidebar az-light <?=!empty($chat_fixo) ? 'az-body-chat-fixed' : ''?>">
     <?php include 'sidebar.php' ?>
-    <div class="az-content az-content-dashboard-five <?=($pagina=='Listar Fechados'?'chamados-fechados-page':'')?>">
+    <div class="az-content az-content-dashboard-five <?=($pagina=='Listar Fechados'?'chamados-fechados-page':'')?> <?=!empty($chat_fixo) ? 'az-content-chat-fixed' : ''?>">
         <div class="az-header">
             <div class="container-fluid">
                 <div class="az-header-left">
@@ -47,7 +54,7 @@
                                 <div class="az-img-user">
                                     <img src="/views/img/icon_admin.png" alt="">
                                 </div>
-                                <h6><?=$_SESSION['nome_cliente']?></h6>
+                                <h6><?=$nome_cliente_exibicao?></h6>
                                 <span>Administrador</span>
                             </div>
                             <a href="#" class="dropdown-item" data-toggle="modal" data-target="#modalTrocarSenha"><?=iconeInterface('configuracoes', 'inline')?> Trocar Senha</a>

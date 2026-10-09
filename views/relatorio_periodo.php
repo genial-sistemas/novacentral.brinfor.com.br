@@ -3,7 +3,7 @@ include 'header.php'; ?>
 
 <div class="az-content-header d-block d-md-flex">
     <div>
-        <h2 class="az-content-title mg-b-5 mg-b-lg-8">Relatório Por Período</h2>
+        <h2 class="az-content-title mg-b-5 mg-b-lg-8">Relatório de Chamados Fechados Por Período</h2>
     </div>
 </div><!-- az-content-header -->
 <div class="az-content-body">
@@ -59,25 +59,32 @@ include 'header.php'; ?>
                                 <th class="width-170">Data e Hora</th>
                                 <th class="width-120">Horas Totais</th>
                                 <th class="width-170">Resp. Abertura</th>
-                                <!--<th class="width-170">Técnico</th>-->
                                 <th>Descrição</th>
+                                <th class="text-center">Opções</th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php
                         foreach($chamados as $k => $c): ?>
                             <tr>
-                                <td><?=$c['id'];?></td>
-                                <td><?=data_brasil_datetime($c['data_abertura']);?></td>
-                                <td><?=$chamados_primeira_interacao[$k]['horas_total'] ?? ''?></td>
-                                <td><?=$c['nome_pessoa'];?></td>
-                                <!--<td><?=$chamados_primeira_interacao[$k]['nome_pessoa']?></td>-->
-                                <td><?=$chamados_primeira_interacao[$k]['descricao']?></td>
+                                <td><?=htmlspecialchars((string)$c['id'], ENT_QUOTES, 'UTF-8')?></td>
+                                <td><?=htmlspecialchars(data_brasil_datetime($c['data_fechamento']), ENT_QUOTES, 'UTF-8')?></td>
+                                <td><?=htmlspecialchars((string)$c['horas_totais'], ENT_QUOTES, 'UTF-8')?></td>
+                                <td><?=htmlspecialchars((string)($c['nome_pessoa'] ?? 'Não informado'), ENT_QUOTES, 'UTF-8')?></td>
+                                <td><?=htmlspecialchars(stripslashes((string)($chamados_primeira_interacao[$k]['descricao'] ?? '')), ENT_QUOTES, 'UTF-8')?></td>
+                                <td class="text-center text-nowrap">
+                                    <form action="/relatorio_periodo" method="post" class="d-inline">
+                                        <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$c['id'], ENT_QUOTES, 'UTF-8')?>">
+                                        <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="detalhes" title="Detalhes" aria-label="Ver detalhes do chamado">
+                                            <?=iconeInterface('detalhes', 'acao')?>
+                                        </button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php
                         endforeach;?>
                         <?php if (!$chamados): ?>
-                            <tr><td colspan="5">Nenhum chamado encontrado para o contrato e período selecionados.</td></tr>
+                            <tr><td colspan="6">Nenhum chamado fechado encontrado para o contrato e período selecionados.</td></tr>
                         <?php endif; ?>
                         </tbody>
                     </table>
