@@ -69,19 +69,36 @@ function obterEquipamentosDocumentacao($idContrato, $dbh = null)
     $dbh = $dbh ?: getConexao();
     $consulta = $dbh->prepare("
         SELECT e.codigo, t.tipo AS equipamento, e.descricao, e.modelo, p.nome,
-               e.tipo AS categoria, e.status
+               e.tipo AS tipo_id, e.status
         FROM contrato_outsourcing_equipamentos e
         LEFT JOIN contrato_outsourcing_equipamentos_tipo t ON t.id = e.tipo
         LEFT JOIN pessoa_juridica_contatos p ON p.id = e.contato
         WHERE e.contrato = :id_contrato
-          AND e.tipo IN (1, 2, 3, 4, 5, 6, 7, 9, 25)
         ORDER BY e.tipo, e.status, e.codigo
     ");
     $consulta->execute(array(':id_contrato' => (int)$idContrato));
     $porCategoria = array();
+    // Converte os IDs reais dos tipos cadastrados nas categorias usadas pelo PDF.
+    $categoriasPorTipo = array(
+        1 => EQP_CATEGORIA_DESKTOP_WORKSTATION,
+        2 => EQP_CATEGORIA_NOTEBOOK,
+        3 => EQP_CATEGORIA_NOTEBOOK,
+        4 => EQP_CATEGORIA_SERVIDOR_FISICO,
+        9 => EQP_CATEGORIA_APS,
+        11 => EQP_CATEGORIA_STORAGE,
+        13 => EQP_CATEGORIA_NOBREAK,
+        19 => EQP_CATEGORIA_SERVIDOR_VIRTUAL,
+        20 => EQP_CATEGORIA_SERVIDOR_VIRTUAL,
+        25 => EQP_CATEGORIA_SERVIDOR_NUVEM
+    );
 
     foreach ($consulta->fetchAll(PDO::FETCH_ASSOC) as $equipamento) {
-        $porCategoria[$equipamento['status']][(int)$equipamento['categoria']][] = $equipamento;
+        $tipoId = (int)$equipamento['tipo_id'];
+        // Tipos sem mapeamento ficam em "Outros", evitando excluí-los da documentação.
+        $categoria = $categoriasPorTipo[$tipoId] ?? EQP_CATEGORIA_OUTROS;
+        $equipamento['categoria'] = $categoria;
+        unset($equipamento['tipo_id']);
+        $porCategoria[$equipamento['status']][$categoria][] = $equipamento;
     }
 
     return $porCategoria;
