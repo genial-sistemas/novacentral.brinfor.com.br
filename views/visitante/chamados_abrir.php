@@ -384,12 +384,12 @@
                                     <label class="form-label">Tipo de Contrato <span class="text-danger">*</span></label>
                                     <select class="form-control" name="id_tipo_contrato" id="id_tipo_contrato">
                                         <option value="">Selecione:</option>
-                                        <option value="1">1 - Helpdesk (Outsourcing)</option>
-                                        <option value="2">2 - Hospedagem</option>
-                                        <option value="4">4 - Domínio</option>
-                                        <option value="5">5 - Backup</option>
-                                        <option value="6">6 - Suporte Produtos</option>
-                                        <option value="7">7 - Locação</option>
+                                        <option value="1" <?=($frm_tipo_contrato === '1' ? 'selected' : '')?>>1 - Helpdesk (Outsourcing)</option>
+                                        <option value="2" <?=($frm_tipo_contrato === '2' ? 'selected' : '')?>>2 - Hospedagem</option>
+                                        <option value="4" <?=($frm_tipo_contrato === '4' ? 'selected' : '')?>>4 - Domínio</option>
+                                        <option value="5" <?=($frm_tipo_contrato === '5' ? 'selected' : '')?>>5 - Backup</option>
+                                        <option value="6" <?=($frm_tipo_contrato === '6' ? 'selected' : '')?>>6 - Suporte Produtos</option>
+                                        <option value="7" <?=($frm_tipo_contrato === '7' ? 'selected' : '')?>>7 - Locação</option>
                                     </select>
                                 </div>
                             </div>
@@ -403,7 +403,7 @@
                                                 class="input-brinfor-esquerda"
                                                 id="inputCodigoContrato"
                                                 name="etiqueta_codigo_contrato"
-                                                value=""
+                                                value="<?=htmlspecialchars($frm_etiqueta, ENT_QUOTES, 'UTF-8')?>"
                                                 maxlength="2"
                                                 autocomplete="off"
                                                 placeholder=" ">
@@ -421,7 +421,7 @@
                                                 class="input-brinfor-direita"
                                                 id="codigo_equipamento"
                                                 name="etiqueta_codigo_equipamento"
-                                                value=""
+                                                value="<?=htmlspecialchars($frm_equipamento, ENT_QUOTES, 'UTF-8')?>"
                                                 maxlength="4"
                                                 autocomplete="off"
                                                 placeholder=" ">
@@ -1414,6 +1414,13 @@
                 showBlocksByType($tipoContrato.val());
                 gerenciarCamposRequired();
                 aplicarValidacaoCampos();
+                if (
+                    $tipoContrato.val() === '1'
+                    && $('#inputCodigoContrato').val().trim() !== ''
+                    && $('#codigo_equipamento').val().trim() !== ''
+                ) {
+                    buscarContratoHelpdesk();
+                }
 
             });
         })(jQuery);

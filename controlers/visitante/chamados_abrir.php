@@ -3,7 +3,20 @@ require "models/contrato.php";
 require "models/chamado.php";
 
 $contratosTipos = obterContratosTiposAtivos();
-$frm_tipo_contrato = isset($_GET["tipo_contrato"]) ? $_GET["tipo_contrato"] : null;
+$tipo_contrato_parametro = filter_input(INPUT_GET, 'tipo_contrato', FILTER_VALIDATE_INT);
+$frm_tipo_contrato = in_array($tipo_contrato_parametro, [1, 2, 4, 5, 6, 7], true)
+    ? (string)$tipo_contrato_parametro
+    : '';
+$etiqueta_parametro = $_GET['etiqueta'] ?? '';
+$equipamento_parametro = $_GET['equipamento'] ?? '';
+$frm_etiqueta = is_scalar($etiqueta_parametro) ? trim((string)$etiqueta_parametro) : '';
+$frm_equipamento = is_scalar($equipamento_parametro) ? trim((string)$equipamento_parametro) : '';
+if (!preg_match('/\A\d{1,2}\z/', $frm_etiqueta)) {
+    $frm_etiqueta = '';
+}
+if (!preg_match('/\A\d{1,4}\z/', $frm_equipamento) || (int)$frm_equipamento === 0) {
+    $frm_equipamento = '';
+}
 
 /*
 if ($_GET!="") {

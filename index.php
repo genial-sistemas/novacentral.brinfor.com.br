@@ -36,6 +36,7 @@
             include 'controlers/visitante/visualizar-chamado.php';
             break;
         case 'visitante-abrir-chamado':
+        case 'abrir-chamado':
             include 'controlers/visitante/chamados_abrir.php';
             break;
         case 'visitante-abrir-chamado-resultado':
