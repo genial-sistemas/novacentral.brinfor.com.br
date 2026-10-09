@@ -49,7 +49,7 @@ include 'header.php'
                                     <div class="az-msg-wrapper">
                                         <?=htmlspecialchars(stripslashes($i['descricao']), ENT_QUOTES, 'UTF-8')?>
                                     </div><!-- az-msg-wrapper -->
-                                    <div><span><?=$i['hora']?></span> <a href="" aria-label="Mais opções"><?=iconeInterface('mais')?></a></div>
+                                    <div><span><?=$i['hora']?></span> <a href="" aria-label="Mais opções"><?=iconeInterface('mais', 'inline')?></a></div>
                                 </div><!-- media-body -->
                             </div><!-- media -->
                         <?php

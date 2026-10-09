@@ -169,7 +169,7 @@
                                 ?>
                                 <tr>
                                     <td>
-                                        <div class="az-img-user" style="color: #FF8C00; font-size: 36px;"><?=iconeInterface('usuario')?></div>
+                                        <div class="az-img-user"><?=iconeInterface('usuario', 'avatar')?></div>
                                     </td>
                                     <td>
                                         <h6 class="mg-b-0 tx-inverse"><?=htmlspecialchars($nome_tecnico, ENT_QUOTES, 'UTF-8')?></h6>

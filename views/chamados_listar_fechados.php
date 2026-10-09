@@ -37,14 +37,14 @@ include 'header.php'; ?>
                             <td class="text-nowrap">
                                 <form action="/chamados_listar_fechados" method="post" class="d-inline mr-2">
                                     <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?>">
-                                    <button type="submit" class="btn btn-link p-0" style="color:#e89928;font-size:20px;line-height:1" name="acao" value="detalhes" title="Detalhes" aria-label="Ver detalhes do chamado">
-                                        <?=iconeInterface('detalhes')?>
+                                    <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="detalhes" title="Detalhes" aria-label="Ver detalhes do chamado">
+                                        <?=iconeInterface('detalhes', 'acao')?>
                                     </button>
                                 </form>
                                 <form action="/chamados_listar_fechados" method="post" class="d-inline">
                                     <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?>">
-                                    <button type="submit" class="btn btn-link p-0" style="color:#e89928;font-size:20px;line-height:1" name="acao" value="reabrir_chamado" title="Reabrir chamado" aria-label="Reabrir chamado">
-                                        <?=iconeInterface('reabrir')?>
+                                    <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="reabrir_chamado" title="Reabrir chamado" aria-label="Reabrir chamado">
+                                        <?=iconeInterface('reabrir', 'acao')?>
                                     </button>
                                 </form>
                             </td>

@@ -41,7 +41,7 @@
                         <a href="" class="az-img-user"><img src="/views/img/icon_user.png" alt=""></a>
                         <div class="dropdown-menu">
                             <div class="az-dropdown-header d-sm-none">
-                                <a href="" class="az-header-arrow"><?=iconeInterface('voltar')?></a>
+                                <a href="" class="az-header-arrow"><?=iconeInterface('voltar', 'inline')?></a>
                             </div>
                             <div class="az-header-profile">
                                 <div class="az-img-user">
@@ -50,8 +50,8 @@
                                 <h6><?=$_SESSION['nome_cliente']?></h6>
                                 <span>Administrador</span>
                             </div>
-                            <a href="#" class="dropdown-item" data-toggle="modal" data-target="#modalTrocarSenha"><?=iconeInterface('configuracoes')?> Trocar Senha</a>
-                            <a href="logout" class="dropdown-item"><?=iconeInterface('sair')?> Sair</a>
+                            <a href="#" class="dropdown-item" data-toggle="modal" data-target="#modalTrocarSenha"><?=iconeInterface('configuracoes', 'inline')?> Trocar Senha</a>
+                            <a href="logout" class="dropdown-item"><?=iconeInterface('sair', 'inline')?> Sair</a>
                         </div>
                     </div>
                 </div>

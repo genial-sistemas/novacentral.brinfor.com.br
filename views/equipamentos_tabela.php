@@ -45,7 +45,7 @@
                                     class="funcionario-acao funcionario-acao-editar"
                                     aria-label="Editar equipamento <?=htmlspecialchars((string)$equipamento['codigo'], ENT_QUOTES, 'UTF-8')?>"
                                     title="Editar"
-                                ><?=iconeInterface('editar')?></a>
+                                ><?=iconeInterface('editar', 'acao')?></a>
                                 <form action="/equipamentos_status" method="post" class="funcionario-acao-form" onsubmit="return confirm('Deseja desativar este equipamento?');">
                                     <input type="hidden" name="csrf" value="<?=htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8')?>">
                                     <input type="hidden" name="id" value="<?=htmlspecialchars((string)$equipamento['id'], ENT_QUOTES, 'UTF-8')?>">
@@ -54,7 +54,7 @@
                                         class="funcionario-acao funcionario-acao-desativar"
                                         aria-label="Desativar equipamento <?=htmlspecialchars((string)$equipamento['codigo'], ENT_QUOTES, 'UTF-8')?>"
                                         title="Desativar"
-                                    ><?=iconeInterface('desativar')?></button>
+                                    ><?=iconeInterface('desativar', 'acao')?></button>
                                 </form>
                                 </div>
                             </td>

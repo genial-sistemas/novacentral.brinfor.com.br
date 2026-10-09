@@ -1,6 +1,6 @@
 <?php
 
-function iconeInterface($nome)
+function iconeInterface($nome, $contexto = 'inline')
 {
     $caminhos = array(
         'dashboard' => '<path d="M4 19V5m0 14h16M7 15l3-4 3 2 5-6"/><path d="M15 7h3v3"/>',
@@ -26,7 +26,12 @@ function iconeInterface($nome)
         throw new InvalidArgumentException('Ícone de interface não reconhecido: ' . $nome);
     }
 
-    return '<svg class="icone-interface" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+    $contextos = array('menu', 'acao', 'avatar', 'botao', 'inline');
+    if (!in_array($contexto, $contextos, true)) {
+        throw new InvalidArgumentException('Contexto de ícone de interface não reconhecido: ' . $contexto);
+    }
+
+    return '<svg class="icone-interface icone-interface--' . $contexto . '" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
         . $caminhos[$nome]
         . '</svg>';
 }

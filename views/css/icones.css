@@ -11,8 +11,26 @@
     vertical-align: -0.125em;
 }
 
-.az-sidebar-body .nav-link > .icone-interface {
+.icone-interface--menu {
+    font-size: 16px;
+}
+
+.az-sidebar-body .nav-link > .icone-interface--menu {
     margin-right: 10px;
+}
+
+.icone-interface--acao,
+.icone-interface--botao {
+    font-size: 18px;
+}
+
+.icone-interface--avatar {
+    width: 36px;
+    height: 36px;
+    color: #ff8c00;
+}
+
+.icone-interface--inline {
     font-size: 16px;
 }
 
@@ -30,16 +48,12 @@
     transform: rotate(225deg);
 }
 
-.az-profile-menu .dropdown-item > .icone-interface {
+.az-profile-menu .dropdown-item > .icone-interface--inline {
     margin-right: 8px;
 }
 
-.funcionario-acao > .icone-interface {
-    width: 18px;
-    height: 18px;
-}
-
-.az-img-user > .icone-interface {
-    width: 1em;
-    height: 1em;
+.chamados-fechados-acao {
+    color: #e89928;
+    font-size: 18px;
+    line-height: 1;
 }
