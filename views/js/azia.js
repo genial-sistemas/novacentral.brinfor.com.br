@@ -85,7 +85,7 @@ $(function(){
 $(function () {
   'use strict'
 
-  $('.az-sidebar .with-sub').on('click', function (e) {
+  $('.az-sidebar .with-sub').off('click.azSidebar').on('click.azSidebar', function (e) {
       e.preventDefault();
       $(this).parent().toggleClass('show');
       $(this).parent().siblings().removeClass('show');
@@ -104,7 +104,7 @@ $(function () {
   });
 
 
-  $('#azSidebarToggle').on('click', function (e) {
+  $('#azSidebarToggle').off('click.azSidebarToggle').on('click.azSidebarToggle', function (e) {
       e.preventDefault();
 
       if (window.matchMedia('(min-width: 992px)').matches) {

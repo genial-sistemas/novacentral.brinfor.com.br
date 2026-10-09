@@ -151,7 +151,7 @@ class myPDF extends FPDF
     }
 
 
-    function tabelalicenciamento(): void
+    function tabelalicenciamento()
     {
         $this->SetFont('Times', 'B', 10);
         $this->Cell(15, 5, documentacaoPdfTexto('Codigo'), 1, 0, 'C');

@@ -10,7 +10,7 @@
     <script src="views/lib/jquery.flot/jquery.flot.pie.js"></script>
     <script src="views/lib/jquery.flot/jquery.flot.resize.js"></script>
     <script src="views/lib/chart.js/Chart.bundle.min.js"></script>
-    <script src="views/js/azia.js"></script>
+    <script src="views/js/azia.js?v=20261009-menu"></script>
     <script src="views/js/chart.flot.sampledata.js"></script>
 </body>
 </html>

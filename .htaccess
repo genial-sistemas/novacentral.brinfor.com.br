@@ -1,6 +1,11 @@
 RewriteEngine On
+
+RewriteCond %{QUERY_STRING} (^|&)acao=editar(&|$) [NC]
+RewriteRule ^funcionarios_cadastrar$ /funcionarios_editar [R=302,L]
+RewriteRule ^funcionarios_editar$ funcionarios_editar.php [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?page=$1 [NC]
+RewriteRule ^(.*)$ index.php?page=$1 [NC,QSA]
 RewriteCond %{SERVER_PORT} 80
 RewriteRule ^(.*)$ https://novacentral.brinfor.com.br/$1 [R,L]

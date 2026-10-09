@@ -100,6 +100,9 @@
         case 'funcionarios_cadastrar':
             include 'controlers/funcionarios_cadastrar.php';
             break;
+        case 'funcionarios_editar':
+            include 'controlers/funcionarios_cadastrar.php';
+            break;
         case 'funcionarios_listar':
             include 'controlers/funcionarios_listar.php';
             break;

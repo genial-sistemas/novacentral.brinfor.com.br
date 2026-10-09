@@ -6,6 +6,24 @@ require_once __DIR__ . "/../models/contato.php";
 // Identifica esta tela para o título e o estado ativo do menu lateral.
 $menu   = 'Funcionários';
 $pagina = 'Cadastrar';
+$rotaAtual = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
+$rotaEdicao = $rotaAtual === 'funcionarios_editar'
+    || ($_GET['page'] ?? null) === 'funcionarios_editar';
+
+// Links antigos da listagem passam a usar o endereço dedicado de edição.
+if (
+    !$rotaEdicao
+    && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
+    && ($_GET['acao'] ?? null) === 'editar'
+    && isset($_GET['id'])
+) {
+    header('Location: /funcionarios_editar?id=' . rawurlencode((string)$_GET['id']), true, 302);
+    exit;
+}
+
+if ($rotaEdicao) {
+    $pagina = 'Editar';
+}
 
 // Estado apresentado pela tela após uma ação; os campos também preservam os dados do formulário.
 $tipo_mensagem = null;
@@ -28,16 +46,17 @@ $uriRedirecionar = null;
 $messages = [];
 
 // As ações de edição e exclusão chegam por GET com o identificador do funcionário.
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && isset($_GET['acao'])) {
-    if ($_GET['acao'] == 'editar' && isset($_GET['id'])) {
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+    if (($rotaEdicao || ($_GET['acao'] ?? null) === 'editar') && isset($_GET['id'])) {
         // Carrega os dados existentes e configura o formulário para atualização.
+        $pagina = 'Editar';
         $acaoLabel = 'Editar';
         $acaoLabelSucesso = 'editado';
         $funcionario = obterContato($_GET['id']);
         $acao = 'funcionario_editar';
         $acaoRedirecionar = 'funcionarios_listar';
 
-    } else if ($_GET['acao'] == 'apagar' && isset($_GET['id'])) {
+    } else if (($_GET['acao'] ?? null) === 'apagar' && isset($_GET['id'])) {
         // A exclusão é lógica: o registro é marcado inativo pelo modelo.
         apagarContato($_GET['id']);
         $acaoRedirecionar = 'funcionarios_listar';

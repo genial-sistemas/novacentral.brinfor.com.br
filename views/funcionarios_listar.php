@@ -25,7 +25,7 @@ include 'header.php'; ?>
                         </tr>
                     </thead>
                     <tbody>
-                    <!-- Cada linha representa um funcionário; os links passam ID e ação ao formulário de cadastro. -->
+                    <!-- Cada linha representa um funcionário com ações de edição e exclusão. -->
                     <?php
                         foreach($contatos as $ca): ?>
                             <tr>
@@ -37,7 +37,7 @@ include 'header.php'; ?>
                                 <td class="funcionario-acoes">
                                     <div class="funcionario-acoes-grupo">
                                         <a
-                                            href="funcionarios_cadastrar?id=<?=$ca['id']?>&acao=editar"
+                                            href="/funcionarios_editar?id=<?=$ca['id']?>"
                                             class="funcionario-acao funcionario-acao-editar"
                                             title="Editar funcionário"
                                             aria-label="Editar funcionário"
