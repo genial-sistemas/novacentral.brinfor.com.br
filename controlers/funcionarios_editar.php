@@ -1,28 +1,18 @@
 <?php
 
-chdir(__DIR__);
-
-include_once __DIR__ . '/controlers/autenticacao.php';
-include_once __DIR__ . '/controlers/funcoes.php';
-
-if (empty($_SESSION['id_pessoa'])) {
-    header('Location: /login');
-    exit;
-}
-
-require_once __DIR__ . '/models/contato.php';
+require_once __DIR__ . '/../models/contato.php';
 
 $idFuncionario = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$idFuncionario || $idFuncionario <= 0) {
     http_response_code(404);
-    include __DIR__ . '/views/404.php';
+    include __DIR__ . '/../views/404.php';
     exit;
 }
 
 $funcionario = obterContato($idFuncionario);
 if ($funcionario === null) {
     http_response_code(404);
-    include __DIR__ . '/views/404.php';
+    include __DIR__ . '/../views/404.php';
     exit;
 }
 
@@ -66,4 +56,4 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['acao'] ?? null)
     }
 }
 
-include __DIR__ . '/views/funcionarios_cadastrar.php';
+include __DIR__ . '/../views/funcionarios_cadastrar.php';
