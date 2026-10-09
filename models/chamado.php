@@ -108,7 +108,7 @@ function obterUltimosChamadosDashboard($contratos) {
     ) ultima ON ultima.id_chamado = chamado.id
     WHERE chamado.id_contrato IN ($marcadores)
     ORDER BY data_ultima_atualizacao DESC, chamado.id DESC
-    LIMIT 8";
+    LIMIT 10";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
     $sth->execute($contratos);

@@ -41,7 +41,7 @@ include 'header.php'; ?>
                                         <?=iconeInterface('detalhes', 'acao')?>
                                     </button>
                                 </form>
-                                <form action="/chamados_listar_fechados" method="post" class="d-inline">
+                                <form action="/chamados_listar_fechados" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja reabrir o chamado?');">
                                     <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?>">
                                     <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="reabrir_chamado" title="Reabrir chamado" aria-label="Reabrir chamado">
                                         <?=iconeInterface('reabrir', 'acao')?>
