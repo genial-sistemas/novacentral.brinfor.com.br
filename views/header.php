@@ -8,7 +8,6 @@
     <!-- vendor css -->
     <link href="views/lib/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="views/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
-    <link href="views/lib/typicons.font/typicons.css" rel="stylesheet">
     <link href="views/lib/morris.js/morris.css" rel="stylesheet">
     <link href="views/lib/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
     <link href="views/lib/jqvmap/jqvmap.min.css" rel="stylesheet">
@@ -19,6 +18,8 @@
     <link rel="stylesheet" href="views/css/chart.css">
     <!-- Customizações -->
     <link rel="stylesheet" href="views/css/custom.css">
+    <link rel="stylesheet" href="views/css/icones.css">
+    <?php require_once __DIR__ . '/icones.php'; ?>
     <!-- Jquery -->
     <script src="views/lib/jquery/jquery.min.js"></script>
     <script src="views/js/telefone.js"></script>
@@ -40,7 +41,7 @@
                         <a href="" class="az-img-user"><img src="/views/img/icon_user.png" alt=""></a>
                         <div class="dropdown-menu">
                             <div class="az-dropdown-header d-sm-none">
-                                <a href="" class="az-header-arrow"><i class="icon ion-md-arrow-back"></i></a>
+                                <a href="" class="az-header-arrow"><?=iconeInterface('voltar')?></a>
                             </div>
                             <div class="az-header-profile">
                                 <div class="az-img-user">
@@ -49,11 +50,8 @@
                                 <h6><?=$_SESSION['nome_cliente']?></h6>
                                 <span>Administrador</span>
                             </div>
-                            <!--<a href="" class="dropdown-item"><i class="typcn typcn-user-outline"></i> Meu Perfil</a>
-                                <a href="" class="dropdown-item"><i class="typcn typcn-edit"></i> Editar Perfil</a>
-                                <a href="" class="dropdown-item"><i class="typcn typcn-time"></i> Registro de Atividades</a> !-->
-                            <a href="#" class="dropdown-item" data-toggle="modal" data-target="#modalTrocarSenha"><i class="typcn typcn-cog-outline"></i> Trocar Senha</a>
-                            <a href="logout" class="dropdown-item"><i class="typcn typcn-power-outline"></i>Sair</a>
+                            <a href="#" class="dropdown-item" data-toggle="modal" data-target="#modalTrocarSenha"><?=iconeInterface('configuracoes')?> Trocar Senha</a>
+                            <a href="logout" class="dropdown-item"><?=iconeInterface('sair')?> Sair</a>
                         </div>
                     </div>
                 </div>

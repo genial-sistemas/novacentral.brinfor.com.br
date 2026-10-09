@@ -42,7 +42,7 @@ include 'header.php'; ?>
                                             title="Editar funcionário"
                                             aria-label="Editar funcionário"
                                         >
-                                            <i class="typcn typcn-edit" aria-hidden="true"></i>
+                                            <?=iconeInterface('editar')?>
                                         </a>
                                         <a
                                             href="funcionarios_cadastrar?id=<?=$ca['id']?>&acao=apagar"
@@ -50,7 +50,7 @@ include 'header.php'; ?>
                                             title="Apagar funcionário"
                                             aria-label="Apagar funcionário"
                                         >
-                                            <i class="typcn typcn-trash" aria-hidden="true"></i>
+                                            <?=iconeInterface('apagar')?>
                                         </a>
                                     </div>
                                 </td>

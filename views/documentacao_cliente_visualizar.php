@@ -6,7 +6,7 @@
         <h2 class="az-content-title mg-b-5 mg-b-lg-8">Documentação</h2>
         </div>
         <a href="<?=htmlspecialchars($pdfDownloadUrl, ENT_QUOTES, 'UTF-8')?>" class="btn btn-outline-primary">
-            <i class="fas fa-download"></i> Baixar PDF
+            <?=iconeInterface('baixar')?> Baixar PDF
         </a>
     </div>
 </div>

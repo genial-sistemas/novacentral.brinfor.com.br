@@ -24,13 +24,13 @@ $contratosLocacao = obterContratosLocacaoCliente(
         <ul class="nav">
             <li class="nav-label">Menu Principal</li>
             <li class="nav-item <?=($menu=='Dashboard'?'active show':'')?>">
-                <a href="/dashboard" class="nav-link with-sub"><i class="typcn typcn-chart-bar-outline"></i>Dashboard</a>
+                <a href="/dashboard" class="nav-link with-sub"><?=iconeInterface('dashboard')?>Dashboard</a>
                 <nav class="nav-sub">
                     <a href="/dashboard" class="nav-sub-link <?=($pagina=='Início'?'active':'')?>">Início</a>
                 </nav>
             </li>
             <li class="nav-item <?=($menu=='Chamados'?'active show':'')?>">
-                <a href="/chamados_listar_abertos" class="nav-link with-sub"><i class="typcn typcn-clipboard"></i>Chamados</a>
+                <a href="/chamados_listar_abertos" class="nav-link with-sub"><?=iconeInterface('chamados')?>Chamados</a>
                 <nav class="nav-sub">
                     <a href="/chamados_abrir" class="nav-sub-link <?=($pagina=='Abrir'?'active':'')?>">Abrir</a>
                     <a href="/chamados_listar_abertos" class="nav-sub-link <?=($pagina=='Listar Abertos'?'active':'')?>">Listar Abertos</a>
@@ -38,7 +38,7 @@ $contratosLocacao = obterContratosLocacaoCliente(
                 </nav>
             </li>
             <li class="nav-item <?=($menu=='Funcionários'?'active show':'')?>">
-                <a href="/funcionarios_listar" class="nav-link with-sub"><i class="typcn typcn-group"></i>Funcionários</a>
+                <a href="/funcionarios_listar" class="nav-link with-sub"><?=iconeInterface('funcionarios')?>Funcionários</a>
                 <nav class="nav-sub">
                     <!-- Os nomes das páginas correspondem aos valores definidos nos controladores. -->
                     <a href="/funcionarios_cadastrar" class="nav-sub-link <?=($pagina=='Cadastrar'?'active':'')?>">Cadastrar</a>
@@ -46,7 +46,7 @@ $contratosLocacao = obterContratosLocacaoCliente(
                 </nav>
             </li>
             <li class="nav-item <?=($menu=='Relatórios'?'active show':'')?>">
-                <a href="/relatorio_periodo" class="nav-link with-sub"><i class="typcn typcn-tabs-outline"></i>Relatórios</a>
+                <a href="/relatorio_periodo" class="nav-link with-sub"><?=iconeInterface('relatorios')?>Relatórios</a>
                 <nav class="nav-sub">
                     <a href="/relatorio_periodo" class="nav-sub-link <?=($pagina=='Por período'?'active':'')?>">Por período</a>
                     <a href="/relatorio_equipamento" class="nav-sub-link <?=($pagina=='Por equipamento'?'active':'')?>">Por equipamento</a>
@@ -54,7 +54,7 @@ $contratosLocacao = obterContratosLocacaoCliente(
             </li>
             <?php if ($temContratoHelpdesk): ?>
                 <li class="nav-item <?=($menu=='Equipamentos'?'active show':'')?>">
-                    <a href="/equipamentos_listar" class="nav-link with-sub"><i class="typcn typcn-device-desktop"></i>Equipamentos</a>
+                    <a href="/equipamentos_listar" class="nav-link with-sub"><?=iconeInterface('equipamentos')?>Equipamentos</a>
                     <nav class="nav-sub">
                         <a href="/equipamentos_listar" class="nav-sub-link <?=($pagina=='Ativos'?'active':'')?>">Ativos</a>
                         <a href="/equipamentos_listar_inativos" class="nav-sub-link <?=($pagina=='Inativos'?'active':'')?>">Inativos</a>
@@ -63,12 +63,12 @@ $contratosLocacao = obterContratosLocacaoCliente(
             <?php endif; ?>
             <?php if ($temContratoHelpdesk): ?>
                 <li class="nav-item <?=($pagina=='Documentação'?'active':'')?>">
-                    <a href="/documentacao_cliente" class="nav-link"><i class="typcn typcn-document-text"></i>Documentação</a>
+                    <a href="/documentacao_cliente" class="nav-link"><?=iconeInterface('documentacao')?>Documentação</a>
                 </li>
             <?php endif; ?>
             <?php if ($contratosLocacao): ?>
                 <li class="nav-item <?=($pagina=='Locação'?'active':'')?>">
-                    <a href="/equipamentos_locacao" class="nav-link"><i class="typcn typcn-device-desktop"></i>Locação</a>
+                    <a href="/equipamentos_locacao" class="nav-link"><?=iconeInterface('equipamentos')?>Locação</a>
                 </li>
             <?php endif; ?>
 

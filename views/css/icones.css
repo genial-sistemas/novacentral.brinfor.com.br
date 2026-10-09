@@ -1,0 +1,45 @@
+.icone-interface {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: -0.125em;
+}
+
+.az-sidebar-body .nav-link > .icone-interface {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.az-sidebar-body .nav-link.with-sub::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-right: 1px solid #ced4da;
+    border-bottom: 1px solid #ced4da;
+    transform: rotate(45deg);
+    font-family: inherit;
+}
+
+.az-sidebar-body .nav-item.show > .nav-link.with-sub::after {
+    transform: rotate(225deg);
+}
+
+.az-profile-menu .dropdown-item > .icone-interface {
+    margin-right: 8px;
+}
+
+.funcionario-acao > .icone-interface {
+    width: 18px;
+    height: 18px;
+}
+
+.az-img-user > .icone-interface {
+    width: 1em;
+    height: 1em;
+}

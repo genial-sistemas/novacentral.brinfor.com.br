@@ -12,5 +12,6 @@
     <script src="views/lib/chart.js/Chart.bundle.min.js"></script>
     <script src="views/js/azia.js?v=20261009-menu"></script>
     <script src="views/js/chart.flot.sampledata.js"></script>
+    <script src="views/js/sidebar.js"></script>
 </body>
 </html>
