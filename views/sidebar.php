@@ -23,11 +23,8 @@ $contratosLocacao = obterContratosLocacaoCliente(
     <div class="az-sidebar-body">
         <ul class="nav">
             <li class="nav-label">Menu Principal</li>
-            <li class="nav-item <?=($menu=='Dashboard'?'active show':'')?>">
-                <a href="/dashboard" class="nav-link with-sub"><?=iconeInterface('dashboard', 'menu')?>Dashboard</a>
-                <nav class="nav-sub">
-                    <a href="/dashboard" class="nav-sub-link <?=($pagina=='Início'?'active':'')?>">Início</a>
-                </nav>
+            <li class="nav-item <?=($menu=='Dashboard'?'active':'')?>">
+                <a href="/dashboard" class="nav-link"><?=iconeInterface('dashboard', 'menu')?>Dashboard</a>
             </li>
             <li class="nav-item <?=($menu=='Chamados'?'active show':'')?>">
                 <a href="/chamados_listar_abertos" class="nav-link with-sub"><?=iconeInterface('chamados', 'menu')?>Chamados</a>
