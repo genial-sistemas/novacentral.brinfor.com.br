@@ -86,7 +86,7 @@ try {
             <div class="detail"><strong>Mensagem:</strong> <?= htmlspecialchars($e->getMessage()) ?></div>
             <a href="chamados_abrir" class="btn">Voltar ao Formulário</a>
         </div>
-        <script src="/views/lib/fontawesome-free/js/all.min.js"></script>
+        <script src="/views/js/vendor/fontawesome-free/js/all.min.js"></script>
     </body>
 
     </html>
@@ -205,7 +205,7 @@ try {
             <div class="detail"><strong>Erro:</strong> <?= htmlspecialchars($e->getMessage()) ?></div>
             <a href="chamados_abrir" class="btn">Voltar ao Formulário</a>
         </div>
-        <script src="/views/lib/fontawesome-free/js/all.min.js"></script>
+        <script src="/views/js/vendor/fontawesome-free/js/all.min.js"></script>
     </body>
 
     </html>

@@ -42,13 +42,6 @@ $contratosLocacao = obterContratosLocacaoCliente(
                     <a href="/funcionarios_listar" class="nav-sub-link <?=($pagina=='Listar'?'active':'')?>">Listar</a>
                 </nav>
             </li>
-            <li class="nav-item <?=($menu=='Relatórios'?'active show':'')?>">
-                <a href="/relatorio_periodo" class="nav-link with-sub"><?=iconeInterface('relatorios', 'menu')?>Relatórios</a>
-                <nav class="nav-sub">
-                    <a href="/relatorio_periodo" class="nav-sub-link <?=($pagina=='Por período'?'active':'')?>">Por período</a>
-                    <a href="/relatorio_equipamento" class="nav-sub-link <?=($pagina=='Por equipamento'?'active':'')?>">Por equipamento</a>
-                </nav>
-            </li>
             <?php if ($temContratoHelpdesk): ?>
                 <li class="nav-item <?=($menu=='Equipamentos'?'active show':'')?>">
                     <a href="/equipamentos_listar" class="nav-link with-sub"><?=iconeInterface('equipamentos', 'menu')?>Equipamentos</a>
@@ -68,7 +61,13 @@ $contratosLocacao = obterContratosLocacaoCliente(
                     <a href="/equipamentos_locacao" class="nav-link"><?=iconeInterface('equipamentos', 'menu')?>Locação</a>
                 </li>
             <?php endif; ?>
-
+            <li class="nav-item <?=($menu=='Relatórios'?'active show':'')?>">
+                <a href="/relatorio_periodo" class="nav-link with-sub"><?=iconeInterface('relatorios', 'menu')?>Relatórios</a>
+                <nav class="nav-sub">
+                    <a href="/relatorio_periodo" class="nav-sub-link <?=($pagina=='Por período'?'active':'')?>">Por período</a>
+                    <a href="/relatorio_equipamento" class="nav-sub-link <?=($pagina=='Por equipamento'?'active':'')?>">Por equipamento</a>
+                </nav>
+            </li>
         </ul>
     </div>
 </div>

@@ -57,7 +57,12 @@ if ($autorizado && $acao === 'reativar') {
             $texto = 'Já existe uma solicitação de desativação aguardando aprovação para este equipamento.';
         } elseif (is_array($solicitacao)) {
             $equipamento = $solicitacao['equipamento'];
-            $urlAprovacao = 'https://novacentral.brinfor.com.br/equipamentos_desativacao_aprovar?token='
+            $hostAtual = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+            $hostPermitido = in_array($hostAtual, [
+                'central.brinfor.com.br',
+                'novacentral.brinfor.com.br',
+            ], true) ? $hostAtual : 'central.brinfor.com.br';
+            $urlAprovacao = 'https://' . $hostPermitido . '/equipamentos_desativacao_aprovar?token='
                 . rawurlencode($solicitacao['token']);
             $escapar = static function ($valor) {
                 return htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');

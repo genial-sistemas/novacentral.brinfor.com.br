@@ -13,11 +13,8 @@ $nome_cliente_exibicao = htmlspecialchars(
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Central do Cliente</title>
     <!-- vendor css -->
-    <link href="views/lib/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="views/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
-    <link href="views/lib/morris.js/morris.css" rel="stylesheet">
-    <link href="views/lib/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
-    <link href="views/lib/jqvmap/jqvmap.min.css" rel="stylesheet">
+    <link href="views/js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="views/js/vendor/ionicons/css/ionicons.min.css" rel="stylesheet">
     <link href="views/css/box_helpdesk.css" rel="stylesheet">
     <!-- azia CSS -->
     <link rel="stylesheet" href="views/css/azia.css">  
@@ -28,7 +25,7 @@ $nome_cliente_exibicao = htmlspecialchars(
     <link rel="stylesheet" href="views/css/icones.css">
     <?php require_once __DIR__ . '/icones.php'; ?>
     <!-- Jquery -->
-    <script src="views/lib/jquery/jquery.min.js"></script>
+    <script src="views/js/vendor/jquery/jquery.min.js"></script>
     <script src="views/js/telefone.js"></script>
     <script src="views/js/troca-senha.js"></script>
     <script src="views/js/abrir_chamado.js"></script>

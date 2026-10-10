@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Nova Central do Cliente</title>
     <!-- vendor css -->
-    <link href="views/lib/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="views/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <link href="views/js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="views/js/vendor/ionicons/css/ionicons.min.css" rel="stylesheet">
     <!-- azia CSS -->
     <link rel="stylesheet" href="views/css/azia.css">
     <!-- Customizações -->
@@ -42,9 +42,8 @@
             </div>
         </div><!-- az-card-signin -->
     </div><!-- az-signin-wrapper -->
-    <script src="views/lib/jquery/jquery.min.js"></script>
-    <script src="views/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="views/lib/ionicons/ionicons.js"></script>
+    <script src="views/js/vendor/jquery/jquery.min.js"></script>
+    <script src="views/js/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="views/js/azia.js"></script>
 </body>
 </html>

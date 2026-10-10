@@ -8,8 +8,8 @@
     <title>Central do Cliente</title>
 
     <!-- vendor css -->
-    <link href="views/lib/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="views/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <link href="views/js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="views/js/vendor/ionicons/css/ionicons.min.css" rel="stylesheet">
 
     <!-- azia CSS -->
     <link rel="stylesheet" href="views/css/azia.css">
@@ -27,9 +27,8 @@
         <a href="dashboard" class="btn btn-outline-indigo">Voltar para o início</a>
     </div>
 
-    <script src="views/lib/jquery/jquery.min.js"></script>
-    <script src="views/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="views/lib/ionicons/ionicons.js"></script>
+    <script src="views/js/vendor/jquery/jquery.min.js"></script>
+    <script src="views/js/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script src="views/js/azia.js"></script>
 </body>

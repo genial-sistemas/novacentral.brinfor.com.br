@@ -22,10 +22,9 @@ $urlInteragir = 'index.php?' . http_build_query([
     <title>Abrir Chamado - BRInfor</title>
 
     <!-- vendor css -->
-    <link href="/views/lib/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="/views/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
-    <link href="/views/lib/typicons.font/typicons.css" rel="stylesheet">
-    <link href="/views/lib/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+    <link href="/views/js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="/views/js/vendor/ionicons/css/ionicons.min.css" rel="stylesheet">
+    <link href="/views/js/vendor/typicons.font/typicons.css" rel="stylesheet">
 
     <!-- azia CSS -->
     <link rel="stylesheet" href="/views/css/azia.css">
@@ -37,7 +36,7 @@ $urlInteragir = 'index.php?' . http_build_query([
     <link href="/views/css/iziToast.min.css" rel="stylesheet">
 
     <!-- Jquery -->
-    <script src="/views/lib/jquery/jquery.min.js"></script>
+    <script src="/views/js/vendor/jquery/jquery.min.js"></script>
 
     <style>
         .box-brinfor {
@@ -213,8 +212,7 @@ $urlInteragir = 'index.php?' . http_build_query([
 </div><!-- az-content -->
 
 
-<script src="/views/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/views/lib/ionicons/ionicons.js"></script>
+<script src="/views/js/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="/views/js/azia.js"></script>
 <script src="/views/js/iziToast.min.js"></script>
 

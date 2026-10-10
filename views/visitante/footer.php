@@ -11,8 +11,7 @@
         </div><!-- az-footer -->
     </div> <!-- az-content -->
 
-    <script src="/views/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="/views/lib/ionicons/ionicons.js"></script>
+    <script src="/views/js/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script src="/views/js/azia.js"></script>
     <script src="/views/js/iziToast.min.js"></script>

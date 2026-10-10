@@ -8,9 +8,9 @@
         <title>Genial Sistemas</title>
 
         <!-- vendor css -->
-        <link href="views/lib/fontawesome-free/css/all.min.css" rel="stylesheet">
-        <link href="views/lib/ionicons/css/ionicons.min.css" rel="stylesheet">
-        <link href="views/lib/typicons.font/typicons.css" rel="stylesheet">
+        <link href="views/js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+        <link href="views/js/vendor/ionicons/css/ionicons.min.css" rel="stylesheet">
+        <link href="views/js/vendor/typicons.font/typicons.css" rel="stylesheet">
 
         <!-- azia CSS -->
         <link rel="stylesheet" href="views/css/azia.css">
