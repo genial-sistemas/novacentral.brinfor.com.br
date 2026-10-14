@@ -1,4 +1,7 @@
 views/lib/
 models/conexao.php
 chamados/
+.logs/
+logs/*.txt
+logs/*.txt.*
 .vscode/sftp.json

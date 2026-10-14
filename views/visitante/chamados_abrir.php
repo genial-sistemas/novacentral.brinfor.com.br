@@ -9,6 +9,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <script src="/views/js/captura-erros.js"></script>
 
     <!-- PWA favicon setup -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">

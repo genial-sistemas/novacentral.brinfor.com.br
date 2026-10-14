@@ -11,6 +11,7 @@ $nome_cliente_exibicao = htmlspecialchars(
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="/views/js/captura-erros.js"></script>
     <title>Central do Cliente</title>
     <!-- vendor css -->
     <link href="views/js/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">

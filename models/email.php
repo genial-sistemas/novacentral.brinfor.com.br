@@ -42,6 +42,13 @@ function enviarEmailHtml($destinatario, $assunto, $html, $texto) {
         $mail->send();
         return array('enviado' => true, 'erro' => null);
     } catch (Throwable $erro) {
+        if (function_exists('registrarErroSistema')) {
+            registrarErroSistema('email.smtp', $erro->getMessage(), array(
+                'tipo' => get_class($erro),
+                'arquivo' => basename($erro->getFile()),
+                'linha' => $erro->getLine()
+            ));
+        }
         error_log('Falha ao enviar e-mail para ' . $destinatario . ': ' . $erro->getMessage());
         return array('enviado' => false, 'erro' => $erro->getMessage());
     }

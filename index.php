@@ -1,4 +1,7 @@
 <?php
+    require_once __DIR__ . '/models/error_logger.php';
+    iniciarCapturaErrosSistema();
+
     if (PHP_SAPI === 'cli-server') {
         $caminho_solicitado = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $arquivo_solicitado = realpath(__DIR__ . $caminho_solicitado);
@@ -115,6 +118,9 @@
             break;
         case 'buscar-contrato':
             include 'controlers/buscar_contrato.php';
+            break;
+        case 'registrar-erro-cliente':
+            include 'controlers/registrar_erro_cliente.php';
             break;
         default:
             include 'views/404.php';
