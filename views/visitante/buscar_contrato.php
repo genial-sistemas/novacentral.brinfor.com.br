@@ -521,67 +521,36 @@ elseif ($id_tipo_contrato == '6') {
 
         $primeiro = $resultados[0];
 
-        // Se tiver mais de um resultado, mostra select
-        if (count($resultados) > 1) {
-            $selectHtml = '<select class="form-control" id="resultadoBusca" style="display:block;">';
-            $selectHtml .= '<option value="">Selecione um produto/serviço...</option>';
+        $selectHtml = '<select class="form-control" id="resultadoBusca" style="display:block;">';
+        $selectHtml .= '<option value="0">Selecione o contrato/produto...</option>';
 
-            foreach ($resultados as $row) {
-                $id_contrato = htmlspecialchars($row['id_contrato']);
-                $id_suporte = htmlspecialchars($row['id_suporte']);
-                $suporte    = htmlspecialchars($row['suporte'] ?? '');
-                $id_contato_val = htmlspecialchars($row['id_contato'] ?? '');
-                $nome = htmlspecialchars($row['nome'] ?? '');
-                $email = htmlspecialchars($row['email'] ?? '');
-                $telefone = htmlspecialchars($row['cel'] ?? '');
+        foreach ($resultados as $row) {
+            $id_contrato = htmlspecialchars((string)$row['id_contrato'], ENT_QUOTES, 'UTF-8');
+            $id_suporte = htmlspecialchars((string)$row['id_suporte'], ENT_QUOTES, 'UTF-8');
+            $suporte = htmlspecialchars((string)($row['suporte'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $id_contato = htmlspecialchars((string)($row['id_contato'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $nome = htmlspecialchars((string)($row['nome'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $email = htmlspecialchars((string)($row['email'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $telefone = htmlspecialchars((string)($row['cel'] ?? ''), ENT_QUOTES, 'UTF-8');
+            $rotulo = 'Contrato #' . $id_contrato . ' - ' . $suporte;
 
-                $selectHtml .= "<option value='{$id_contato_val}'
-                                        data-id-contrato='{$id_contrato}'
-                                        data-suporte='{$suporte}'
-                                        data-id-suporte='{$id_suporte}'
-                                        data-nome='{$nome}'
-                                        data-email='{$email}'
-                                        data-telefone='{$telefone}'>
-                                        {$suporte}
-                                </option>";
-            }
-            $selectHtml .= '</select>';
-
-            echo json_encode([
-                'success' => true,
-                'select_html' => $selectHtml,
-                'usar_select' => true
-            ]);
-        } else {
-            // Resultado único - já tem os dados do contato
-            $id_contato_val = $primeiro['id_contato'] ?? '';
-            $suporte_descricao = $primeiro['suporte'] ?? '';
-            $nome = $primeiro['nome'] ?? '';
-            $email = $primeiro['email'] ?? '';
-            $telefone = $primeiro['cel'] ?? '';
-
-            // Cria o input readonly com a descrição do produto
-            $inputHtml = '<input type="text" class="form-control" id="resultadoBusca" 
-                                style="display:block;" 
-                                value="' . htmlspecialchars($suporte_descricao) . '" 
-                                readonly 
-                                data-id-suporte="' . htmlspecialchars($primeiro['id_suporte'] ?? '') . '"
-                                data-nome="' . htmlspecialchars($nome) . '"
-                                data-email="' . htmlspecialchars($email) . '"
-                                data-telefone="' . htmlspecialchars($telefone) . '">';
-
-            echo json_encode([
-                'success' => true,
-                'nome' => $nome,
-                'email' => $email,
-                'telefone' => $telefone,
-                'suporte' => $suporte_descricao,
-                'id_contrato' => $primeiro['id_contrato'] ?? '',
-                'id_suporte' => $primeiro['id_suporte'] ?? '',
-                'input_html' => $inputHtml,
-                'usar_select' => false
-            ]);
+            $selectHtml .= "<option value='{$id_contrato}'
+                                    data-id-contrato='{$id_contrato}'
+                                    data-id-suporte='{$id_suporte}'
+                                    data-id-contato='{$id_contato}'
+                                    data-nome='{$nome}'
+                                    data-email='{$email}'
+                                    data-telefone='{$telefone}'>
+                                    {$rotulo}
+                            </option>";
         }
+        $selectHtml .= '</select>';
+
+        echo json_encode([
+            'success' => true,
+            'select_html' => $selectHtml,
+            'usar_select' => true
+        ]);
     } catch (PDOException $e) {
         echo json_encode(['erro' => 'Erro na consulta: ' . $e->getMessage()]);
     }

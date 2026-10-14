@@ -1019,13 +1019,12 @@
                                 if (resposta.select_html) {
                                     $resultadoBuscaContainer.html(resposta.select_html).show();
 
-                                    var $select = $('#contrato_selecionado');
-                                    var totalOptions = $select.find('option').length;
+                                    var totalOptions = $('#resultadoBusca option').length - 1;
 
-                                    if (totalOptions <= 2) {
+                                    if (totalOptions === 1) {
                                         showSuccessAlert('Contrato encontrado', 'Selecione o contrato na lista abaixo para continuar.');
                                     } else {
-                                        showSuccessAlert('Encontrados ' + (totalOptions - 1) + ' contratos', 'Selecione um na lista abaixo');
+                                        showSuccessAlert('Encontrados ' + totalOptions + ' contratos', 'Selecione um na lista abaixo');
                                     }
                                     limparCamposFormulario();
                                 } else {
@@ -1131,35 +1130,20 @@
 
                 $(document).on('change', '#resultadoBusca', function() {
                     var optionSelected = $(this).find('option:selected');
-                    var id = extrairIdContrato(optionSelected);
+                    var idContrato = parseInt(optionSelected.data('id-contrato'), 10) || 0;
 
-                    if (id > 0) {
-                        var $select = $('#contrato_selecionado');
-                        if ($select.length) {
-                            $select.val(id);
-                            $select.trigger('change');
-                        } else {
-                            var dados = {
-                                id_contrato: id,
-                                id_dominio: parseInt(optionSelected.data('id-dominio'), 10) || 0,
-                                id_backup: parseInt(optionSelected.data('id-backup'), 10) || 0,
-                                id_suporte: parseInt(optionSelected.data('id-suporte'), 10) || 0,
-                                id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
-                                id_equipamento: parseInt(optionSelected.data('id-equipamento'), 10) || 0,
-                                id_pessoa: parseInt(optionSelected.data('id-pessoa'), 10) || 0,
-                                nome: optionSelected.data('nome') || '',
-                                email: optionSelected.data('email') || '',
-                                telefone: optionSelected.data('telefone') || '',
-                                codigo_contrato: optionSelected.data('codigo') || '',
-                                descricao_contrato: optionSelected.data('descricao') || '',
-                                dominio: optionSelected.data('dominio') || ''
-                            };
-                            preencherDadosContrato(dados);
-                            $resultadoBuscaContainer.hide().empty();
-                            aplicarValidacaoCampos();
-                        }
+                    if (idContrato > 0) {
+                        preencherDadosContrato({
+                            id_contrato: idContrato,
+                            id_suporte: parseInt(optionSelected.data('id-suporte'), 10) || 0,
+                            id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
+                            nome: optionSelected.data('nome') || '',
+                            email: optionSelected.data('email') || '',
+                            telefone: optionSelected.data('telefone') || ''
+                        });
                     } else {
                         limparCamposFormulario();
+                        aplicarValidacaoCampos();
                     }
                 });
 
