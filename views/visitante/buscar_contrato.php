@@ -455,6 +455,7 @@ elseif ($id_tipo_contrato == '6') {
     try {
         if ($search_type == 'CNPJ') {
             $sql = "SELECT 
+                        c.id AS id_contrato,
                         cs.id_contato,
                         cs.id_produto,
                         sp.id AS id_suporte,
@@ -472,6 +473,7 @@ elseif ($id_tipo_contrato == '6') {
             $usarSelect = true;
         } elseif ($search_type == 'CPF') {
             $sql = "SELECT 
+                        c.id AS id_contrato,
                         cs.id_contato,
                         cs.id_produto,
                         sp.id AS id_suporte,
@@ -489,6 +491,7 @@ elseif ($id_tipo_contrato == '6') {
             $usarSelect = true;
         } elseif ($search_type == 'ID') {
             $sql = "SELECT 
+                        cs.id_contrato,
                         cs.id_contato,
                         cs.id_produto,
                         sp.id AS id_suporte,
@@ -524,6 +527,7 @@ elseif ($id_tipo_contrato == '6') {
             $selectHtml .= '<option value="">Selecione um produto/serviço...</option>';
 
             foreach ($resultados as $row) {
+                $id_contrato = htmlspecialchars($row['id_contrato']);
                 $id_suporte = htmlspecialchars($row['id_suporte']);
                 $suporte    = htmlspecialchars($row['suporte'] ?? '');
                 $id_contato_val = htmlspecialchars($row['id_contato'] ?? '');
@@ -531,7 +535,8 @@ elseif ($id_tipo_contrato == '6') {
                 $email = htmlspecialchars($row['email'] ?? '');
                 $telefone = htmlspecialchars($row['cel'] ?? '');
 
-                $selectHtml .= "<option value='{$id_contato_val}' 
+                $selectHtml .= "<option value='{$id_contato_val}'
+                                        data-id-contrato='{$id_contrato}'
                                         data-suporte='{$suporte}'
                                         data-id-suporte='{$id_suporte}'
                                         data-nome='{$nome}'
@@ -571,6 +576,7 @@ elseif ($id_tipo_contrato == '6') {
                 'email' => $email,
                 'telefone' => $telefone,
                 'suporte' => $suporte_descricao,
+                'id_contrato' => $primeiro['id_contrato'] ?? '',
                 'id_suporte' => $primeiro['id_suporte'] ?? '',
                 'input_html' => $inputHtml,
                 'usar_select' => false
