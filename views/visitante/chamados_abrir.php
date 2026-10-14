@@ -869,7 +869,7 @@
                     }
 
                     $.ajax({
-                        url: 'index.php?page=buscar-contrato',
+                        url: 'views/visitante/buscar_contrato.php',
                         type: 'POST',
                         dataType: 'json',
                         data: {
@@ -978,7 +978,7 @@
                     }
 
                     $.ajax({
-                        url: 'index.php?page=buscar-contrato',
+                        url: 'views/visitante/buscar_contrato.php',
                         type: 'POST',
                         dataType: 'json',
                         data: {
