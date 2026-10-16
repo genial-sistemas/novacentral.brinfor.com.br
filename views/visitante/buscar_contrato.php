@@ -39,6 +39,8 @@ if ($id_tipo_contrato == '1') {
         j.nome,
         j.cel,
         j.email,
+        e.contato AS id_contato,
+        e.id AS id_equipamento,
         c.etiqueta,
         c.id_contrato,
         e.contrato,
@@ -72,6 +74,8 @@ if ($id_tipo_contrato == '1') {
             'nome' => $dados['nome'] ?? '',
             'email' => $dados['email'] ?? '',
             'telefone' => $dados['cel'] ?? '',
+            'id_contato' => $dados['id_contato'] ?? 0,
+            'id_equipamento' => $dados['id_equipamento'] ?? 0,
             'id_contrato' => $dados['id_contrato'] ?? '',
             'contrato' => $dados['contrato'] ?? '',
             'codigo' => $dados['codigo'] ?? ''
