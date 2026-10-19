@@ -58,6 +58,8 @@ if ($id_tipo_contrato == '1') {
         $params[':equipamento'] = $equipamento;
     }
 
+    $sql .= " LIMIT 2";
+
     try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -65,6 +67,11 @@ if ($id_tipo_contrato == '1') {
 
         if (empty($resultados)) {
             echo json_encode(['erro' => 'Nenhum contrato encontrado']);
+            exit;
+        }
+
+        if (count($resultados) > 1) {
+            echo json_encode(['erro' => 'Mais de um equipamento corresponde a esses códigos. Confirme o contrato e o equipamento.']);
             exit;
         }
 
