@@ -48,10 +48,10 @@ if ($id_tipo_contrato == '1') {
     FROM contrato_outsourcing c
     INNER JOIN contrato_outsourcing_equipamentos e ON c.id_contrato = e.contrato
     INNER JOIN pessoa_juridica_contatos j ON e.contato = j.id
-    WHERE c.etiqueta = :etiqueta
+    WHERE c.etiqueta = :contrato
     ";
 
-    $params = [':etiqueta' => $id_tipo_contrato];
+    $params = [':contrato' => $contrato];
 
     if (!empty($equipamento)) {
         $sql .= " AND e.codigo = :equipamento";
