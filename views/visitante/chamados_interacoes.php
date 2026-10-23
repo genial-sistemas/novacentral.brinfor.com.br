@@ -235,6 +235,12 @@
             padding: 20px 24px;
         }
 
+        #azChatBody::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
         /* ===== MENSAGENS ===== */
         .system-message {
             text-align: center;
@@ -264,6 +270,9 @@
 
         /* Separador de data */
         .date-separator {
+            clear: both;
+            display: block;
+            width: 100%;
             text-align: center;
             margin: 20px 0 16px 0;
             padding-top: 12px;
