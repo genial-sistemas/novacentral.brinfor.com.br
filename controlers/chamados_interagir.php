@@ -66,7 +66,7 @@ if (($_GET['atualizar'] ?? '') === '1') {
         'tecnico' => $ultima_interacao_tecnico,
         'equipamento' => $equipamento_rotulo,
         'eventos' => $eventos_json
-    ), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    ), JSON_UNESCAPED_UNICODE);
     exit;
 }
 

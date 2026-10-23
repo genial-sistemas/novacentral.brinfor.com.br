@@ -831,10 +831,14 @@
                                     spanStatus.classList.add('atendimento');
                                 } else if (statusTexto === 'finalizado' || statusTexto === 'fechado') {
                                     spanStatus.classList.add('finalizado');
-                                } else if (statusTexto === 'aberto') {
+                                } else if (statusTexto.includes('aberto')) {
                                     spanStatus.classList.add('aberto');
-                                } else if (statusTexto === 'aguardando') {
+                                } else if (statusTexto.includes('ag.') || statusTexto.includes('aguardando')) {
                                     spanStatus.classList.add('aguardando');
+                                } else if (statusTexto.includes('pausa')) {
+                                    spanStatus.classList.add('pendente');
+                                } else if (statusTexto.includes('resp.')) {
+                                    spanStatus.classList.add('atendimento');
                                 } else {
                                     spanStatus.classList.add('pendente');
                                 }

@@ -47,8 +47,12 @@ $viewData = [
 
 if ($idChamado > 0 && !empty($seguranca)) {
     try {
-        // Busca o chamado
-        $sql = "SELECT * FROM bhcloud_bhinfor.contrato_chamado WHERE id = ? AND seguranca = ?";
+        // Busca o chamado com status e tipo da base de dados
+        $sql = "SELECT c.*, s.status AS situacao_nome, ct.descricao AS tipo_contrato_nome
+                FROM bhcloud_bhinfor.contrato_chamado c
+                LEFT JOIN bhcloud_bhinfor.contrato_chamado_status s ON s.id = c.id_situacao
+                LEFT JOIN bhcloud_bhinfor.contrato_tipo ct ON ct.id = c.id_tipo_contrato
+                WHERE c.id = ? AND c.seguranca = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idChamado, $seguranca]);
         $chamado = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -57,7 +61,9 @@ if ($idChamado > 0 && !empty($seguranca)) {
             $viewData['idChamado'] = $chamado['id'];
             $viewData['seguranca'] = $chamado['seguranca'];
             $viewData['idTipoContrato'] = $chamado['id_tipo_contrato'] ?? 0;
-            $viewData['situacao'] = $chamado['id_situacao'] ?? '';
+            $viewData['tipoContrato'] = $chamado['tipo_contrato_nome'] ?? 'Chamado';
+            $viewData['idSituacao'] = (int)($chamado['id_situacao'] ?? 0);
+            $viewData['situacao'] = $chamado['situacao_nome'] ?? 'Não informado';
             $viewData['nome'] = $chamado['nome'] ?? '';
             $viewData['email'] = $chamado['email'] ?? '';
             $viewData['telefone'] = $chamado['telefone'] ?? '';
@@ -98,23 +104,6 @@ if (isset($_GET['endpoint'])) {
     $endpoint = $_GET['endpoint'];
 
     if ($endpoint === 'info') {
-        $tiposContrato = [
-            1 => 'Helpdesk (Outsourcing)',
-            2 => 'Hospedagem',
-            4 => 'Domínio',
-            5 => 'Backup',
-            6 => 'Suporte Produtos',
-            7 => 'Locação'
-        ];
-        $situacoes = [
-            1 => 'Aberto',
-            2 => 'Em Atendimento',
-            3 => 'Aguardando Cliente',
-            4 => 'Aguardando Terceiros',
-            5 => 'Resolvido',
-            6 => 'Fechado',
-            7 => 'Cancelado'
-        ];
         $ultimaInteracao = $viewData['interacoes'][0] ?? null;
         $stmtTecnico = $pdo->prepare(
             'SELECT p.nome_pessoa FROM bhcloud_bhinfor.contrato_chamado_eventos e
@@ -125,21 +114,42 @@ if (isset($_GET['endpoint'])) {
         $stmtTecnico->execute([$idChamado]);
         $tecnico = $stmtTecnico->fetchColumn();
 
+        require_once __DIR__ . '/../../models/chamado.php';
+        $stmtEquipamento = $pdo->prepare(
+            'SELECT id_equipamento FROM bhcloud_bhinfor.contrato_chamado_eventos
+             WHERE id_chamado = ? AND id_equipamento > 0
+             ORDER BY data DESC, hora DESC, id DESC LIMIT 1'
+        );
+        $stmtEquipamento->execute([$idChamado]);
+        $idEquipamento = (int) ($stmtEquipamento->fetchColumn() ?: 0);
+        $equipamentoRotulo = 'Não informado';
+        if (function_exists('obterRotuloEquipamentoChamado') && $idEquipamento > 0) {
+            $rotulo = obterRotuloEquipamentoChamado(
+                (int)($chamado['id_tipo_contrato'] ?? 0),
+                (int)($chamado['id_contrato'] ?? 0),
+                $idEquipamento
+            );
+            if (!empty($rotulo)) {
+                $equipamentoRotulo = $rotulo;
+            }
+        }
+
         echo json_encode([
             'success' => true,
             'info' => [
                 'id_chamado' => $idChamado,
-                'tipo_chamado' => $tiposContrato[(int) $viewData['idTipoContrato']] ?? 'Chamado',
+                'id_situacao' => (int)($chamado['id_situacao'] ?? 0),
+                'tipo_chamado' => $viewData['tipoContrato'] ?: 'Chamado',
                 'tecnico_responsavel' => $tecnico ?: 'Não informado',
                 'data_abertura' => $chamado['data_abertura'] ?? '',
-                'equipamento' => 'Não informado',
-                'situacao' => $situacoes[(int) $viewData['situacao']] ?? 'Não informado',
+                'equipamento' => $equipamentoRotulo,
+                'situacao' => $viewData['situacao'] ?: 'Não informado',
                 'ultima_interacao' => $ultimaInteracao ? [
                     'data' => $ultimaInteracao['data'] ?? '',
                     'hora' => $ultimaInteracao['hora'] ?? ''
                 ] : null
             ]
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
