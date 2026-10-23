@@ -1,5 +1,6 @@
     <?php
         require_once __DIR__ . '/../../controlers/funcoes.php';
+        if (!isset($hasError)) { $hasError = (is_array($messages ?? null) && count($messages) > 0); }
         if (!isset($redirecionar)) { $redirecionar = null; }
         if (!isset($messages)) { $messages = []; }
     ?>
@@ -17,7 +18,7 @@
     <script src="/views/js/iziToast.min.js"></script>
     
     <script>
-        let hasError = <?php echo($hasError ? 1 : 0) ?>;
+        let hasError = <?php echo(!empty($hasError) ? 1 : 0) ?>;
         let redirecionar = <?php echo($redirecionar ? 1 : 0) ?>;
         let uriRedirecionar = '<?php echo($uriRedirecionar ?? '') ?>';
 
