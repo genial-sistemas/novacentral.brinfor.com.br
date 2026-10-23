@@ -62,7 +62,11 @@
             break;
         case 'interagir-chamado':
         case 'visitante-interagir-chamado':
-            include 'controlers/chamados_interagir.php';
+            if (!empty($_GET['seguranca']) || !empty($_POST['seguranca'])) {
+                include 'controlers/visitante/chamados_interacoes.php';
+            } else {
+                include 'controlers/chamados_interagir.php';
+            }
             break;
         case 'chamados_abrir-resultado':
             include 'views/chamados_abrir_resultado.php';
