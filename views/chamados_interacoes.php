@@ -41,7 +41,7 @@ include 'header.php'
                         $evento_cliente = (int)$i['id_pessoa'] === 0;
                         $nome_interacao = $evento_cliente ? 'Você' : (explode(' ', trim((string)($i['nome_pessoa'] ?? '')))[0] ?: 'Técnico');
                         ?>
-                            <div class="media <?=$evento_cliente ? 'flex-row-reverse message-client' : 'message-technician'?>" data-id-evento="<?=htmlspecialchars((string)$i['id_evento'], ENT_QUOTES, 'UTF-8')?>">
+                            <div class="media <?=$evento_cliente ? 'flex-row-reverse message-client' : 'message-technician'?>" data-id-evento="<?=htmlspecialchars((string)($i['id_evento'] ?: $i['id']), ENT_QUOTES, 'UTF-8')?>">
                                 <div class="az-img-user online"><img src="/views/img/icon_user.png" alt="Usuário">
                                 <?=htmlspecialchars($nome_interacao, ENT_QUOTES, 'UTF-8')?>
                                 </div>

@@ -916,9 +916,14 @@
                     return;
                 }
 
-                eventos.sort((a, b) => a.id_evento - b.id_evento);
+                eventos.sort((a, b) => {
+                    const dataA = (a.data || '') + ' ' + (a.hora || '');
+                    const dataB = (b.data || '') + ' ' + (b.hora || '');
+                    if (dataA !== dataB) return dataA.localeCompare(dataB);
+                    return (Number(a.id_evento) || 0) - (Number(b.id_evento) || 0);
+                });
 
-                const novosEventos = eventos.filter(e => e.id_evento > ultimoIdEvento);
+                const novosEventos = eventos.filter(e => Number(e.id_evento) > ultimoIdEvento);
 
                 if (novosEventos.length === 0 && !primeiraCarga) {
                     return;
@@ -926,8 +931,9 @@
 
                 if (eventos.length > 0) {
                     const ultimo = eventos[eventos.length - 1];
-                    if (ultimo.id_evento > ultimoIdEvento) {
-                        ultimoIdEvento = ultimo.id_evento;
+                    const idUltimo = Number(ultimo.id_evento) || 0;
+                    if (idUltimo > ultimoIdEvento) {
+                        ultimoIdEvento = idUltimo;
                     }
                 }
 
@@ -942,7 +948,7 @@
                     });
                 } else {
                     novosEventos.forEach(evento => {
-                        const jaExiste = mensagensCache.some(m => m.id_evento === evento.id_evento);
+                        const jaExiste = mensagensCache.some(m => String(m.id_evento) === String(evento.id_evento));
                         if (!jaExiste) {
                             mensagensCache.push(evento);
                             adicionarMensagemNoChat(evento);

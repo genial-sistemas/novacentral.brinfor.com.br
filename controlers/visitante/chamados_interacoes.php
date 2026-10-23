@@ -69,7 +69,7 @@ if ($idChamado > 0 && !empty($seguranca)) {
             }
             
             // Busca interações do chamado
-            $sqlInteracoes = "SELECT * FROM bhcloud_bhinfor.contrato_chamado_eventos WHERE id_chamado = ? ORDER BY data DESC, hora DESC";
+            $sqlInteracoes = "SELECT * FROM bhcloud_bhinfor.contrato_chamado_eventos WHERE id_chamado = ? ORDER BY data DESC, hora DESC, id DESC";
             $stmtInteracoes = $pdo->prepare($sqlInteracoes);
             $stmtInteracoes->execute([$idChamado]);
             $viewData['interacoes'] = $stmtInteracoes->fetchAll(PDO::FETCH_ASSOC);
@@ -120,7 +120,7 @@ if (isset($_GET['endpoint'])) {
             'SELECT p.nome_pessoa FROM bhcloud_bhinfor.contrato_chamado_eventos e
              JOIN bhcloud_bhinfor.pessoa p ON p.id = e.id_pessoa
              WHERE e.id_chamado = ? AND e.id_pessoa > 0
-             ORDER BY e.id_evento DESC LIMIT 1'
+             ORDER BY e.data DESC, e.hora DESC, e.id DESC LIMIT 1'
         );
         $stmtTecnico->execute([$idChamado]);
         $tecnico = $stmtTecnico->fetchColumn();
@@ -145,12 +145,12 @@ if (isset($_GET['endpoint'])) {
 
     if ($endpoint === 'eventos') {
         $stmt = $pdo->prepare(
-            'SELECT e.id_evento, e.id_chamado, e.id_pessoa, e.data, e.hora,
+            'SELECT COALESCE(e.id_evento, e.id) AS id_evento, e.id, e.id_chamado, e.id_pessoa, e.data, e.hora,
                     e.descricao, e.status, e.link, p.nome_pessoa AS nome_tecnico
              FROM bhcloud_bhinfor.contrato_chamado_eventos e
              LEFT JOIN bhcloud_bhinfor.pessoa p ON p.id = e.id_pessoa
              WHERE e.id_chamado = ?
-             ORDER BY e.id_evento ASC'
+             ORDER BY e.data ASC, e.hora ASC, e.id ASC'
         );
         $stmt->execute([$idChamado]);
         echo json_encode(['success' => true, 'eventos' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
@@ -184,7 +184,7 @@ if (isset($_GET['endpoint'])) {
         $stmtEquipamento = $pdo->prepare(
             'SELECT id_equipamento FROM bhcloud_bhinfor.contrato_chamado_eventos
              WHERE id_chamado = ? AND id_equipamento > 0
-             ORDER BY id_evento ASC LIMIT 1'
+             ORDER BY data ASC, hora ASC, id ASC LIMIT 1'
         );
         $stmtEquipamento->execute([$idChamado]);
         $idEquipamento = (int) ($stmtEquipamento->fetchColumn() ?: 0);

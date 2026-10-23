@@ -48,7 +48,7 @@ if (($_GET['atualizar'] ?? '') === '1') {
     header('Cache-Control: no-store, no-cache, must-revalidate');
     $eventos_json = array_map(static function ($interacao) {
         return array(
-            'id_evento' => (int)$interacao['id_evento'],
+            'id_evento' => (int)($interacao['id_evento'] ?: $interacao['id']),
             'id_pessoa' => (int)$interacao['id_pessoa'],
             'nome_pessoa' => $interacao['nome_pessoa'] ?? '',
             'data' => $interacao['data'],

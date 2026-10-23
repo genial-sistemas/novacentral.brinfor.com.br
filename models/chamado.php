@@ -327,7 +327,7 @@ function obterInteracoesPorChamados($id_chamado) {
     FROM contrato_chamado_eventos a
     LEFT JOIN pessoa b ON a.id_pessoa=b.id
     WHERE a.id_chamado=$id_chamado
-    ORDER BY a.data ASC, a.hora ASC, a.id_evento ASC";
+    ORDER BY a.data ASC, a.hora ASC, COALESCE(a.id_evento, a.id) ASC";
     $dbh = getConexao();
     $sth = $dbh->prepare($consulta);
     $sth->execute();
@@ -494,7 +494,7 @@ function obterUltimasInteracoesPorChamados($chamados) {
                evento.data, evento.hora,
                ROW_NUMBER() OVER (
                    PARTITION BY evento.id_chamado
-                   ORDER BY evento.data DESC, evento.hora DESC, evento.id_evento DESC
+                   ORDER BY evento.data DESC, evento.hora DESC, COALESCE(evento.id_evento, evento.id) DESC
                ) AS ordem
         FROM contrato_chamado_eventos evento
         WHERE evento.id_chamado IN ($placeholders)
@@ -594,7 +594,7 @@ function reabrirChamado($id_chamado) {
         $consultaEquipamento = $dbh->prepare('SELECT id_equipamento
             FROM contrato_chamado_eventos
             WHERE id_chamado = :id_chamado
-            ORDER BY data DESC, hora DESC, id_evento DESC
+            ORDER BY data DESC, hora DESC, COALESCE(id_evento, id) DESC
             LIMIT 1');
         $consultaEquipamento->execute(array(':id_chamado' => (int)$id_chamado));
         $idEquipamento = (int)($consultaEquipamento->fetchColumn() ?: 0);
