@@ -43,3 +43,34 @@ function statusNotaFiscal($status)
     }
     return [$status !== '' && $status !== null ? ucfirst((string)$status) : 'Não informado', 'pendente'];
 }
+
+/** Boletos (Banco Inter) do cliente logado, paginados: em aberto primeiro. Retorna ['total' => n, 'itens' => [...]]. */
+function obterBoletos($idPessoa, $limite, $offset)
+{
+    $resultado = erp_api('financeiro.boletos', [
+        'id_pessoa' => (int)$idPessoa,
+        'limite' => (int)$limite,
+        'offset' => (int)$offset,
+    ]) ?: [];
+    return ['total' => (int)($resultado['total'] ?? 0), 'itens' => $resultado['itens'] ?? []];
+}
+
+/** PDF do boleto (a API confere se o boleto é do cliente). Retorna os bytes do PDF. */
+function obterPdfBoleto($idBoleto, $idPessoa)
+{
+    $arquivo = erp_api('financeiro.boleto_pdf', ['id' => (int)$idBoleto, 'id_pessoa' => (int)$idPessoa]);
+    return base64_decode((string)$arquivo['base64']);
+}
+
+/** Texto e cor do status do boleto (tabela financeiro_boleto do ERP). */
+function statusBoleto($status)
+{
+    $mapa = [
+        'A_RECEBER' => ['A vencer', 'pendente'],
+        'ATRASADO' => ['Atrasado', 'erro'],
+        'RECEBIDO' => ['Pago', 'ok'],
+        'CANCELADO' => ['Cancelado', 'cancelada'],
+    ];
+    $chave = strtoupper(trim((string)$status));
+    return $mapa[$chave] ?? [$status !== '' && $status !== null ? ucfirst(strtolower((string)$status)) : 'Não informado', 'pendente'];
+}

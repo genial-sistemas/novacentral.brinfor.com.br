@@ -46,7 +46,7 @@ $contratosLocacao = obterContratosLocacaoCliente(
                 <li class="nav-item <?=($menu=='Equipamentos'?'active show':'')?>">
                     <a href="/equipamentos_listar" class="nav-link with-sub"><?=iconeInterface('equipamentos', 'menu')?>Equipamentos</a>
                     <nav class="nav-sub">
-                        <a href="/equipamentos_listar" class="nav-sub-link <?=($pagina=='Ativos'?'active':'')?>">Ativos</a>
+                        <a href="/equipamentos_listar" class="nav-sub-link <?=($menu=='Equipamentos' && $pagina=='Ativos'?'active':'')?>">Ativos</a>
                         <a href="/equipamentos_listar_inativos" class="nav-sub-link <?=($pagina=='Inativos'?'active':'')?>">Inativos</a>
                     </nav>
                 </li>
@@ -57,14 +57,18 @@ $contratosLocacao = obterContratosLocacaoCliente(
                 </li>
             <?php endif; ?>
             <?php if ($contratosLocacao): ?>
-                <li class="nav-item <?=($pagina=='Locação'?'active':'')?>">
-                    <a href="/equipamentos_locacao" class="nav-link"><?=iconeInterface('equipamentos', 'menu')?>Locação</a>
+                <li class="nav-item <?=($menu=='Locação'?'active show':'')?>">
+                    <a href="/equipamentos_locacao" class="nav-link with-sub"><?=iconeInterface('equipamentos', 'menu')?>Locação</a>
+                    <nav class="nav-sub">
+                        <a href="/equipamentos_locacao" class="nav-sub-link <?=($menu=='Locação' && $pagina=='Ativos'?'active':'')?>">Ativos</a>
+                    </nav>
                 </li>
             <?php endif; ?>
             <li class="nav-item <?=($menu=='Financeiro'?'active show':'')?>">
                 <a href="/financeiro_notas" class="nav-link with-sub"><?=iconeInterface('financeiro', 'menu')?>Financeiro</a>
                 <nav class="nav-sub">
                     <a href="/financeiro_notas" class="nav-sub-link <?=($pagina=='Notas Fiscais'?'active':'')?>">Notas Fiscais</a>
+                    <a href="/financeiro_boletos" class="nav-sub-link <?=($pagina=='Boletos'?'active':'')?>">Boletos</a>
                 </nav>
             </li>
             <li class="nav-item <?=($menu=='Relatórios'?'active show':'')?>">

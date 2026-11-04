@@ -19,8 +19,8 @@ if (!$contratosLocacao) {
     exit;
 }
 
-$menu = 'Equipamentos';
-$pagina = 'Locação';
+$menu = 'Locação';
+$pagina = 'Ativos';
 $equipamentos = obterEquipamentosLocacaoCliente(
     $_SESSION['id_pessoa'],
     $contratosLocacao,

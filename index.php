@@ -131,6 +131,12 @@
         case 'financeiro_nota_arquivo':
             include 'controlers/financeiro_nota_arquivo.php';
             break;
+        case 'financeiro_boletos':
+            include 'controlers/financeiro_boletos.php';
+            break;
+        case 'financeiro_boleto_arquivo':
+            include 'controlers/financeiro_boleto_arquivo.php';
+            break;
         // Rotas do módulo de funcionários: formulário de cadastro/edição e listagem.
         case 'funcionarios_cadastrar':
             include 'controlers/funcionarios_cadastrar.php';
