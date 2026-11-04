@@ -424,3 +424,30 @@ function obterChamadosTodosEquipamentosPeriodo($contratos, $data_inicial, $data_
         'data_final' => (string)$data_final,
     ]) ?: [];
 }
+
+/** Página do relatório por equipamento: ['total' => n, 'itens' => [...]]. Sem $id_equipamento = todos. */
+function obterRelatorioEquipamentoPagina($contratos, $id_contrato, $id_equipamento, $data_inicial, $data_final, $limite, $offset) {
+    $retorno = erp_api('chamado.equipamento_relatorio', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'equipamento_contrato' => (int)$id_contrato,
+        'equipamento' => (int)$id_equipamento,
+        'data_inicial' => (string)$data_inicial,
+        'data_final' => (string)$data_final,
+        'limite' => (int)$limite,
+        'offset' => (int)$offset,
+    ]);
+    return is_array($retorno) ? $retorno + ['total' => 0, 'itens' => []] : ['total' => 0, 'itens' => []];
+}
+
+/** Interações de vários chamados, agrupadas por id do chamado. */
+function obterInteracoesDosChamados($ids, $contratos) {
+    $ids = chamado_ids_contratos($ids);
+    if (!$ids) {
+        return [];
+    }
+    $agrupadas = [];
+    foreach (erp_api('chamado.interacoes_lista', ['ids' => $ids, 'contratos' => chamado_ids_contratos($contratos)]) ?: [] as $evento) {
+        $agrupadas[(int)$evento['id_chamado']][] = $evento;
+    }
+    return $agrupadas;
+}

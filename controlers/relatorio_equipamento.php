@@ -6,9 +6,16 @@ require 'models/contrato.php';
 $menu = 'Relatórios';
 $pagina = 'Por equipamento';
 
-$data_inicial_texto = $_POST['data_inicial'] ?? '01/01/' . date('Y');
-$data_final_texto = $_POST['data_final'] ?? date('d/m/Y');
-$referencia = trim($_POST['equipamento'] ?? 'todos');
+// Filtros pela URL (GET) para a paginação manter a pesquisa.
+$data_inicial_texto = (string)($_GET['data_inicial'] ?? '01/01/' . date('Y'));
+$data_final_texto = (string)($_GET['data_final'] ?? date('d/m/Y'));
+$referencia = trim((string)($_GET['equipamento'] ?? 'todos'));
+$mostrar_interacoes = !empty($_GET['interacoes']);
+$itens_por_pagina = 20;
+$pagina_atual = max(1, (int)($_GET['pagina'] ?? 1));
+$total_chamados = 0;
+$total_paginas = 1;
+$interacoes_por_chamado = array();
 $ids_contratos = array_map('intval', $_SESSION['contratos'] ?? array());
 $contratos = $ids_contratos ? obterContratosAtivos($ids_contratos) : array();
 $equipamentos = obterEquipamentosParaRelatorio($contratos);
@@ -24,13 +31,12 @@ foreach ($contratos as $contrato) {
     }
 }
 $mostrar_filtro_tipo = count($tipos_com_equipamento) > 1;
-$tipo_filtro = (int)($_POST['tipo_contrato'] ?? 0);
+$tipo_filtro = (int)($_GET['tipo_contrato'] ?? 0);
 if (!$mostrar_filtro_tipo || !in_array($tipo_filtro, array(1, 7), true)) {
     $tipo_filtro = 0; // 0 = todos os tipos
 }
 
 $chamados = array();
-$chamados_primeira_interacao = array();
 $equipamento_selecionado = $equipamentos_por_referencia[$referencia] ?? null;
 // O equipamento escolhido precisa ser do tipo filtrado.
 if ($equipamento_selecionado && $tipo_filtro && (int)$equipamento_selecionado['id_tipo'] !== $tipo_filtro) {
@@ -51,7 +57,7 @@ $parse_data = static function ($valor) {
 $data_inicial = null;
 $data_final = null;
 
-if (isset($_POST['acao']) && $_POST['acao'] === 'filtrar') {
+if (($_GET['acao'] ?? '') === 'filtrar') {
     $data_inicial = $parse_data($data_inicial_texto);
     $data_final = $parse_data($data_final_texto);
 
@@ -63,42 +69,52 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'filtrar') {
         $erro_relatorio = 'Selecione um equipamento ativo vinculado à sua conta.';
     } else {
         $relatorio_executado = true;
-        if ($referencia === 'todos') {
-            $contratos_com_equipamentos = array();
-            foreach ($contratos as $contrato) {
-                $tipo_contrato = (int)$contrato['id_tipo'];
-                if (in_array($tipo_contrato, array(1, 7), true) && (!$tipo_filtro || $tipo_contrato === $tipo_filtro)) {
-                    $contratos_com_equipamentos[] = (int)$contrato['id'];
-                }
+        // Contratos com equipamento (Helpdesk/Locação), respeitando o filtro de tipo.
+        $contratos_com_equipamentos = array();
+        foreach ($contratos as $contrato) {
+            $tipo_contrato = (int)$contrato['id_tipo'];
+            if (in_array($tipo_contrato, array(1, 7), true) && (!$tipo_filtro || $tipo_contrato === $tipo_filtro)) {
+                $contratos_com_equipamentos[] = (int)$contrato['id'];
             }
-            $chamados = obterChamadosTodosEquipamentosPeriodo(
-                $contratos_com_equipamentos,
-                $data_inicial->format('Y-m-d'),
-                $data_final->format('Y-m-d')
-            );
-            foreach ($chamados as &$chamado) {
-                $referencia_chamado = (int)$chamado['id_contrato'] . ':' . (int)$chamado['id_equipamento'];
-                $chamado['equipamento_rotulo'] = $equipamentos_por_referencia[$referencia_chamado]['rotulo'] ?? 'Equipamento ' . (int)$chamado['id_equipamento'];
-            }
-            unset($chamado);
-        } else {
-            $chamados = obterChamadosPorEquipamentoPeriodo(
-                $equipamento_selecionado['id_contrato'],
-                $equipamento_selecionado['id'],
-                $data_inicial->format('Y-m-d'),
-                $data_final->format('Y-m-d')
-            );
-            foreach ($chamados as &$chamado) {
-                $chamado['equipamento_rotulo'] = $equipamento_selecionado['rotulo'];
-            }
-            unset($chamado);
         }
+        $buscar_pagina = static function ($pagina) use ($contratos_com_equipamentos, $equipamento_selecionado, $data_inicial, $data_final, $itens_por_pagina) {
+            return obterRelatorioEquipamentoPagina(
+                $contratos_com_equipamentos,
+                $equipamento_selecionado['id_contrato'] ?? 0,
+                $equipamento_selecionado['id'] ?? 0,
+                $data_inicial->format('Y-m-d'),
+                $data_final->format('Y-m-d'),
+                $itens_por_pagina,
+                ($pagina - 1) * $itens_por_pagina
+            );
+        };
+        $resultado = $buscar_pagina($pagina_atual);
+        $total_chamados = (int)$resultado['total'];
+        $total_paginas = max(1, (int)ceil($total_chamados / $itens_por_pagina));
+        if ($pagina_atual > $total_paginas) {
+            $pagina_atual = $total_paginas;
+            $resultado = $buscar_pagina($pagina_atual);
+        }
+        $chamados = $resultado['itens'];
+        foreach ($chamados as &$chamado) {
+            $referencia_chamado = (int)$chamado['id_contrato'] . ':' . (int)$chamado['id_equipamento'];
+            $chamado['equipamento_rotulo'] = $equipamentos_por_referencia[$referencia_chamado]['rotulo']
+                ?? 'Equipamento ' . (int)$chamado['id_equipamento'];
+        }
+        unset($chamado);
 
-        foreach ($chamados as $indice => $chamado) {
-            $interacoes = obterInteracoesPorChamados($chamado['id']);
-            $chamados_primeira_interacao[$indice] = $interacoes[0] ?? array();
+        if ($mostrar_interacoes && $chamados) {
+            $interacoes_por_chamado = obterInteracoesDosChamados(array_column($chamados, 'id'), $contratos_com_equipamentos);
         }
     }
 }
+
+// Link de página mantendo os filtros.
+$link_pagina = static function ($n) {
+    $parametros = $_GET;
+    unset($parametros['page']);
+    $parametros['pagina'] = (int)$n;
+    return '/relatorio_equipamento?' . http_build_query($parametros);
+};
 
 include 'views/relatorio_equipamento.php';
