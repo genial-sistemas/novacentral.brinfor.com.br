@@ -7,6 +7,8 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
 .chamados-acoes form { margin: 0; }
 .btn-icone { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border-radius: 6px; }
 .btn-icone svg { width: 18px; height: 18px; }
+.btn-interagir { background: #fff; border: 1px solid #cdd4e0; color: #fa9758; }
+.btn-interagir:hover { background: #fa9758; border-color: #fa9758; color: #fff; }
 .btn-encerrar { background: #fff; border: 1px solid #cdd4e0; color: #3bb001; }
 .btn-encerrar:hover { background: #3bb001; border-color: #3bb001; color: #fff; }
 .chamados-equipamento { color: #596882; font-size: 12px; }
@@ -66,7 +68,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                             <td><?=$h($ca['situacao'])?></td>
                             <td>
                                 <div class="chamados-acoes">
-                                    <a class="btn btn-az-primary btn-icone" href="/chamados_interagir?id=<?=(int)$ca['id']?>"
+                                    <a class="btn btn-icone btn-interagir" href="/chamados_interagir?id=<?=(int)$ca['id']?>"
                                        title="Interagir" aria-label="Interagir com o chamado <?=(int)$ca['id']?>">
                                         <?=iconeInterface('conversa', 'inline')?>
                                     </a>
