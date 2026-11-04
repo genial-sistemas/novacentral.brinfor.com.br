@@ -64,7 +64,7 @@
         <div class="col-sm-6 col-lg-4 col-xl-3 mg-t-20 mg-sm-t-0">
             <div class="card card-body card-dashboard-fifteen">
                 <h1><?= $chamados_total ?></h1>
-                <label class="tx-primary">Chamados de mês.</label>
+                <label class="tx-primary">Chamados do Período</label>
                 <span></span>
             </div>
         </div>
