@@ -32,8 +32,10 @@ include 'header.php'
                                 <?php foreach($contratos_outsourcing_equipamentos as $co): ?>
                                     <?php 
                                         $codigo = str_pad($co['codigo'], 4, "0", STR_PAD_LEFT); 
-                                        $contato_info = obterNomeContato($co['contato']) ?: [];
-                                        $contato_nome = $contato_info["nome"] ?? '';
+                                        // Contato vem do mapa carregado no controller; se o contato estiver inativo,
+                                        // usa o nome que já veio junto com o equipamento.
+                                        $contato_info = $contatos_por_id[(int)($co['contato'] ?? 0)] ?? [];
+                                        $contato_nome = $contato_info["nome"] ?? ($co['nome_contato'] ?? '');
                                         $contato_email = $contato_info["email"] ?? '';
                                         $contato_telefone = $contato_info["cel"] ?? '';
                                         $numero_serie = trim((string)($co['sn'] ?? ''));

@@ -189,6 +189,18 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'abrir_chamado') {
     }
 }
 
+// Contatos da empresa em UMA chamada à API (antes era uma chamada por equipamento,
+// e uma falha ou demora em qualquer uma interrompia a página no campo de equipamento).
+$contatos_por_id = [];
+try {
+    require_once __DIR__ . '/../models/contato.php';
+    foreach (obterContatos() as $contato) {
+        $contatos_por_id[(int)$contato['id']] = $contato;
+    }
+} catch (Throwable $e) {
+    error_log('Abrir chamado: falha ao carregar contatos: ' . $e->getMessage());
+}
+
 function validaNomeContato($contato_nome) {
     
     if($contato_nome == NULL){
