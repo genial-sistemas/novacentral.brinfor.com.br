@@ -53,6 +53,8 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                 <span class="valor">#<span data-conversa="numero"><?=$h($chamado['id'])?></span></span>
                 <span class="rotulo">Tipo Chamado</span>
                 <span class="valor" data-conversa="tipo"><?=$h($chamado['tipo_contrato_nome'] ?? '')?></span>
+                <span class="rotulo">Tipo Atendimento</span>
+                <span class="valor" data-conversa="atendimento">…</span>
                 <span class="rotulo">Aberto por</span>
                 <span class="valor"><?=$h(trim((string)($chamado['nome'] ?? '')) !== '' ? $chamado['nome'] : 'Não informado')?></span>
                 <span class="rotulo">Técnico responsável</span>

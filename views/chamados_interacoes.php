@@ -40,6 +40,8 @@ include 'header.php'
                 <dd>#<?=$h($chamado['id'])?></dd>
                 <dt>Tipo Chamado</dt>
                 <dd data-conversa="tipo"><?=$h($chamado['tipo_contrato'])?></dd>
+                <dt>Tipo Atendimento</dt>
+                <dd data-conversa="atendimento">…</dd>
                 <dt>Aberto por</dt>
                 <dd><?=$h(trim((string)($chamado['nome'] ?? '')) !== '' ? $chamado['nome'] : 'Não informado')?></dd>
                 <dt>Técnico responsável</dt>

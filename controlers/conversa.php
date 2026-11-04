@@ -118,6 +118,7 @@ try {
         'chamado' => [
             'id' => (int)$chamado['id'],
             'tipo_contrato' => (string)($chamado['tipo_contrato'] ?? ''),
+            'tipo_atendimento' => trim((string)($chamado['tipo_atendimento'] ?? '')) !== '' ? $chamado['tipo_atendimento'] : 'Não informado',
             'situacao' => (string)($chamado['situacao'] ?? ''),
             'id_situacao' => (int)$chamado['id_situacao'],
             'encerrado' => (int)$chamado['id_situacao'] === 7,
