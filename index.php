@@ -124,6 +124,13 @@
         case 'equipamentos_locacao':
             include 'controlers/equipamentos_locacao.php';
             break;
+        // Financeiro (só com login: não estão na lista de páginas públicas)
+        case 'financeiro_notas':
+            include 'controlers/financeiro_notas.php';
+            break;
+        case 'financeiro_nota_arquivo':
+            include 'controlers/financeiro_nota_arquivo.php';
+            break;
         // Rotas do módulo de funcionários: formulário de cadastro/edição e listagem.
         case 'funcionarios_cadastrar':
             include 'controlers/funcionarios_cadastrar.php';

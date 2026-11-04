@@ -61,6 +61,12 @@ $contratosLocacao = obterContratosLocacaoCliente(
                     <a href="/equipamentos_locacao" class="nav-link"><?=iconeInterface('equipamentos', 'menu')?>Locação</a>
                 </li>
             <?php endif; ?>
+            <li class="nav-item <?=($menu=='Financeiro'?'active show':'')?>">
+                <a href="/financeiro_notas" class="nav-link with-sub"><?=iconeInterface('financeiro', 'menu')?>Financeiro</a>
+                <nav class="nav-sub">
+                    <a href="/financeiro_notas" class="nav-sub-link <?=($pagina=='Notas Fiscais'?'active':'')?>">Notas Fiscais</a>
+                </nav>
+            </li>
             <li class="nav-item <?=($menu=='Relatórios'?'active show':'')?>">
                 <a href="/relatorio_periodo" class="nav-link with-sub"><?=iconeInterface('relatorios', 'menu')?>Relatórios</a>
                 <nav class="nav-sub">

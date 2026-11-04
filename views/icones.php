@@ -22,7 +22,9 @@ function iconeInterface($nome, $contexto = 'inline')
         'sair' => '<path d="M10 17l5-5-5-5m5 5H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/>',
         'voltar' => '<path d="m15 18-6-6 6-6M9 12h12"/>',
         'conversa' => '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
-        'encerrar' => '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'
+        'encerrar' => '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+        // Cifrão dentro de um círculo: menu Financeiro.
+        'financeiro' => '<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5V8m0 8v1.5"/>'
     );
 
     if (!isset($caminhos[$nome])) {
