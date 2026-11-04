@@ -125,14 +125,9 @@ try {
         'ultima_interacao' => $ultima ? date('d/m/Y', strtotime($ultima['data'])) . ' às ' . substr($ultima['hora'], 0, 5) : '',
         'eventos' => array_map('conversaEvento', $estado['eventos'] ?: []),
     ];
-    if ($desde === 0) {
-        // Rótulo do equipamento muda raramente: só na primeira carga.
-        $resposta['equipamento'] = obterRotuloEquipamentoChamado(
-            $chamado['id_tipo_contrato'],
-            $chamado['id_contrato'],
-            (int)$estado['id_equipamento']
-        );
-    }
+    // Detalhes (domínio, equipamento com nº de série etc.) com a mesma regra da lista de chamados.
+    $detalhes = trim((string)($estado['detalhes'] ?? ''), " -");
+    $resposta['equipamento'] = $detalhes !== '' ? $detalhes : '-';
     conversaResponder(200, $resposta);
 
 } catch (ErpApiErro $e) {

@@ -63,7 +63,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
             <div>
                 <span class="rotulo">Data abertura</span>
                 <span class="valor" data-conversa="abertura"><?=$h(!empty($chamado['data_abertura']) ? date('d/m/Y', strtotime($chamado['data_abertura'])) : '')?></span>
-                <span class="rotulo">Equipamento</span>
+                <span class="rotulo">Detalhes</span>
                 <span class="valor" data-conversa="equipamento">…</span>
             </div>
         </section>

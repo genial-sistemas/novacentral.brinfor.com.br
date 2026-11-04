@@ -42,7 +42,7 @@ include 'header.php'
             <dl>
                 <dt>Data abertura</dt>
                 <dd><?=$h($data_abertura)?></dd>
-                <dt>Equipamento</dt>
+                <dt>Detalhes</dt>
                 <dd data-conversa="equipamento">…</dd>
             </dl>
             <dl>
