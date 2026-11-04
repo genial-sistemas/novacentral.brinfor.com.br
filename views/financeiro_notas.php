@@ -62,11 +62,11 @@ include __DIR__ . '/partials/botoes_icone.php';
                     <td>
                         <?php if (!empty($nota['tem_arquivo']) && $numero !== ''): ?>
                             <div class="chamados-acoes">
-                                <a class="btn btn-icone btn-pdf" href="/financeiro_nota_arquivo?id=<?=(int)$nota['id']?>&amp;formato=pdf"
+                                <a class="btn btn-icone btn-pdf" href="/financeiro_nota_arquivo?id=<?=(int)$nota['id']?>&amp;formato=pdf&amp;numero=<?=rawurlencode((string)$nota['numero_nfs'])?>"
                                    target="_blank" rel="noopener" title="Abrir PDF" aria-label="Abrir PDF da nota <?=$h($numero)?>">
                                     <?=iconeInterface('documentacao', 'inline')?>
                                 </a>
-                                <a class="btn btn-icone btn-xml" href="/financeiro_nota_arquivo?id=<?=(int)$nota['id']?>&amp;formato=xml"
+                                <a class="btn btn-icone btn-xml" href="/financeiro_nota_arquivo?id=<?=(int)$nota['id']?>&amp;formato=xml&amp;numero=<?=rawurlencode((string)$nota['numero_nfs'])?>"
                                    title="Baixar XML" aria-label="Baixar XML da nota <?=$h($numero)?>">XML</a>
                             </div>
                         <?php else: ?>

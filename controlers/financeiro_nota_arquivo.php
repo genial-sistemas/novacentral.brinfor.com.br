@@ -16,7 +16,9 @@ try {
     exit;
 }
 
-$nome = 'Nota Fiscal BRInfor ' . $idNota . '.' . $formato;
+// Nome do arquivo usa o número da nota (só dígitos); sem número, cai no id.
+$numeroNota = preg_replace('/\D/', '', (string)($_GET['numero'] ?? ''));
+$nome = 'Nota Fiscal BRInfor ' . ($numeroNota !== '' ? $numeroNota : $idNota) . '.' . $formato;
 header('Content-Type: ' . ($formato === 'xml' ? 'application/xml' : 'application/pdf'));
 header('Content-Disposition: ' . ($formato === 'xml' ? 'attachment' : 'inline') . "; filename*=UTF-8''" . rawurlencode($nome));
 header('Content-Length: ' . strlen($arquivo['conteudo']));
