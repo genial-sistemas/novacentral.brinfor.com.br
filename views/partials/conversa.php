@@ -14,7 +14,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
 ?>
 <style>
 .conversa { display: flex; flex-direction: column; height: 100%; min-height: 420px; background: #fff; border: 1px solid #e3e7ed; border-radius: 8px; overflow: hidden; }
-.conversa-lista { flex: 1; overflow-y: auto; padding: 16px; background: #f5f7fb; scroll-behavior: smooth; }
+.conversa-lista { flex: 1; overflow-y: auto; padding: 16px; background: #f5f7fb; }
 .conversa-carregando, .conversa-vazia { text-align: center; color: #7987a1; padding: 30px 0; font-size: 14px; }
 .conversa-data { text-align: center; margin: 14px 0 10px; }
 .conversa-data span { background: #e3e7ed; color: #596882; font-size: 11px; padding: 3px 10px; border-radius: 10px; }
@@ -102,8 +102,14 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
     function pertoDoFim() {
         return lista.scrollHeight - lista.scrollTop - lista.clientHeight < 80;
     }
+    // Rola até a última mensagem depois que o navegador termina de montar a lista
+    // (antes a rolagem podia rodar com a lista ainda sem o tamanho final e parar no meio).
     function rolarParaFim() {
         lista.scrollTop = lista.scrollHeight;
+        requestAnimationFrame(function () {
+            lista.scrollTop = lista.scrollHeight;
+            setTimeout(function () { lista.scrollTop = lista.scrollHeight; }, 150);
+        });
     }
     function mostrarErro(msg) {
         erroBox.textContent = msg || '';
@@ -174,7 +180,6 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
         preencher('numero', c.id);
         if (dados.equipamento !== undefined) preencher('equipamento', dados.equipamento);
 
-        var estavaNoFim = pertoDoFim();
         var eventos = dados.eventos || [];
         for (var i = 0; i < eventos.length; i++) adicionarEvento(eventos[i]);
 
@@ -193,8 +198,8 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
             if (v) v.remove();
         }
 
-        // Só desce sozinho se o cliente já estava no fim (não atrapalha quem está lendo o histórico).
-        if (eventos.length && (rolarSempre || estavaNoFim)) rolarParaFim();
+        // Sempre mostra a última mensagem: ao abrir o chamado e quando chega mensagem nova.
+        if (eventos.length || rolarSempre) rolarParaFim();
 
         // Chamado encerrado: mostra o histórico completo, mas não deixa responder.
         encerradoBox.hidden = !c.encerrado;
