@@ -61,7 +61,7 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'detalhes') {
 	include 'views/chamados_interacoes.php';
 
 }else{
-    $itens_por_pagina = 10;
+    $itens_por_pagina = 30;
     $total_chamados = contarChamadosFechados($contratos);
     $total_paginas = max(1, (int)ceil($total_chamados / $itens_por_pagina));
     $pagina_atual = filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT);

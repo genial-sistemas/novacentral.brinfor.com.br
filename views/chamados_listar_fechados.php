@@ -66,10 +66,9 @@ include __DIR__ . '/partials/botoes_icone.php'; ?>
         </table>
     </div>
     <?php if ($total_paginas > 1):
-        // Números compactos: primeira, última e duas vizinhas da página atual, com "…" entre os saltos.
-        $paginas_visiveis = array_unique(array_filter([1, $pagina_atual - 2, $pagina_atual - 1, $pagina_atual, $pagina_atual + 1, $pagina_atual + 2, $total_paginas],
-            static function ($n) use ($total_paginas) { return $n >= 1 && $n <= $total_paginas; }));
-        sort($paginas_visiveis);
+        // Até 10 números de página, numa janela que acompanha a página atual.
+        $inicio_janela = max(1, min($pagina_atual - 4, $total_paginas - 9));
+        $paginas_visiveis = range($inicio_janela, min($total_paginas, $inicio_janela + 9));
         $link_pagina = static function ($n) { return '/chamados_listar_fechados?pagina=' . (int)$n; };
     ?>
         <nav class="mt-4" aria-label="Paginação dos chamados fechados">
