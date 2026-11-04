@@ -200,10 +200,65 @@
     flex-wrap: nowrap;
 }
 
+/* Paginação no laranja do site (o padrão do tema era roxo) */
 .chamados-fechados-pagination {
     flex-wrap: wrap;
     max-width: 100%;
-    row-gap: 4px;
+    gap: 4px;
+    align-items: center;
+}
+
+.chamados-fechados-pagination .page-item .page-link {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cdd4e0;
+    border-radius: 6px !important;
+    margin: 0;
+    background: #fff;
+    color: #596882;
+    font-size: 13px;
+    line-height: 1;
+    box-shadow: none;
+}
+
+.chamados-fechados-pagination .page-item .page-link:hover,
+.chamados-fechados-pagination .page-item .page-link:focus {
+    background: #fff4ec;
+    border-color: #fa9758;
+    color: #fa9758;
+    box-shadow: none;
+}
+
+.chamados-fechados-pagination .page-item.active .page-link {
+    background: #fa9758;
+    border-color: #fa9758;
+    color: #fff;
+    font-weight: 600;
+}
+
+.chamados-fechados-pagination .page-item.disabled .page-link {
+    background: #f5f7fb;
+    border-color: #e3e7ed;
+    color: #b4bdce;
+}
+
+.chamados-fechados-pagination .page-item.reticencias .page-link {
+    border: 0;
+    background: transparent;
+    min-width: 20px;
+    padding: 0;
+}
+
+.chamados-fechados-pagination .page-nav {
+    gap: 6px;
+}
+
+.chamados-fechados-paginacao-info {
+    font-size: 12px;
 }
 
 #chamados_fechados {
