@@ -25,6 +25,12 @@ function erp_api_config(): array {
  */
 function erp_api(string $acao, array $params = []): mixed {
     $config = erp_api_config();
+    if (!function_exists('curl_init')) {
+        throw new ErpApiErro('A extensão cURL do PHP não está ativa neste servidor.');
+    }
+    if (empty($config['url']) || empty($config['chave'])) {
+        throw new ErpApiErro('models/erp_config.php sem "url" ou "chave".');
+    }
     $corpo = json_encode(['acao' => $acao, 'params' => $params], JSON_UNESCAPED_UNICODE);
 
     $ch = curl_init($config['url']);
@@ -49,7 +55,7 @@ function erp_api(string $acao, array $params = []): mixed {
 
     if ($resposta === false) {
         error_log("API ERP [$acao] falha de conexão: $erroCurl");
-        throw new ErpApiErro('Não foi possível conectar à API do ERP.');
+        throw new ErpApiErro('Não foi possível conectar à API do ERP (' . $erroCurl . ').');
     }
 
     $json = json_decode($resposta, true);

@@ -11,12 +11,25 @@ if (isset($_POST['acao']) && $_POST['acao'] == 'logar') {
     $usuario = htmlspecialchars($_POST['usuario']);
     $senha = htmlspecialchars($_POST['senha']);
 
-    $res = obterUsuario($usuario, $senha);
+    try {
+        $res = obterUsuario($usuario, $senha);
+        if (sizeof($res)) {
+            $idPessoa = $res[0]['id_pessoa'];
+            $nomeCliente = obterNome2($idPessoa);
+            $contratosUsuario = obterContratosUsuario($idPessoa);
+        }
+    } catch (Throwable $e) {
+        // A API do ERP falhou: mostra o motivo (sem dados sensíveis) em vez de página em branco.
+        error_log('Login: falha ao consultar a API do ERP: ' . get_class($e) . ': ' . $e->getMessage());
+        $_SESSION['erro_api_login'] = $e instanceof ErpApiErro ? $e->getMessage() : 'erro interno (' . get_class($e) . ')';
+        header('location:login?erro=api');
+        exit;
+    }
 
     if (sizeof($res)) {
-        $_SESSION['id_pessoa'] = $res[0]['id_pessoa'];
-        $_SESSION['nome_cliente'] = obterNome2($_SESSION['id_pessoa']);
-        $_SESSION['contratos'] = obterContratosUsuario($_SESSION['id_pessoa']);
+        $_SESSION['id_pessoa'] = $idPessoa;
+        $_SESSION['nome_cliente'] = $nomeCliente;
+        $_SESSION['contratos'] = $contratosUsuario;
         //$_SESSION['nome_cliente'] = obterNomeCliente($_SESSION['contratos'][0]);
         header('location:dashboard');
         exit;
