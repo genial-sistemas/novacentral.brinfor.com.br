@@ -1,5 +1,6 @@
 <?php
-include 'header.php'; ?>
+include 'header.php';
+include __DIR__ . '/partials/botoes_icone.php'; ?>
 
 <div class="az-content-header d-block d-md-flex">
     <div>
@@ -73,12 +74,7 @@ include 'header.php'; ?>
                                 <td><?=htmlspecialchars((string)($c['nome_pessoa'] ?? 'Não informado'), ENT_QUOTES, 'UTF-8')?></td>
                                 <td><?=htmlspecialchars(stripslashes((string)($chamados_primeira_interacao[$k]['descricao'] ?? '')), ENT_QUOTES, 'UTF-8')?></td>
                                 <td class="text-center text-nowrap">
-                                    <form action="/relatorio_periodo" method="post" class="d-inline">
-                                        <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$c['id'], ENT_QUOTES, 'UTF-8')?>">
-                                        <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="detalhes" title="Detalhes" aria-label="Ver detalhes do chamado">
-                                            <?=iconeInterface('detalhes', 'acao')?>
-                                        </button>
-                                    </form>
+                                    <?php $id_chamado_botoes = (int)$c['id']; include __DIR__ . '/partials/botoes_chamado_relatorio.php'; ?>
                                 </td>
                             </tr>
                         <?php
@@ -91,6 +87,7 @@ include 'header.php'; ?>
             </div>
         </div>
     </div>
+    <?php include __DIR__ . '/partials/modal_conversa.php'; ?>
     <?php endif; ?>
 </div><!-- az-content-body -->
 

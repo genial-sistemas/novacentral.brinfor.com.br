@@ -113,20 +113,7 @@
                         <td class="relatorio-equipamento-descricao"><?=nl2br($h(stripslashes((string)($chamado['motivo'] ?? ''))))?></td>
                         <td class="text-center"><?=$h(($chamado['situacao'] ?? '') ?: '-')?></td>
                         <td>
-                            <div class="chamados-acoes">
-                                <button type="button" class="btn btn-icone btn-interagir" data-abrir-conversa="<?=(int)$chamado['id']?>"
-                                        title="Ver conversa" aria-label="Ver a conversa do chamado <?=(int)$chamado['id']?>">
-                                    <?=iconeInterface('conversa', 'inline')?>
-                                </button>
-                                <form action="/chamados_listar_fechados" method="post"
-                                      onsubmit="return confirm('Reabrir o chamado #<?=(int)$chamado['id']?>?');">
-                                    <input type="hidden" name="chamado_id" value="<?=(int)$chamado['id']?>">
-                                    <button type="submit" class="btn btn-icone btn-reabrir" name="acao" value="reabrir_chamado"
-                                            title="Reabrir chamado" aria-label="Reabrir o chamado <?=(int)$chamado['id']?>">
-                                        <?=iconeInterface('reabrir', 'inline')?>
-                                    </button>
-                                </form>
-                            </div>
+                            <?php $id_chamado_botoes = (int)$chamado['id']; include __DIR__ . '/partials/botoes_chamado_relatorio.php'; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -138,33 +125,7 @@
             </tbody>
         </table>
     </div>
-    <div class="modal fade" id="modalConversa" tabindex="-1" role="dialog" aria-labelledby="modalConversaTitulo" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalConversaTitulo">Chamado</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="modal-body p-0">
-                    <iframe id="modalConversaFrame" title="Conversa do chamado" style="width:100%;height:70vh;border:0;display:block"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script>
-    // Conversa do chamado num modal, para continuar no relatório.
-    document.querySelectorAll('[data-abrir-conversa]').forEach(function (botao) {
-        botao.addEventListener('click', function () {
-            var id = botao.dataset.abrirConversa;
-            document.getElementById('modalConversaTitulo').textContent = 'Chamado #' + id;
-            document.getElementById('modalConversaFrame').src = '/chamados_conversa_modal?id=' + encodeURIComponent(id);
-            $('#modalConversa').modal('show');
-        });
-    });
-    $('#modalConversa').on('hidden.bs.modal', function () {
-        document.getElementById('modalConversaFrame').src = 'about:blank';
-    });
-    </script>
+    <?php include __DIR__ . '/partials/modal_conversa.php'; ?>
     <?php if ($total_paginas > 1):
         $inicio_janela = max(1, min($pagina_atual - 4, $total_paginas - 9));
         $paginas_visiveis = range($inicio_janela, min($total_paginas, $inicio_janela + 9));
