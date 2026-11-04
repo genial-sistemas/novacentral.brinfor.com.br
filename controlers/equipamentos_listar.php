@@ -26,4 +26,7 @@ $equipamentos = obterEquipamentosCliente(
     $dbh
 );
 
+// Funcionários ativos para o modal de edição.
+$contatos = obterContatosAtivosEquipamentos($_SESSION['id_pessoa'], $dbh);
+
 include __DIR__ . '/../views/equipamentos_listar.php';

@@ -58,8 +58,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['acao'] ?? null)
         $funcionario['cel'],
         $funcionario['email']
     )) {
+        if (($_POST['retorno'] ?? '') === 'modal') {
+            header('Location: /funcionarios_listar?editado=1');
+            exit;
+        }
         $_POST['acao'] = 'funcionario_editar';
     } else {
+        if (($_POST['retorno'] ?? '') === 'modal') {
+            header('Location: /funcionarios_listar?erro_editar=1');
+            exit;
+        }
         $tipo_mensagem = 'Error';
         $mensagem = 'Não foi possível editar o funcionário. Confira os dados e tente novamente.';
         $_POST['acao'] = null;

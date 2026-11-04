@@ -14,6 +14,8 @@ $messages = [];
 
 // A consulta restringe o resultado aos funcionários ativos do cliente da sessão.
 $contatos = obterContatos();
+// Cargos para o modal de edição.
+$cargos = obterCargos();
 
 // A view monta a tabela de funcionários e as ações de editar/apagar.
 include __DIR__ . '/../views/funcionarios_listar.php';

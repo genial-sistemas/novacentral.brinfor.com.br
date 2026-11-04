@@ -1,3 +1,4 @@
+<?php include_once __DIR__ . '/partials/botoes_icone.php'; ?>
 <?php if (!empty($mensagemEquipamento)): ?>
     <div class="alert alert-<?=($mensagemEquipamento['tipo'] === 'success' ? 'success' : 'danger')?>" role="alert">
         <?=htmlspecialchars($mensagemEquipamento['texto'], ENT_QUOTES, 'UTF-8')?>
@@ -50,6 +51,12 @@
                                 <div class="funcionario-acoes-grupo">
                                     <a
                                         href="/equipamentos_editar?id=<?=urlencode((string)$equipamento['id'])?>"
+                                        data-editar-equipamento
+                                        data-id="<?=(int)$equipamento['id']?>"
+                                        data-codigo="<?=htmlspecialchars((string)$equipamento['codigo'], ENT_QUOTES, 'UTF-8')?>"
+                                        data-tipo="<?=htmlspecialchars((string)($equipamento['nome_tipo'] ?? ''), ENT_QUOTES, 'UTF-8')?>"
+                                        data-modelo="<?=htmlspecialchars((string)($equipamento['modelo'] ?? ''), ENT_QUOTES, 'UTF-8')?>"
+                                        data-contato="<?=htmlspecialchars((string)($equipamento['contato'] ?? ''), ENT_QUOTES, 'UTF-8')?>"
                                         class="funcionario-acao funcionario-acao-editar"
                                         aria-label="Editar equipamento <?=htmlspecialchars((string)$equipamento['codigo'], ENT_QUOTES, 'UTF-8')?>"
                                         title="Editar"
@@ -73,12 +80,17 @@
                             </td>
                         <?php else: ?>
                             <td class="funcionario-acoes">
-                                <form action="/equipamentos_status" method="post" class="funcionario-acao-form" onsubmit="return confirm('Deseja reativar este equipamento?');">
-                                    <input type="hidden" name="csrf" value="<?=htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8')?>">
-                                    <input type="hidden" name="id" value="<?=htmlspecialchars((string)$equipamento['id'], ENT_QUOTES, 'UTF-8')?>">
-                                    <input type="hidden" name="acao" value="reativar">
-                                    <button type="submit" class="btn btn-sm btn-az-primary">Reativar</button>
-                                </form>
+                                <div class="chamados-acoes">
+                                    <form action="/equipamentos_status" method="post" onsubmit="return confirm('Deseja reativar este equipamento?');">
+                                        <input type="hidden" name="csrf" value="<?=htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8')?>">
+                                        <input type="hidden" name="id" value="<?=htmlspecialchars((string)$equipamento['id'], ENT_QUOTES, 'UTF-8')?>">
+                                        <input type="hidden" name="acao" value="reativar">
+                                        <button type="submit" class="btn btn-icone btn-reabrir"
+                                                title="Reativar equipamento" aria-label="Reativar o equipamento <?=htmlspecialchars((string)$equipamento['codigo'], ENT_QUOTES, 'UTF-8')?>">
+                                            <?=iconeInterface('reabrir', 'inline')?>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         <?php endif; ?>
                     </tr>
