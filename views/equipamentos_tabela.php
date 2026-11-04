@@ -45,7 +45,7 @@
                         <td><?=htmlspecialchars((string)($equipamento['nome_tipo'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                         <td><?=htmlspecialchars((string)($equipamento['descricao'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
                         <td><?=htmlspecialchars((string)($equipamento['modelo'] ?? ''), ENT_QUOTES, 'UTF-8')?></td>
-                        <td><?=htmlspecialchars($funcionario, ENT_QUOTES, 'UTF-8')?></td>
+                        <td><?=$funcionario !== '' ? htmlspecialchars($funcionario, ENT_QUOTES, 'UTF-8') : '<span class="text-muted">Sem Funcionário Vinculado</span>'?></td>
                         <?php if ($pagina === 'Ativos'): ?>
                             <td class="funcionario-acoes">
                                 <div class="funcionario-acoes-grupo">
