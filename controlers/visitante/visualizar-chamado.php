@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../models/anexo.php';
 // visualizar-chamado.php
 // Este arquivo deve ser salvo na mesma pasta do formulário
 
@@ -330,16 +331,15 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
         $extensao = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
 
         // Extensão E conteúdo precisam estar na lista. Antes era "OU", e um .php enviado como image/png passava.
-        $tipo_permitido = in_array($extensao, $extensoes_permitidas, true)
-            && in_array($tipo_mime, $tipos_permitidos, true)
-            && stripos($tipo_mime, 'php') === false;
+        // Só imagem e PDF (regra única em models/anexo.php).
+        $tipo_permitido = anexoTipoValido($extensao, $tipo_mime);
         $limite_php_upload = tamanhoIniParaBytes(ini_get('upload_max_filesize'));
         $tamanho_maximo = min(10 * 1024 * 1024, $limite_php_upload);
 
         if ($tamanho > $tamanho_maximo) {
             $arquivo_erro = 'Arquivo muito grande. Limite atual por arquivo: ' . formatarTamanho($tamanho_maximo) . '.';
         } elseif (!$tipo_permitido) {
-            $arquivo_erro = 'Tipo de arquivo não permitido.';
+            $arquivo_erro = 'Envie apenas imagem (JPG, PNG, GIF, WebP) ou PDF.';
         } else {
             $idBase = $proximo_id_chamado;
             $arquivo_nome_renomeado = renomearArquivo($idBase, $extensao);
@@ -434,8 +434,7 @@ function salvarArquivoChamado($arquivo_temp, $id_chamado, $nome_original)
 
     // Segunda barreira: só grava extensões da lista fechada, nunca .php/.phtml/.phar/.htaccess.
     $extensao = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
-    $permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'zip', 'rar', '7z'];
-    if (!in_array($extensao, $permitidas, true)) {
+    if (!in_array($extensao, anexoExtensoesPermitidas(), true)) {
         return ['status' => 'erro', 'mensagem' => 'Tipo de arquivo não permitido.'];
     }
     $timestamp = date('Ymd_His');
@@ -445,6 +444,9 @@ function salvarArquivoChamado($arquivo_temp, $id_chamado, $nome_original)
 
     if (move_uploaded_file($arquivo_temp, $caminho_completo)) {
         chmod($caminho_completo, 0644);
+        if (function_exists('finfo_open')) {
+            anexoCompactarImagem($caminho_completo, (string)finfo_file(finfo_open(FILEINFO_MIME_TYPE), $caminho_completo));
+        }
         error_log("✅ Arquivo salvo: " . $caminho_completo);
         return [
             'status' => 'sucesso',

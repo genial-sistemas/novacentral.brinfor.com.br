@@ -42,6 +42,12 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
 .conversa-btn:disabled { opacity: .6; cursor: default; }
 .conversa-arquivo { display: inline-flex; align-items: center; gap: 6px; background: #eef0f4; border-radius: 12px; padding: 3px 10px; font-size: 12px; }
 .conversa-arquivo button { border: 0; background: none; font-size: 14px; line-height: 1; cursor: pointer; color: #596882; }
+.conversa-visor { position: fixed; inset: 0; z-index: 2000; background: rgba(15,20,30,.85); display: flex; align-items: center; justify-content: center; padding: 40px 16px 16px; }
+.conversa-visor[hidden] { display: none; }
+.conversa-visor img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; background: #fff; }
+.conversa-visor-barra { position: absolute; top: 8px; right: 12px; display: flex; gap: 12px; align-items: center; }
+.conversa-visor-barra a, .conversa-visor-barra button { color: #fff; background: none; border: 0; font-size: 14px; cursor: pointer; text-decoration: underline; }
+.conversa-visor-barra button { font-size: 28px; line-height: 1; text-decoration: none; }
 @media (max-width: 576px) { .conversa-balao { max-width: 88%; } }
 </style>
 
@@ -66,11 +72,18 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                 <button type="button" id="conversa-arquivo-remover" aria-label="Remover anexo">×</button>
             </span>
             <input type="file" id="conversa-input-arquivo" hidden
-                   accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
+                   accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,image/jpeg,image/png,image/gif,image/webp,application/pdf">
             <button type="button" class="conversa-btn anexar" id="conversa-anexar">📎 Anexar</button>
             <button type="submit" class="conversa-btn enviar" id="conversa-enviar">Enviar</button>
         </div>
     </form>
+    <div class="conversa-visor" id="conversa-visor" role="dialog" aria-modal="true" aria-label="Imagem anexada" hidden>
+        <div class="conversa-visor-barra">
+            <a id="conversa-visor-abrir" href="#" target="_blank" rel="noopener noreferrer">Abrir original</a>
+            <button type="button" id="conversa-visor-fechar" aria-label="Fechar">&times;</button>
+        </div>
+        <img id="conversa-visor-img" alt="">
+    </div>
 </div>
 
 <script>
@@ -91,7 +104,21 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
 
     var ID = raiz.dataset.id, SEGURANCA = raiz.dataset.seguranca, TOKEN = raiz.dataset.token;
     var INTERVALO = 5000, TAMANHO_MAXIMO = 10 * 1024 * 1024;
-    var EXTENSOES = ['jpg','jpeg','png','gif','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv','zip','rar','7z'];
+    // ---------- visualizador de imagem ----------
+    var visor = document.getElementById('conversa-visor');
+    var visorImg = document.getElementById('conversa-visor-img');
+    function abrirImagem(url, nome) {
+        visorImg.src = url;
+        visorImg.alt = nome || 'Anexo';
+        document.getElementById('conversa-visor-abrir').href = url;
+        visor.hidden = false;
+    }
+    function fecharImagem() { visor.hidden = true; visorImg.removeAttribute('src'); }
+    visor.addEventListener('click', function (e) { if (e.target === visor) fecharImagem(); });
+    document.getElementById('conversa-visor-fechar').addEventListener('click', fecharImagem);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !visor.hidden) fecharImagem(); });
+
+    var EXTENSOES = ['jpg','jpeg','png','gif','webp','pdf'];
 
     var ultimoId = 0, idsExibidos = {}, ultimaData = '', timer = null, buscando = false, enviando = false, primeiraCarga = true;
 
@@ -155,6 +182,13 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
             link.textContent = '📎 ' + (ev.anexo_nome || 'Abrir anexo');
+            // Imagem abre no visualizador da página; PDF (e anexos antigos) em nova janela.
+            if (/\.(jpe?g|png|gif|webp)$/i.test(String(ev.anexo).split('?')[0])) {
+                link.addEventListener('click', function (evento) {
+                    evento.preventDefault();
+                    abrirImagem(ev.anexo, ev.anexo_nome);
+                });
+            }
             balao.appendChild(link);
         } else {
             balao.appendChild(document.createTextNode(ev.texto || ''));
@@ -258,7 +292,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
         var f = inputArquivo.files[0];
         if (!f) { limparArquivo(); return; }
         var ext = (f.name.split('.').pop() || '').toLowerCase();
-        if (EXTENSOES.indexOf(ext) === -1) { mostrarErro('Tipo de arquivo não permitido.'); limparArquivo(); return; }
+        if (EXTENSOES.indexOf(ext) === -1) { mostrarErro('Envie apenas imagem (JPG, PNG, GIF, WebP) ou PDF.'); limparArquivo(); return; }
         if (f.size > TAMANHO_MAXIMO) { mostrarErro('O arquivo deve ter até 10 MB.'); limparArquivo(); return; }
         mostrarErro('');
         nomeArquivo.textContent = '📎 ' + f.name;
