@@ -14,25 +14,39 @@ $data_abertura = $data_abertura ?? date('d/m/Y', strtotime($chamado['data_abertu
 include 'header.php'
 ?>
 <div class="az-content-body chat-interacoes-page">
-    <div class="row row-sm chat-interacoes-info">
-        <div class="col-md-12">
-            <div class="card card-body card-dashboard-fifteen">
-                <div class="row mg-b-10">
-                    <div class="col-md-4">
-                        <b>Chamado</b>: <?=htmlspecialchars((string)$chamado['id'], ENT_QUOTES, 'UTF-8')?> (<span data-conversa="tipo"><?=htmlspecialchars((string)$chamado['tipo_contrato'], ENT_QUOTES, 'UTF-8')?></span>)<br />
-                        <b>Técnico responsável</b>: <span data-conversa="tecnico">…</span>
-                    </div>
-                    <div class="col-md-4">
-                        <b>Última interação</b>: <span data-conversa="ultima">…</span><br />
-                        <b>Status</b>: <span data-conversa="situacao"><?=htmlspecialchars((string)$chamado['situacao'], ENT_QUOTES, 'UTF-8')?></span>
-                    </div>
-                    <div class="col-md-4">
-                        <b>Data abertura</b>: <?=htmlspecialchars($data_abertura, ENT_QUOTES, 'UTF-8')?><br />
-                        <b>Equipamento</b>: <span data-conversa="equipamento">…</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <?php $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }; ?>
+    <style>
+    /* Cartão próprio: o tema (card-dashboard-fifteen) transformava cada <span> em bloco. */
+    .chamado-info { background: #fff; border: 1px solid #e3e7ed; border-radius: 8px; padding: 14px 20px; margin-bottom: 14px;
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px; }
+    .chamado-info dt { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: #7987a1; margin: 0; }
+    .chamado-info dd { font-size: 14px; color: #1c273c; margin: 0 0 6px; overflow-wrap: anywhere; }
+    .chamado-info .situacao-etiqueta { display: inline-block; background: #fff4ec; color: #d9661f; border-radius: 10px; padding: 1px 10px; font-size: 12px; font-weight: 600; }
+    .chat-interacoes-coluna > .conversa { flex: 1 1 auto; width: 100%; min-width: 0; }
+    @media (max-width: 767.98px) { .chamado-info { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 479.98px) { .chamado-info { grid-template-columns: 1fr; } }
+    </style>
+    <div class="chat-interacoes-info">
+        <section class="chamado-info" aria-label="Dados do chamado">
+            <dl>
+                <dt>Chamado</dt>
+                <dd>#<?=$h($chamado['id'])?> · <span data-conversa="tipo"><?=$h($chamado['tipo_contrato'])?></span></dd>
+                <dt>Técnico responsável</dt>
+                <dd data-conversa="tecnico">…</dd>
+            </dl>
+            <dl>
+                <dt>Última interação</dt>
+                <dd data-conversa="ultima">…</dd>
+                <dt>Status</dt>
+                <dd><span class="situacao-etiqueta" data-conversa="situacao"><?=$h($chamado['situacao'])?></span></dd>
+            </dl>
+            <dl>
+                <dt>Data abertura</dt>
+                <dd><?=$h($data_abertura)?></dd>
+                <dt>Equipamento / detalhes</dt>
+                <dd data-conversa="equipamento">…</dd>
+            </dl>
+        </section>
     </div>
     <div class="row row-sm chat-interacoes-conversa">
         <div class="col-md-12 chat-interacoes-coluna" style="min-height: 60vh;">
