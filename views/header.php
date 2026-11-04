@@ -21,9 +21,9 @@ $nome_cliente_exibicao = htmlspecialchars(
     <link rel="stylesheet" href="views/css/azia.css">  
     <!-- Chart.js -->
     <link rel="stylesheet" href="views/css/chart.css">
-    <!-- Customizações -->
-    <link rel="stylesheet" href="views/css/custom.css">
-    <link rel="stylesheet" href="views/css/icones.css">
+    <!-- Customizações (?v = data do arquivo: o navegador busca a versão nova a cada publicação) -->
+    <link rel="stylesheet" href="/views/css/custom.css?v=<?=@filemtime(__DIR__ . '/css/custom.css')?>">
+    <link rel="stylesheet" href="/views/css/icones.css?v=<?=@filemtime(__DIR__ . '/css/icones.css')?>">
     <?php require_once __DIR__ . '/icones.php'; ?>
     <!-- Jquery -->
     <script src="views/js/vendor/jquery/jquery.min.js"></script>
