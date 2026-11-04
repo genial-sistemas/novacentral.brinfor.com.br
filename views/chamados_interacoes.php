@@ -19,8 +19,11 @@ include 'header.php'
     /* Cartão próprio: o tema (card-dashboard-fifteen) transformava cada <span> em bloco. */
     .chamado-info { background: #fff; border: 1px solid #e3e7ed; border-radius: 8px; padding: 14px 20px; margin-bottom: 14px;
         display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px; }
-    .chamado-info dt { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: #7987a1; margin: 0; }
-    .chamado-info dd { font-size: 14px; color: #1c273c; margin: 0 0 6px; overflow-wrap: anywhere; }
+    /* Rótulo e valor na mesma linha ("Chamado: #123 · Helpdesk"). */
+    .chamado-info dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 6px; margin: 0; align-items: baseline; }
+    .chamado-info dt { font-size: 13px; font-weight: 700; color: #1c273c; margin: 0; white-space: nowrap; }
+    .chamado-info dt::after { content: ':'; }
+    .chamado-info dd { font-size: 13px; color: #596882; margin: 0; overflow-wrap: anywhere; }
     .chamado-info .situacao-etiqueta { display: inline-block; background: #fff4ec; color: #d9661f; border-radius: 10px; padding: 1px 10px; font-size: 12px; font-weight: 600; }
     .chat-interacoes-coluna > .conversa { flex: 1 1 auto; width: 100%; min-width: 0; }
     @media (max-width: 767.98px) { .chamado-info { grid-template-columns: 1fr 1fr; } }
@@ -43,7 +46,7 @@ include 'header.php'
             <dl>
                 <dt>Data abertura</dt>
                 <dd><?=$h($data_abertura)?></dd>
-                <dt>Equipamento / detalhes</dt>
+                <dt>Equipamento</dt>
                 <dd data-conversa="equipamento">…</dd>
             </dl>
         </section>
