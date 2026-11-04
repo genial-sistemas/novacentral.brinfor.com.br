@@ -11,6 +11,10 @@ if (!$chamado || !in_array((int)$chamado['id_contrato'], $contratos, true)) {
     http_response_code(404);
     exit('Chamado não encontrado.');
 }
+// Só chamados encerrados (situação 7): no modal é apenas leitura, sem envio de novas interações.
+if ((int)$chamado['id_situacao'] !== 7) {
+    exit('Este chamado não está encerrado. Abra-o pela lista de chamados abertos para interagir.');
+}
 
 $conversa_id = (int)$chamado['id'];
 $conversa_seguranca = '';
