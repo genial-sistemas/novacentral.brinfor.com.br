@@ -29,6 +29,15 @@ function obterChamadosAbertosLista($contratos) {
     return erp_api('chamado.abertos_lista', ['contratos' => chamado_ids_contratos($contratos)]) ?: [];
 }
 
+/** Página de chamados fechados no mesmo formato da lista de abertos (solicitante e detalhes). */
+function obterChamadosFechadosLista($contratos, $limite, $offset) {
+    return erp_api('chamado.fechados_lista', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'limite' => (int)$limite,
+        'offset' => (int)$offset,
+    ]) ?: [];
+}
+
 /** Encerramento pelo cliente logado (situação 7 + evento "Chamado encerrado pelo usuário"). */
 function encerrarChamadoCliente($id_chamado, $contratos) {
     try {

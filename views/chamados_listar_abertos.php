@@ -2,17 +2,7 @@
 include 'header.php';
 $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); };
 ?>
-<style>
-.chamados-acoes { display: flex; gap: 6px; align-items: center; }
-.chamados-acoes form { margin: 0; }
-.btn-icone { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border-radius: 6px; }
-.btn-icone svg { width: 18px; height: 18px; }
-.btn-interagir { background: #fff; border: 1px solid #cdd4e0; color: #fa9758; }
-.btn-interagir:hover { background: #fa9758; border-color: #fa9758; color: #fff; }
-.btn-encerrar { background: #fff; border: 1px solid #cdd4e0; color: #3bb001; }
-.btn-encerrar:hover { background: #3bb001; border-color: #3bb001; color: #fff; }
-.chamados-equipamento { color: #596882; font-size: 12px; }
-</style>
+<?php include __DIR__ . '/partials/botoes_icone.php'; ?>
 
 <div class="az-content-header d-block d-md-flex">
     <div>
@@ -41,7 +31,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                             <th>ID</th>
                             <th>Tipo</th>
                             <th>Aberto por</th>
-                            <th>Equipamento</th>
+                            <th>Detalhes</th>
                             <th>Última Interação</th>
                             <th>Status</th>
                             <th>Opções</th>
@@ -57,13 +47,13 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                         $ultima = !empty($ca['ultima_data'])
                             ? data_brasil_datetime($ca['ultima_data'] . ' ' . $ca['ultima_hora'])
                             : '-';
-                        $equipamento = trim((string)($ca['equipamento'] ?? ''), " -");
+                        $detalhes = trim((string)($ca['detalhes'] ?? ''), " -");
                     ?>
                         <tr>
                             <th scope="row"><?=$h($ca['id'])?></th>
                             <td><?=$h($ca['tipo_contrato'])?></td>
                             <td><?=$h(trim((string)$ca['solicitante']) !== '' ? $ca['solicitante'] : 'Não informado')?></td>
-                            <td class="chamados-equipamento"><?=$h($equipamento !== '' ? $equipamento : '-')?></td>
+                            <td class="chamados-detalhes"><?=$h($detalhes !== '' ? $detalhes : '-')?></td>
                             <td><?=$h($ultima)?></td>
                             <td><?=$h($ca['situacao'])?></td>
                             <td>

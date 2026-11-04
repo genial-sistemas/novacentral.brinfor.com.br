@@ -67,12 +67,12 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'detalhes') {
     $pagina_atual = filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT);
     $pagina_atual = max(1, min($total_paginas, $pagina_atual ?: 1));
 
-	$chamados_fechados = obterChamadosFechadosPagina(
+	// Uma chamada à API traz solicitante, detalhes e última interação de cada chamado da página.
+	$chamados_fechados = obterChamadosFechadosLista(
         $contratos,
         $itens_por_pagina,
         ($pagina_atual - 1) * $itens_por_pagina
     );
-	$chamados_fechados_ultima_interacao = obterUltimasInteracoesPorChamados($chamados_fechados);
 
 	include 'views/chamados_listar_fechados.php';
 }

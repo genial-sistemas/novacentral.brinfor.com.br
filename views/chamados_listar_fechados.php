@@ -1,5 +1,7 @@
 <?php
-include 'header.php'; ?>
+include 'header.php';
+$h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); };
+include __DIR__ . '/partials/botoes_icone.php'; ?>
 
 <div class="az-content-header d-block d-md-flex">
     <div>
@@ -16,43 +18,48 @@ include 'header.php'; ?>
                 <tr>
                         <th scope="col">ID</th>
                         <th scope="col">Tipo</th>
+                        <th scope="col">Aberto por</th>
+                        <th scope="col">Detalhes</th>
                         <th scope="col">Última Interação</th>
-                        <th scope="col">Técnico</th>
                         <th scope="col">Status</th>
                         <th scope="col">Opções</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($chamados_fechados as $cf): ?>
-                        <?php
-                        $ultima_interacao = $chamados_fechados_ultima_interacao[$cf['id']] ?? array();
-                        $data_hora_interacao = trim(($ultima_interacao['data'] ?? '') . ' ' . ($ultima_interacao['hora'] ?? ''));
+                <?php foreach ($chamados_fechados as $cf):
+                        $ultima = !empty($cf['ultima_data'])
+                            ? data_brasil_datetime($cf['ultima_data'] . ' ' . $cf['ultima_hora'])
+                            : '-';
+                        $detalhes = trim((string)($cf['detalhes'] ?? ''), " -");
                         ?>
                         <tr>
-                            <th scope="row"><?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?></th>
-                            <td><?=htmlspecialchars((string)$cf['tipo_contrato'], ENT_QUOTES, 'UTF-8')?></td>
-                            <td><?=htmlspecialchars($data_hora_interacao !== '' ? data_brasil_datetime($data_hora_interacao) : '-', ENT_QUOTES, 'UTF-8')?></td>
-                            <td><?=htmlspecialchars((string)($ultima_interacao['nome_pessoa'] ?? '-'), ENT_QUOTES, 'UTF-8')?></td>
-                            <td><?=htmlspecialchars((string)$cf['situacao'], ENT_QUOTES, 'UTF-8')?></td>
-                            <td class="text-nowrap">
-                                <form action="/chamados_listar_fechados" method="post" class="d-inline mr-2">
-                                    <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?>">
-                                    <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="detalhes" title="Detalhes" aria-label="Ver detalhes do chamado">
-                                        <?=iconeInterface('detalhes', 'acao')?>
-                                    </button>
-                                </form>
-                                <form action="/chamados_listar_fechados" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja reabrir o chamado?');">
-                                    <input type="hidden" name="chamado_id" value="<?=htmlspecialchars((string)$cf['id'], ENT_QUOTES, 'UTF-8')?>">
-                                    <button type="submit" class="btn btn-link p-0 chamados-fechados-acao" name="acao" value="reabrir_chamado" title="Reabrir chamado" aria-label="Reabrir chamado">
-                                        <?=iconeInterface('reabrir', 'acao')?>
-                                    </button>
-                                </form>
+                            <th scope="row"><?=$h($cf['id'])?></th>
+                            <td><?=$h($cf['tipo_contrato'])?></td>
+                            <td><?=$h(trim((string)$cf['solicitante']) !== '' ? $cf['solicitante'] : 'Não informado')?></td>
+                            <td class="chamados-detalhes"><?=$h($detalhes !== '' ? $detalhes : '-')?></td>
+                            <td><?=$h($ultima)?></td>
+                            <td><?=$h($cf['situacao'])?></td>
+                            <td>
+                                <div class="chamados-acoes">
+                                    <a class="btn btn-icone btn-interagir" href="/chamados_interagir?id=<?=(int)$cf['id']?>"
+                                       title="Ver conversa" aria-label="Ver a conversa do chamado <?=(int)$cf['id']?>">
+                                        <?=iconeInterface('conversa', 'inline')?>
+                                    </a>
+                                    <form action="/chamados_listar_fechados" method="post"
+                                          onsubmit="return confirm('Reabrir o chamado #<?=(int)$cf['id']?>?');">
+                                        <input type="hidden" name="chamado_id" value="<?=(int)$cf['id']?>">
+                                        <button type="submit" class="btn btn-icone btn-reabrir" name="acao" value="reabrir_chamado"
+                                                title="Reabrir chamado" aria-label="Reabrir o chamado <?=(int)$cf['id']?>">
+                                            <?=iconeInterface('reabrir', 'inline')?>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                 <?php endforeach; ?>
                 <?php if (!$chamados_fechados): ?>
                         <tr>
-                            <td colspan="6">Nenhum chamado fechado encontrado.</td>
+                            <td colspan="7" class="text-center text-muted">Nenhum chamado fechado encontrado.</td>
                         </tr>
                 <?php endif; ?>
             </tbody>
