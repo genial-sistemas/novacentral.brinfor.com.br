@@ -40,16 +40,16 @@ include 'header.php'
                 <dd data-conversa="tecnico">…</dd>
             </dl>
             <dl>
-                <dt>Última interação</dt>
-                <dd data-conversa="ultima">…</dd>
-                <dt>Status</dt>
-                <dd><span class="situacao-etiqueta" data-conversa="situacao"><?=$h($chamado['situacao'])?></span></dd>
-            </dl>
-            <dl>
                 <dt>Data abertura</dt>
                 <dd><?=$h($data_abertura)?></dd>
                 <dt>Equipamento</dt>
                 <dd data-conversa="equipamento">…</dd>
+            </dl>
+            <dl>
+                <dt>Última interação</dt>
+                <dd data-conversa="ultima">…</dd>
+                <dt>Status</dt>
+                <dd><span class="situacao-etiqueta" data-conversa="situacao"><?=$h($chamado['situacao'])?></span></dd>
             </dl>
         </section>
     </div>
