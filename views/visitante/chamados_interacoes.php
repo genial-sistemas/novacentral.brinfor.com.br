@@ -55,22 +55,22 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                 <span class="valor" data-conversa="tipo"><?=$h($chamado['tipo_contrato_nome'] ?? '')?></span>
                 <span class="rotulo">Tipo Atendimento</span>
                 <span class="valor" data-conversa="atendimento">…</span>
+            </div>
+            <div>
+                <span class="rotulo">Detalhes</span>
+                <span class="valor" data-conversa="equipamento">…</span>
                 <span class="rotulo">Aberto por</span>
                 <span class="valor" data-conversa="aberto_por">…</span>
                 <span class="rotulo">Técnico responsável</span>
                 <span class="valor" data-conversa="tecnico">…</span>
             </div>
             <div>
+                <span class="rotulo">Data abertura</span>
+                <span class="valor" data-conversa="abertura"><?=$h(!empty($chamado['data_abertura']) ? date('d/m/Y', strtotime($chamado['data_abertura'])) : '')?></span>
                 <span class="rotulo">Última interação</span>
                 <span class="valor" data-conversa="ultima">…</span>
                 <span class="rotulo">Status</span>
                 <span class="valor"><span class="situacao" data-conversa="situacao"><?=$h($chamado['situacao_nome'] ?? '')?></span></span>
-            </div>
-            <div>
-                <span class="rotulo">Data abertura</span>
-                <span class="valor" data-conversa="abertura"><?=$h(!empty($chamado['data_abertura']) ? date('d/m/Y', strtotime($chamado['data_abertura'])) : '')?></span>
-                <span class="rotulo">Detalhes</span>
-                <span class="valor" data-conversa="equipamento">…</span>
             </div>
         </section>
 

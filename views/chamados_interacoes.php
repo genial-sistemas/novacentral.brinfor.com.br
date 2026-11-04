@@ -35,6 +35,7 @@ include 'header.php'
     </style>
     <div class="chat-interacoes-info">
         <section class="chamado-info" aria-label="Dados do chamado">
+            <?php /* 3 colunas x 3 linhas: identificação | detalhes e pessoas | datas e status */ ?>
             <dl>
                 <dt>Chamado</dt>
                 <dd>#<?=$h($chamado['id'])?></dd>
@@ -42,6 +43,10 @@ include 'header.php'
                 <dd data-conversa="tipo"><?=$h($chamado['tipo_contrato'])?></dd>
                 <dt>Tipo Atendimento</dt>
                 <dd data-conversa="atendimento">…</dd>
+            </dl>
+            <dl>
+                <dt>Detalhes</dt>
+                <dd data-conversa="equipamento">…</dd>
                 <dt>Aberto por</dt>
                 <dd data-conversa="aberto_por">…</dd>
                 <dt>Técnico responsável</dt>
@@ -50,10 +55,6 @@ include 'header.php'
             <dl>
                 <dt>Data abertura</dt>
                 <dd><?=$h($data_abertura)?></dd>
-                <dt>Detalhes</dt>
-                <dd data-conversa="equipamento">…</dd>
-            </dl>
-            <dl>
                 <dt>Última interação</dt>
                 <dd data-conversa="ultima">…</dd>
                 <dt>Status</dt>
