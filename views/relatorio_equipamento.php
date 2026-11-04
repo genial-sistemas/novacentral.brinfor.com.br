@@ -36,7 +36,7 @@
                 <div class="form-group">
                     <label for="equipamento">Equipamento</label>
                     <select class="form-control" id="equipamento" name="equipamento" required>
-                        <option value="todos" <?=($referencia === 'todos' ? 'selected' : '')?>>Todos os equipamentos</option>
+                        <option value="" disabled <?=($referencia === '' ? 'selected' : '')?>>Selecione o equipamento</option>
                         <?php foreach ($equipamentos as $equipamento): ?>
                             <option value="<?=htmlspecialchars($equipamento['referencia'], ENT_QUOTES, 'UTF-8')?>" data-tipo="<?=(int)$equipamento['id_tipo']?>" <?=($referencia === $equipamento['referencia'] ? 'selected' : '')?>>
                                 <?=htmlspecialchars($equipamento['rotulo'], ENT_QUOTES, 'UTF-8')?>
@@ -63,11 +63,11 @@
             var escolhido = tipo.value;
             for (var i = 0; i < equipamento.options.length; i++) {
                 var opcao = equipamento.options[i];
-                if (!opcao.dataset.tipo) continue; // "Todos os equipamentos"
+                if (!opcao.dataset.tipo) continue; // "Selecione o equipamento"
                 var visivel = escolhido === '0' || opcao.dataset.tipo === escolhido;
                 opcao.hidden = !visivel;
                 opcao.disabled = !visivel;
-                if (!visivel && opcao.selected) equipamento.value = 'todos';
+                if (!visivel && opcao.selected) equipamento.value = '';
             }
         }
         tipo.addEventListener('change', filtrar);
@@ -104,7 +104,6 @@
                     <tr>
                         <td class="text-center">
                             <?=(int)$chamado['id']?>
-                            <?php if ($referencia === 'todos'): ?><br><small><?=$h($chamado['equipamento_rotulo'])?></small><?php endif; ?>
                         </td>
                         <td class="text-center"><?=$h(data_brasil_datetime($chamado['data_fechamento']))?></td>
                         <td class="text-center"><?=$h($horas !== '' ? $horas : '-')?></td>

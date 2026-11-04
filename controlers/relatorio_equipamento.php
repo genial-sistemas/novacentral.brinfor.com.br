@@ -9,7 +9,7 @@ $pagina = 'Por equipamento';
 // Filtros pela URL (GET) para a paginação manter a pesquisa.
 $data_inicial_texto = (string)($_GET['data_inicial'] ?? '01/01/' . date('Y'));
 $data_final_texto = (string)($_GET['data_final'] ?? date('d/m/Y'));
-$referencia = trim((string)($_GET['equipamento'] ?? 'todos'));
+$referencia = trim((string)($_GET['equipamento'] ?? ''));
 $itens_por_pagina = 20;
 $pagina_atual = max(1, (int)($_GET['pagina'] ?? 1));
 $total_chamados = 0;
@@ -64,7 +64,8 @@ if (($_GET['acao'] ?? '') === 'filtrar') {
         $erro_relatorio = 'Informe as duas datas no formato DD/MM/AAAA.';
     } elseif ($data_inicial > $data_final) {
         $erro_relatorio = 'A data inicial deve ser anterior ou igual à data final.';
-    } elseif ($referencia !== 'todos' && $equipamento_selecionado === null) {
+    } elseif ($equipamento_selecionado === null) {
+        // Relatório é sempre de um equipamento (a opção "Todos" foi removida).
         $erro_relatorio = 'Selecione um equipamento ativo vinculado à sua conta.';
     } else {
         $relatorio_executado = true;
