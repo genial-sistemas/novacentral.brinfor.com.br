@@ -31,8 +31,8 @@ include 'header.php'; ?>
                             <tr>
                                 <td style="vertical-align: middle;"><?=$ca['nome']?></td>
                                 <td style="vertical-align: middle;"><?=$ca['descricao']?></td>
-                                <td style="vertical-align: middle;"><?=$ca['tel'] . ($ca['ramal'] != '' && $ca['ramal'] != null ? ' - Ramal: ' . $ca['ramal'] : '')?></td>
-                                <td style="vertical-align: middle;"><?=$ca['cel']?></td>
+                                <td style="vertical-align: middle;"><?=htmlspecialchars(formata_telefone($ca['tel']) . (trim((string)$ca['ramal']) !== '' ? ' - Ramal: ' . trim((string)$ca['ramal']) : ''), ENT_QUOTES, 'UTF-8')?></td>
+                                <td style="vertical-align: middle;"><?=htmlspecialchars(formata_telefone($ca['cel']), ENT_QUOTES, 'UTF-8')?></td>
                                 <td style="vertical-align: middle;"><?=$ca['email']?></td>
                                 <td class="funcionario-acoes">
                                     <div class="funcionario-acoes-grupo">

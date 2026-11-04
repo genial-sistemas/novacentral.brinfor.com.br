@@ -57,20 +57,26 @@ function moeda_brasil($numero)
     return $real;
 }
 
+// (31) 3333-4444, (31) 98888-7777, 3333-4444 ou 0800 123 4567. Aceita DDD com 0 e +55. Outros formatos voltam como vieram.
 function formata_telefone($phone)
 {
-    $formatedPhone = preg_replace('/[^0-9]/', '', $phone);
-    $matches = [];
-    preg_match('/^([0-9]{2})([0-9]{4,5})([0-9]{4})$/', $formatedPhone, $matches);
-    if ($matches) {
-        return '('.$matches[1].') '.$matches[2].'-'.$matches[3];
+    $digitos = preg_replace('/\D/', '', (string)$phone);
+    if (preg_match('/^0?(800|300|303|400|500|900)(\d{3})(\d{4})$/', $digitos, $m)) {
+        return '0' . $m[1] . ' ' . $m[2] . ' ' . $m[3];
     }
-
-    if (strlen($phone)==8) {
-        $phone = substr($phone, -8, 4) . "-" . substr($phone, -4, 4);
+    if (strlen($digitos) >= 12 && strpos($digitos, '55') === 0) {
+        $digitos = substr($digitos, 2);
     }
-
-    return $phone;
+    if (strlen($digitos) >= 11 && $digitos[0] === '0') {
+        $digitos = substr($digitos, 1);
+    }
+    if (preg_match('/^(\d{2})(\d{4,5})(\d{4})$/', $digitos, $m)) {
+        return '(' . $m[1] . ') ' . $m[2] . '-' . $m[3];
+    }
+    if (preg_match('/^(\d{4,5})(\d{4})$/', $digitos, $m)) {
+        return $m[1] . '-' . $m[2];
+    }
+    return trim((string)$phone);
 }
 
 function isValidString($value) {
