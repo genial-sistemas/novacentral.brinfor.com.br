@@ -1,7 +1,11 @@
 views/lib/
-models/conexao.php
 chamados/
 .logs/
 logs/*.txt
 logs/*.txt.*
-.vscode/sftp.jsonmodels/erp_config.php
+
+# Credenciais: nunca enviar ao GitHub
+.vscode/sftp.json
+models/conexao.php
+models/erp_config.php
+CHAVE-API-*.txt
