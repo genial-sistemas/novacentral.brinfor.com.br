@@ -14,7 +14,7 @@ $itens_por_pagina = 20;
 $pagina_atual = max(1, (int)($_GET['pagina'] ?? 1));
 $total_chamados = 0;
 $total_paginas = 1;
-$interacoes_por_chamado = array();
+
 $ids_contratos = array_map('intval', $_SESSION['contratos'] ?? array());
 $contratos = $ids_contratos ? obterContratosAtivos($ids_contratos) : array();
 $equipamentos = obterEquipamentosParaRelatorio($contratos);
@@ -101,11 +101,6 @@ if (($_GET['acao'] ?? '') === 'filtrar') {
                 ?? 'Equipamento ' . (int)$chamado['id_equipamento'];
         }
         unset($chamado);
-
-        // Interações da página numa chamada só; aparecem ao clicar no ícone de cada chamado.
-        if ($chamados) {
-            $interacoes_por_chamado = obterInteracoesDosChamados(array_column($chamados, 'id'), $contratos_com_equipamentos);
-        }
     }
 }
 

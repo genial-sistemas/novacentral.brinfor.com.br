@@ -100,7 +100,6 @@
             <tbody>
                 <?php foreach ($chamados as $chamado):
                     $horas = (string)($chamado['horas_total'] ?? '');
-                    $eventos = $interacoes_por_chamado[(int)$chamado['id']] ?? array();
                 ?>
                     <tr>
                         <td class="text-center">
@@ -115,10 +114,6 @@
                         <td class="text-center"><?=$h(($chamado['situacao'] ?? '') ?: '-')?></td>
                         <td>
                             <div class="chamados-acoes">
-                                <button type="button" class="btn btn-icone btn-interagir" data-interacoes="<?=(int)$chamado['id']?>"
-                                        title="Listar interações" aria-label="Listar as interações do chamado <?=(int)$chamado['id']?>" aria-expanded="false">
-                                    <?=iconeInterface('detalhes', 'inline')?>
-                                </button>
                                 <a class="btn btn-icone btn-interagir" href="/chamados_interagir?id=<?=(int)$chamado['id']?>"
                                    title="Ver conversa" aria-label="Ver a conversa do chamado <?=(int)$chamado['id']?>">
                                     <?=iconeInterface('conversa', 'inline')?>
@@ -134,45 +129,15 @@
                             </div>
                         </td>
                     </tr>
-                    <tr class="relatorio-equipamento-interacoes" id="interacoes-<?=(int)$chamado['id']?>" hidden>
-                        <td colspan="8">
-                            <?php if (!$eventos): ?>
-                                <small class="text-muted">Nenhuma interação registrada.</small>
-                            <?php else: ?>
-                            <table class="table table-sm mg-b-0">
-                                <thead><tr><th>Data - Hora</th><th>Responsável</th><th>Descrição</th></tr></thead>
-                                <tbody>
-                                <?php foreach ($eventos as $evento): ?>
-                                    <tr>
-                                        <td class="text-nowrap"><?=$h(data_brasil_datetime($evento['data'] . ' ' . $evento['hora']))?></td>
-                                        <td><?=$h((int)$evento['id_pessoa'] === 0 ? 'Usuário' : (trim((string)$evento['nome_pessoa']) ?: 'Técnico'))?></td>
-                                        <td><?=nl2br($h(stripslashes((string)$evento['descricao'])))?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
                 <?php endforeach; ?>
                 <?php if (!$chamados): ?>
                     <tr>
-                        <td colspan="8">Nenhum chamado encontrado para o equipamento e período selecionados.</td>
+                        <td colspan="7">Nenhum chamado encontrado para o equipamento e período selecionados.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
-    <script>
-    // Ícone "Listar interações": mostra/esconde as interações do chamado.
-    document.querySelectorAll('[data-interacoes]').forEach(function (botao) {
-        botao.addEventListener('click', function () {
-            var linha = document.getElementById('interacoes-' + botao.dataset.interacoes);
-            linha.hidden = !linha.hidden;
-            botao.setAttribute('aria-expanded', linha.hidden ? 'false' : 'true');
-        });
-    });
-    </script>
     <?php if ($total_paginas > 1):
         $inicio_janela = max(1, min($pagina_atual - 4, $total_paginas - 9));
         $paginas_visiveis = range($inicio_janela, min($total_paginas, $inicio_janela + 9));
