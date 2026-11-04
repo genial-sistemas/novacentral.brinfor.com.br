@@ -25,7 +25,11 @@ include 'header.php'
     .chamado-info dt::after { content: ':'; }
     .chamado-info dd { font-size: 13px; color: #596882; margin: 0; overflow-wrap: anywhere; }
     .chamado-info .situacao-etiqueta { display: inline-block; background: #fff4ec; color: #d9661f; border-radius: 10px; padding: 1px 10px; font-size: 12px; font-weight: 600; }
-    .chat-interacoes-coluna > .conversa { flex: 1 1 auto; width: 100%; min-width: 0; }
+    /* A página tem a altura da janela: a conversa ocupa o espaço que sobra e só a lista de mensagens rola,
+       mantendo o campo de digitar sempre visível acima do rodapé. */
+    .chat-interacoes-conversa { display: flex; }
+    .chat-interacoes-coluna { flex: 1 1 auto; height: 100%; }
+    .chat-interacoes-coluna > .conversa { flex: 1 1 auto; width: 100%; min-width: 0; height: 100%; min-height: 0; }
     @media (max-width: 767.98px) { .chamado-info { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 479.98px) { .chamado-info { grid-template-columns: 1fr; } }
     </style>
@@ -54,7 +58,7 @@ include 'header.php'
         </section>
     </div>
     <div class="row row-sm chat-interacoes-conversa">
-        <div class="col-md-12 chat-interacoes-coluna" style="min-height: 60vh;">
+        <div class="col-md-12 chat-interacoes-coluna">
             <?php include __DIR__ . '/partials/conversa.php'; ?>
         </div>
     </div>

@@ -47,7 +47,9 @@ if ($idChamado <= 0) {
 /** Converte um evento da API no formato usado pela tela (sem dados internos). */
 function conversaEvento(array $e)
 {
-    $texto = stripslashes((string)($e['descricao'] ?? ''));
+    // O ERP grava parte das mensagens com entidades HTML (&#039; &lt; &gt;): converte para o caractere real.
+    // A tela mostra o texto com textContent, então isso não abre brecha para HTML/script.
+    $texto = html_entity_decode(stripslashes((string)($e['descricao'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $anexo = null;
     if ((int)($e['link'] ?? 0) === 1 && preg_match('#^https?://#i', $texto)) {
         $anexo = $texto;
