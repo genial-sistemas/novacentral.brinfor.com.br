@@ -23,7 +23,7 @@ function erp_api_config(): array {
  * Chama uma ação da API do ERP e devolve o campo "data" da resposta.
  * Lança ErpApiErro em falha de rede, HTTP ou resposta com ok=false.
  */
-function erp_api(string $acao, array $params = []): mixed {
+function erp_api($acao, array $params = []) {
     $config = erp_api_config();
     if (!function_exists('curl_init')) {
         throw new ErpApiErro('A extensão cURL do PHP não está ativa neste servidor.');

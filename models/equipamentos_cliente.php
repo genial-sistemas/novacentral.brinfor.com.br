@@ -8,7 +8,7 @@ function equipamentosIdsContratos($contratos)
 {
     return array_values(array_unique(array_filter(
         array_map('intval', (array)$contratos),
-        static fn($id) => $id > 0
+        static function ($id) { return $id > 0; }
     )));
 }
 

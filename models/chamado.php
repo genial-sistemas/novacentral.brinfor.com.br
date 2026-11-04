@@ -5,7 +5,7 @@ require_once __DIR__ . '/email.php';
 const CHAMADO_STATUS_RESP_CLIENTE = 6;
 
 function chamado_ids_contratos($contratos): array {
-    return array_values(array_unique(array_filter(array_map('intval', (array)$contratos), static fn($id) => $id > 0)));
+    return array_values(array_unique(array_filter(array_map('intval', (array)$contratos), static function ($id) { return $id > 0; })));
 }
 
 function obterTiposSolicitacao() {
@@ -134,7 +134,7 @@ function obterRotuloEquipamentoChamado($id_tipo_contrato, $id_contrato, $id_equi
         'id_equipamento' => $id_equipamento,
     ]) ?: [];
 
-    $coluna = static fn(string $nome) => array_values(array_filter(array_map('trim', array_column($linhas, $nome))));
+    $coluna = static function ($nome) use ($linhas) { return array_values(array_filter(array_map('trim', array_column($linhas, $nome)))); };
 
     if ($id_tipo_contrato === 1 && $linhas) {
         $rotulos = array();

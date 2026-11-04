@@ -8,7 +8,7 @@ require_once __DIR__ . '/../models/erp_api.php';
 
 header('Content-Type: application/json');
 
-function busca_responder(array $dados): void {
+function busca_responder(array $dados) {
     echo json_encode($dados);
     exit;
 }

@@ -23,6 +23,17 @@ function limparDadosErroSistema($valor)
     return substr($valor, 0, 4000);
 }
 
+function rastroSemArgumentos($excecao)
+{
+    $linhas = array();
+    foreach ($excecao->getTrace() as $i => $quadro) {
+        $funcao = (isset($quadro['class']) ? $quadro['class'] . $quadro['type'] : '') . (isset($quadro['function']) ? $quadro['function'] : '');
+        $local = isset($quadro['file']) ? basename($quadro['file']) . '(' . (isset($quadro['line']) ? $quadro['line'] : '?') . ')' : '[interno]';
+        $linhas[] = '#' . $i . ' ' . $local . ': ' . $funcao . '()';
+    }
+    return implode(' ', $linhas);
+}
+
 function registrarErroSistema($origem, $mensagem, array $contexto = array())
 {
     $arquivo = caminhoArquivoLogSistema();
@@ -48,7 +59,8 @@ function registrarErroSistema($origem, $mensagem, array $contexto = array())
                 'tipo' => get_class($valor),
                 'arquivo' => basename($valor->getFile()),
                 'linha' => $valor->getLine(),
-                'rastro' => limparDadosErroSistema($valor->getTraceAsString())
+                // Rastro sem os argumentos das funções: getTraceAsString() gravava senhas digitadas no login.
+                'rastro' => limparDadosErroSistema(rastroSemArgumentos($valor))
             );
         } elseif (is_scalar($valor) || $valor === null) {
             $registro[limparDadosErroSistema($chave)] = limparDadosErroSistema($valor);

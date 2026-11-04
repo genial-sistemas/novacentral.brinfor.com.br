@@ -8,7 +8,7 @@ require_once __DIR__ . '/equipamentoConstantes.php';
 // Um contrato só dá acesso à documentação se estiver ativo e pertencer ao usuário.
 function obterContratoHelpdesk($contratos, $dbh = null)
 {
-    $ids = array_values(array_unique(array_filter(array_map('intval', (array)$contratos), static fn($id) => $id > 0)));
+    $ids = array_values(array_unique(array_filter(array_map('intval', (array)$contratos), static function ($id) { return $id > 0; })));
     if (!$ids) {
         return null;
     }
@@ -82,7 +82,7 @@ function obterRede_ssid($idContrato, $dbh = null)
 
 function obterLicencasPorCategorias($idContrato, $categorias, $dbh = null)
 {
-    $categorias = array_values(array_unique(array_filter(array_map('intval', (array)$categorias), static fn($categoria) => $categoria > 0)));
+    $categorias = array_values(array_unique(array_filter(array_map('intval', (array)$categorias), static function ($categoria) { return $categoria > 0; })));
     if (!$categorias) {
         return array();
     }
