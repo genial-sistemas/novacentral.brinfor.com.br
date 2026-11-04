@@ -99,6 +99,9 @@
         case 'chamados_interagir':
             include 'controlers/chamados_interagir.php';
             break;
+        case 'chamados_avaliados':
+            include 'controlers/chamados_avaliados.php';
+            break;
         case 'chamados_conversa_modal':
             include 'controlers/chamados_conversa_modal.php';
             break;

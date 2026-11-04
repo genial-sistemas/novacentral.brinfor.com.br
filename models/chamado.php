@@ -438,3 +438,13 @@ function obterRelatorioEquipamentoPagina($contratos, $id_contrato, $id_equipamen
     ]);
     return is_array($retorno) ? $retorno + ['total' => 0, 'itens' => []] : ['total' => 0, 'itens' => []];
 }
+
+/** Chamados avaliados (pesquisa de satisfação): ['total' => n, 'itens' => [...]]. */
+function obterChamadosAvaliados($contratos, $limite, $offset) {
+    $retorno = erp_api('chamado.avaliados', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'limite' => (int)$limite,
+        'offset' => (int)$offset,
+    ]);
+    return is_array($retorno) ? $retorno + ['total' => 0, 'itens' => []] : ['total' => 0, 'itens' => []];
+}

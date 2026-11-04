@@ -32,6 +32,7 @@ $contratosLocacao = obterContratosLocacaoCliente(
                     <a href="/chamados_abrir" class="nav-sub-link <?=($pagina=='Abrir'?'active':'')?>">Abrir</a>
                     <a href="/chamados_listar_abertos" class="nav-sub-link <?=($pagina=='Listar Abertos'?'active':'')?>">Listar Abertos</a>
                     <a href="/chamados_listar_fechados" class="nav-sub-link <?=($pagina=='Listar Fechados'?'active':'')?>">Listar Fechados</a>
+                    <a href="/chamados_avaliados" class="nav-sub-link <?=($pagina=='Avaliados'?'active':'')?>">Avaliados</a>
                 </nav>
             </li>
             <li class="nav-item <?=($menu=='Funcionários'?'active show':'')?>">
