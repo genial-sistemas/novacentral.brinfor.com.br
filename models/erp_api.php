@@ -51,7 +51,6 @@ function erp_api($acao, array $params = []) {
     $resposta = curl_exec($ch);
     $erroCurl = curl_error($ch);
     $http = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
 
     if ($resposta === false) {
         error_log("API ERP [$acao] falha de conexão: $erroCurl");
