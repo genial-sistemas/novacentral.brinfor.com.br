@@ -1105,10 +1105,13 @@
                         return;
                     }
 
-                    var idContrato = parseInt(optionSelected.val(), 10);
+                    // Locação: o value da opção é o contato; o contrato vem em data-id-contrato.
+                    var idContrato = parseInt(optionSelected.data('id-contrato'), 10) || parseInt(optionSelected.val(), 10);
 
                     var dados = {
                         id_contrato: idContrato,
+                        // Equipamento locado escolhido: gravado no evento do chamado (identificação do equipamento).
+                        id_equipamento: parseInt(optionSelected.data('id-equipamento'), 10) || 0,
                         id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
                         id_pessoa: parseInt(optionSelected.data('id-pessoa'), 10) || 0,
                         id_dominio: parseInt(optionSelected.data('id-dominio'), 10) || 0,
@@ -1136,6 +1139,8 @@
                     if (idContrato > 0) {
                         preencherDadosContrato({
                             id_contrato: idContrato,
+                            // Locação: identificação do equipamento escolhido vai para o evento do chamado.
+                            id_equipamento: parseInt(optionSelected.data('id-equipamento'), 10) || 0,
                             id_suporte: parseInt(optionSelected.data('id-suporte'), 10) || 0,
                             id_contato: parseInt(optionSelected.data('id-contato'), 10) || 0,
                             nome: optionSelected.data('nome') || '',
