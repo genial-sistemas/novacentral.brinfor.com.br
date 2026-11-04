@@ -221,9 +221,8 @@ $pdf->SetTextColor(0,0,0);
 $pdf->Cell(0,20, documentacaoPdfTexto('2.2 Topologia'),0,1,'C');
 $pdf->marcar('2.2');
 $pdf->SetFont('Arial', '', 12);
-if (!empty($rede['topologia_img']) && is_file($rede['topologia_img'])) {
-    $pdf->Image($rede['topologia_img'],05,45);
-}
+// Imagem gravada pelo ERP como URL; ajustada à página mantendo a proporção.
+documentacaoDesenharImagem($pdf, $rede['topologia_img'] ?? '', 10, 45, 190, 225, 'Topologia ainda não cadastrada.');
 $pdf->Ln();
 
 //Página 13 - Roteamento
@@ -234,9 +233,8 @@ $pdf->SetTextColor(0,0,0);
 $pdf->Cell(0,20, documentacaoPdfTexto('2.3 Roteamento'),0,1,'C');
 $pdf->marcar('2.3');
 $pdf->SetFont('Arial', '', 12);
-if (!empty($rede['roteamento_img']) && is_file($rede['roteamento_img'])) {
-    $pdf->Image($rede['roteamento_img'],05,45);
-}
+// Imagem gravada pelo ERP como URL; ajustada à página mantendo a proporção.
+documentacaoDesenharImagem($pdf, $rede['roteamento_img'] ?? '', 10, 45, 190, 225, 'Roteamento ainda não cadastrado.');
 $pdf->Ln();
 
 //Página 14 - Endereçamento
@@ -519,10 +517,7 @@ $pdf->Cell(0,20, documentacaoPdfTexto('4.2 Nível de Cibersegurança'),0,1,'C');
 $pdf->marcar('4.2');
 $pdf->SetFont('Arial', 'B', 12);
 $pdf->Ln();
-$imagemPiramide = 'views/img/piramide_seguranca.png';
-if (is_file($imagemPiramide)) {
-    $pdf->Image($imagemPiramide,50,50,110);
-}
+documentacaoDesenharImagem($pdf, 'views/img/piramide_seguranca.png', 50, 50, 110, 75, '');
 $pdf->SetY(130);
 $pdf->SetTextColor(0,0,0);
 $pdf->SetFont('Arial', 'B', 18);

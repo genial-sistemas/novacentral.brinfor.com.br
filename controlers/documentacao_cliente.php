@@ -8,6 +8,105 @@ if (empty($_SESSION['id_pessoa']) || !is_array($_SESSION['contratos'] ?? null)) 
 require_once __DIR__ . '/../bibliotecas/fpdf/fpdf_protecao.php';
 require_once __DIR__ . '/../models/documentacao_cliente.php';
 
+/**
+ * Arquivo local de uma imagem da documentação (topologia, roteamento etc.), pronto para o FPDF.
+ * O ERP grava essas imagens como URL (https://erp.bhcloud.com.br/import/...): baixa só desse host,
+ * aceita JPG/PNG/GIF (WebP/BMP convertidos para PNG) e guarda em cache durante a geração.
+ * Retorna null se não houver imagem válida.
+ */
+function documentacaoImagemLocal($origem)
+{
+    static $cache = array();
+    $origem = trim((string)$origem);
+    if ($origem === '') {
+        return null;
+    }
+    if (array_key_exists($origem, $cache)) {
+        return $cache[$origem];
+    }
+    $cache[$origem] = null;
+
+    $arquivo = null;
+    if (preg_match('#^https?://#i', $origem)) {
+        $host = strtolower((string)parse_url($origem, PHP_URL_HOST));
+        if (!in_array($host, array('erp.bhcloud.com.br'), true)) {
+            error_log('Documentação: host de imagem não permitido: ' . $host);
+            return null;
+        }
+        $ch = curl_init($origem);
+        curl_setopt_array($ch, array(
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_MAXFILESIZE => 15 * 1024 * 1024,
+        ));
+        $conteudo = curl_exec($ch);
+        $http = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($conteudo === false || $http !== 200 || $conteudo === '') {
+            error_log('Documentação: não foi possível baixar a imagem ' . $origem . ' (HTTP ' . $http . ')');
+            return null;
+        }
+        $arquivo = tempnam(sys_get_temp_dir(), 'doc');
+        file_put_contents($arquivo, $conteudo);
+        register_shutdown_function(static function () use ($arquivo) { @unlink($arquivo); });
+    } elseif (is_file($origem)) {
+        $arquivo = $origem;
+    } else {
+        return null;
+    }
+
+    $info = @getimagesize($arquivo);
+    $tipos = array(IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif');
+    if (!$info) {
+        return null;
+    }
+    if (!isset($tipos[$info[2]])) {
+        // WebP/BMP: converte para PNG com o GD, se disponível.
+        $imagem = false;
+        if ($info[2] === IMAGETYPE_WEBP && function_exists('imagecreatefromwebp')) {
+            $imagem = @imagecreatefromwebp($arquivo);
+        } elseif ($info[2] === IMAGETYPE_BMP && function_exists('imagecreatefrombmp')) {
+            $imagem = @imagecreatefrombmp($arquivo);
+        }
+        if (!$imagem) {
+            return null;
+        }
+        $png = tempnam(sys_get_temp_dir(), 'doc');
+        imagepng($imagem, $png);
+        imagedestroy($imagem);
+        register_shutdown_function(static function () use ($png) { @unlink($png); });
+        $cache[$origem] = array('arquivo' => $png, 'tipo' => 'png', 'largura' => $info[0], 'altura' => $info[1]);
+        return $cache[$origem];
+    }
+    $cache[$origem] = array('arquivo' => $arquivo, 'tipo' => $tipos[$info[2]], 'largura' => $info[0], 'altura' => $info[1]);
+    return $cache[$origem];
+}
+
+/**
+ * Desenha a imagem dentro de uma caixa (mm), mantendo a proporção e centralizando na largura.
+ * Sem imagem válida, escreve um aviso no lugar.
+ */
+function documentacaoDesenharImagem($pdf, $origem, $x, $y, $larguraMax, $alturaMax, $aviso = 'Imagem não cadastrada.')
+{
+    $imagem = documentacaoImagemLocal($origem);
+    if ($imagem === null) {
+        if ($aviso !== '') {
+            $pdf->SetY($y);
+            $pdf->SetFont('Arial', 'I', 11);
+            $pdf->SetTextColor(120, 120, 120);
+            $pdf->Cell(0, 10, documentacaoPdfTexto($aviso), 0, 1, 'C');
+            $pdf->SetTextColor(0, 0, 0);
+        }
+        return;
+    }
+    $escala = min($larguraMax / $imagem['largura'], $alturaMax / $imagem['altura']);
+    $largura = $imagem['largura'] * $escala;
+    $altura = $imagem['altura'] * $escala;
+    $pdf->Image($imagem['arquivo'], $x + ($larguraMax - $largura) / 2, $y, $largura, $altura, $imagem['tipo']);
+}
+
 function documentacaoPdfTexto($texto)
 {
     // FPDF espera ISO-8859-1; converter aqui evita utf8_decode(), descontinuado no PHP 8.2.
