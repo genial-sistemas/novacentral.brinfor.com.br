@@ -76,7 +76,7 @@ include __DIR__ . '/partials/botoes_icone.php'; ?>
         <nav class="mt-4" aria-label="Paginação dos chamados fechados">
             <ul class="pagination justify-content-center chamados-fechados-pagination">
                 <li class="page-item <?=$pagina_atual <= 1 ? 'disabled' : ''?>">
-                    <a class="page-link" href="<?=$link_pagina(max(1, $pagina_atual - 1))?>" aria-label="Página anterior">‹ Anterior</a>
+                    <a class="page-link" href="<?=$link_pagina(max(1, $pagina_atual - 1))?>" aria-label="Página anterior" title="Página anterior">&lt;</a>
                 </li>
                 <?php $anterior = 0; foreach ($paginas_visiveis as $n): ?>
                     <?php if ($anterior && $n > $anterior + 1): ?>
@@ -87,7 +87,7 @@ include __DIR__ . '/partials/botoes_icone.php'; ?>
                     </li>
                 <?php $anterior = $n; endforeach; ?>
                 <li class="page-item <?=$pagina_atual >= $total_paginas ? 'disabled' : ''?>">
-                    <a class="page-link" href="<?=$link_pagina(min($total_paginas, $pagina_atual + 1))?>" aria-label="Próxima página">Próxima ›</a>
+                    <a class="page-link" href="<?=$link_pagina(min($total_paginas, $pagina_atual + 1))?>" aria-label="Próxima página" title="Próxima página">&gt;</a>
                 </li>
             </ul>
         </nav>
