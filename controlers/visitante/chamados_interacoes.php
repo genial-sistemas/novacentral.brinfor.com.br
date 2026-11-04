@@ -13,18 +13,9 @@ $idChamado = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $seguranca = isset($_GET['seguranca']) ? trim($_GET['seguranca']) : '';
 
 // ============================================
-// CONEXÃO COM O BANCO
+// DADOS VIA API DO ERP
 // ============================================
-try {
-    $dsn = 'mysql:host=bhcloud.com.br;dbname=bhcloud_bhinfor;charset=utf8';
-    $user = 'bhcloud_admin';
-    $pass = '$Qnv3hf@BeBL';
-    $pdo = new PDO($dsn, $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Erro de conexão: " . $e->getMessage());
-}
+require_once __DIR__ . '/../../models/erp_api.php';
 
 // ============================================
 // BUSCA O CHAMADO
@@ -48,15 +39,8 @@ $viewData = [
 if ($idChamado > 0 && !empty($seguranca)) {
     try {
         // Busca o chamado com status e tipo da base de dados
-        $sql = "SELECT c.*, s.status AS situacao_nome, ct.descricao AS tipo_contrato_nome
-                FROM bhcloud_bhinfor.contrato_chamado c
-                LEFT JOIN bhcloud_bhinfor.contrato_chamado_status s ON s.id = c.id_situacao
-                LEFT JOIN bhcloud_bhinfor.contrato_tipo ct ON ct.id = c.id_tipo_contrato
-                WHERE c.id = ? AND c.seguranca = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$idChamado, $seguranca]);
-        $chamado = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+        $chamado = erp_api('chamado.obter_seguro', ['id' => $idChamado, 'seguranca' => $seguranca]);
+
         if ($chamado) {
             $viewData['idChamado'] = $chamado['id'];
             $viewData['seguranca'] = $chamado['seguranca'];
@@ -75,16 +59,15 @@ if ($idChamado > 0 && !empty($seguranca)) {
             }
             
             // Busca interações do chamado
-            $sqlInteracoes = "SELECT * FROM bhcloud_bhinfor.contrato_chamado_eventos WHERE id_chamado = ? ORDER BY data DESC, hora DESC, id DESC";
-            $stmtInteracoes = $pdo->prepare($sqlInteracoes);
-            $stmtInteracoes->execute([$idChamado]);
-            $viewData['interacoes'] = $stmtInteracoes->fetchAll(PDO::FETCH_ASSOC);
-            
+            // A API devolve em ordem crescente; aqui a lista fica da mais recente para a mais antiga.
+            $eventosChamado = erp_api('chamado.eventos_visitante', ['id' => $idChamado]) ?: [];
+            $viewData['interacoes'] = array_reverse($eventosChamado);
+
         } else {
             $viewData['error'] = 'Chamado não encontrado.';
         }
-    } catch (PDOException $e) {
-        $viewData['error'] = 'Erro ao buscar chamado: ' . $e->getMessage();
+    } catch (ErpApiErro $e) {
+        $viewData['error'] = 'Não foi possível consultar o chamado agora. Tente novamente em instantes.';
     }
 } else {
     $viewData['error'] = 'Parâmetros inválidos.';
@@ -105,23 +88,19 @@ if (isset($_GET['endpoint'])) {
 
     if ($endpoint === 'info') {
         $ultimaInteracao = $viewData['interacoes'][0] ?? null;
-        $stmtTecnico = $pdo->prepare(
-            'SELECT p.nome_pessoa FROM bhcloud_bhinfor.contrato_chamado_eventos e
-             JOIN bhcloud_bhinfor.pessoa p ON p.id = e.id_pessoa
-             WHERE e.id_chamado = ? AND e.id_pessoa > 0
-             ORDER BY e.data DESC, e.hora DESC, e.id DESC LIMIT 1'
-        );
-        $stmtTecnico->execute([$idChamado]);
-        $tecnico = $stmtTecnico->fetchColumn();
+        // Último técnico e último equipamento saem da lista de eventos (mais recente primeiro).
+        $tecnico = '';
+        $idEquipamento = 0;
+        foreach ($viewData['interacoes'] as $evento) {
+            if ($tecnico === '' && (int)($evento['id_pessoa'] ?? 0) > 0 && !empty($evento['nome_tecnico'])) {
+                $tecnico = $evento['nome_tecnico'];
+            }
+            if ($idEquipamento === 0 && (int)($evento['id_equipamento'] ?? 0) > 0) {
+                $idEquipamento = (int)$evento['id_equipamento'];
+            }
+        }
 
         require_once __DIR__ . '/../../models/chamado.php';
-        $stmtEquipamento = $pdo->prepare(
-            'SELECT id_equipamento FROM bhcloud_bhinfor.contrato_chamado_eventos
-             WHERE id_chamado = ? AND id_equipamento > 0
-             ORDER BY data DESC, hora DESC, id DESC LIMIT 1'
-        );
-        $stmtEquipamento->execute([$idChamado]);
-        $idEquipamento = (int) ($stmtEquipamento->fetchColumn() ?: 0);
         $equipamentoRotulo = 'Não informado';
         if (function_exists('obterRotuloEquipamentoChamado') && $idEquipamento > 0) {
             $rotulo = obterRotuloEquipamentoChamado(
@@ -154,16 +133,7 @@ if (isset($_GET['endpoint'])) {
     }
 
     if ($endpoint === 'eventos') {
-        $stmt = $pdo->prepare(
-            'SELECT COALESCE(e.id_evento, e.id) AS id_evento, e.id, e.id_chamado, e.id_pessoa, e.data, e.hora,
-                    e.descricao, e.status, e.link, p.nome_pessoa AS nome_tecnico
-             FROM bhcloud_bhinfor.contrato_chamado_eventos e
-             LEFT JOIN bhcloud_bhinfor.pessoa p ON p.id = e.id_pessoa
-             WHERE e.id_chamado = ?
-             ORDER BY e.data ASC, e.hora ASC, e.id ASC'
-        );
-        $stmt->execute([$idChamado]);
-        echo json_encode(['success' => true, 'eventos' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        echo json_encode(['success' => true, 'eventos' => $eventosChamado]);
         exit;
     }
 
@@ -191,22 +161,19 @@ if (isset($_GET['endpoint'])) {
             exit;
         }
 
-        $stmtEquipamento = $pdo->prepare(
-            'SELECT id_equipamento FROM bhcloud_bhinfor.contrato_chamado_eventos
-             WHERE id_chamado = ? AND id_equipamento > 0
-             ORDER BY data ASC, hora ASC, id ASC LIMIT 1'
-        );
-        $stmtEquipamento->execute([$idChamado]);
-        $idEquipamento = (int) ($stmtEquipamento->fetchColumn() ?: 0);
+        try {
+            $idEvento = erp_api('chamado.responder_visitante', [
+                'id' => $idChamado,
+                'seguranca' => $seguranca,
+                'descricao' => $descricao,
+            ]);
+        } catch (ErpApiErro $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Não foi possível enviar a mensagem agora.']);
+            exit;
+        }
 
-        $stmt = $pdo->prepare(
-            'INSERT INTO bhcloud_bhinfor.contrato_chamado_eventos
-                (id_chamado, id_pessoa, id_equipamento, data, hora, descricao, status)
-             VALUES (?, 0, ?, CURDATE(), CURTIME(), ?, 7)'
-        );
-        $stmt->execute([$idChamado, $idEquipamento, $descricao]);
-
-        echo json_encode(['success' => true, 'id_evento' => (int) $pdo->lastInsertId()]);
+        echo json_encode(['success' => true, 'id_evento' => (int)$idEvento]);
         exit;
     }
 

@@ -10,89 +10,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 date_default_timezone_set('America/Sao_Paulo');
 
-$dsn  = 'mysql:host=bhcloud.com.br;dbname=bhcloud_bhinfor;charset=utf8';
-$user = 'bhcloud_admin';
-$pass = '$Qnv3hf@BeBL';
+require_once __DIR__ . '/../../models/erp_api.php';
 
-try {
-    $pdo = new PDO($dsn, $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    // Exibe erro de forma amigável
-?>
-    <!DOCTYPE html>
-    <html lang="pt-br">
-
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Erro - BRInfor</title>
-        <link rel="stylesheet" href="/views/css/azia.css">
-        <style>
-            body {
-                background: #f8f9fa;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                margin: 0;
-            }
-
-            .error-box {
-                max-width: 600px;
-                background: white;
-                padding: 40px;
-                border-radius: 10px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                border-left: 5px solid #dc3545;
-            }
-
-            .error-box h1 {
-                color: #dc3545;
-                margin-top: 0;
-            }
-
-            .error-box .detail {
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 5px;
-                font-family: monospace;
-                font-size: 13px;
-                margin: 15px 0;
-                border: 1px solid #dee2e6;
-                word-break: break-all;
-            }
-
-            .btn {
-                display: inline-block;
-                padding: 10px 25px;
-                background: #1a2a4a;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-            }
-
-            .btn:hover {
-                background: #0d1a30;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div class="error-box">
-            <h1><i class="fas fa-exclamation-triangle"></i> Erro de Conexão</h1>
-            <p>Não foi possível conectar ao banco de dados.</p>
-            <div class="detail"><strong>Mensagem:</strong> <?= htmlspecialchars($e->getMessage()) ?></div>
-            <a href="chamados_abrir" class="btn">Voltar ao Formulário</a>
-        </div>
-        <script src="/views/js/vendor/fontawesome-free/js/all.min.js"></script>
-    </body>
-
-    </html>
-<?php
-    exit;
-}
 
 function obterPastaBaseUploadsChamados()
 {
@@ -128,90 +47,12 @@ if (!is_dir($pasta_upload) && !mkdir($pasta_upload, 0775, true) && !is_dir($past
 }
 
 // ============================================
-// BUSCAR O PRÓXIMO ID DO CHAMADO
+// NÚMERO DO CHAMADO
 // ============================================
-try {
-    $stmt = $pdo->query("SELECT MAX(id) as max_id FROM bhcloud_bhinfor.contrato_chamado");
-    $result = $stmt->fetch();
-    if ($result && $result['max_id'] > 0) {
-        $proximo_id_chamado = $result['max_id'] + 1;
-    } else {
-        $proximo_id_chamado = 1;
-    }
-} catch (PDOException $e) {
-?>
-    <!DOCTYPE html>
-    <html lang="pt-br">
+// O número é definido pelo ERP ao gravar (AUTO_INCREMENT). Antes era MAX(id)+1,
+// o que podia gerar número repetido com duas aberturas ao mesmo tempo.
+$proximo_id_chamado = 0;
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Erro - BRInfor</title>
-        <link rel="stylesheet" href="/views/css/azia.css">
-        <style>
-            body {
-                background: #f8f9fa;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-                margin: 0;
-            }
-
-            .error-box {
-                max-width: 600px;
-                background: white;
-                padding: 40px;
-                border-radius: 10px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                border-left: 5px solid #dc3545;
-            }
-
-            .error-box h1 {
-                color: #dc3545;
-                margin-top: 0;
-            }
-
-            .error-box .detail {
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 5px;
-                font-family: monospace;
-                font-size: 13px;
-                margin: 15px 0;
-                border: 1px solid #dee2e6;
-                word-break: break-all;
-            }
-
-            .btn {
-                display: inline-block;
-                padding: 10px 25px;
-                background: #1a2a4a;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-            }
-
-            .btn:hover {
-                background: #0d1a30;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div class="error-box">
-            <h1><i class="fas fa-exclamation-triangle"></i> Erro ao Buscar ID</h1>
-            <p>Não foi possível obter o próximo ID do chamado.</p>
-            <div class="detail"><strong>Erro:</strong> <?= htmlspecialchars($e->getMessage()) ?></div>
-            <a href="chamados_abrir" class="btn">Voltar ao Formulário</a>
-        </div>
-        <script src="/views/js/vendor/fontawesome-free/js/all.min.js"></script>
-    </body>
-
-    </html>
-<?php
-    exit;
-}
 
 // ============================================
 // CONSTANTES DE UPLOAD
@@ -616,7 +457,6 @@ function salvarArquivoChamado($arquivo_temp, $id_chamado, $nome_original)
 // ============================================
 function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 {
-    global $pdo;
 
     require_once __DIR__ . '/../../models/email.php';
 
@@ -637,40 +477,20 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 
     try {
         if (!empty($dados['id_contrato']) && $dados['id_contrato'] > 0) {
+            $emails = erp_api('contrato.emails_abertura', ['id' => (int)$dados['id_contrato']]) ?: [];
             if ($tipo_contrato == '1') {
-                $sql_contrato = "SELECT id_pessoa FROM bhcloud_bhinfor.contrato WHERE id = ?";
-                $stmt = $pdo->prepare($sql_contrato);
-                $stmt->execute([$dados['id_contrato']]);
-                $contrato = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($contrato && !empty($contrato['id_pessoa']) && $contrato['id_pessoa'] > 0) {
-                    $id_pessoa = $contrato['id_pessoa'];
-                    $logs_busca[] = "✅ id_pessoa encontrado: " . $id_pessoa;
-
-                    $sql_pessoa = "SELECT email FROM bhcloud_bhinfor.pessoa_juridica WHERE id_pessoa = ?";
-                    $stmt = $pdo->prepare($sql_pessoa);
-                    $stmt->execute([$id_pessoa]);
-                    $pessoa = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                    if ($pessoa && !empty($pessoa['email'])) {
-                        $destinatarios[] = $pessoa['email'];
-                        $logs_busca[] = "✅ E-mail da pessoa_juridica encontrado: " . $pessoa['email'];
-                    }
+                // Helpdesk: e-mail cadastrado da empresa (pessoa jurídica do contrato).
+                if (!empty($emails['email_empresa'])) {
+                    $destinatarios[] = $emails['email_empresa'];
+                    $logs_busca[] = "E-mail da pessoa_juridica encontrado: " . $emails['email_empresa'];
                 }
-            } else {
-                $sql = "SELECT email_gerente FROM bhcloud_bhinfor.contrato WHERE id = ?";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([$dados['id_contrato']]);
-                $contrato = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($contrato && !empty($contrato['email_gerente'])) {
-                    $destinatarios[] = $contrato['email_gerente'];
-                    $logs_busca[] = "✅ E-mail do gerente encontrado: " . $contrato['email_gerente'];
-                }
+            } elseif (!empty($emails['email_gerente'])) {
+                $destinatarios[] = $emails['email_gerente'];
+                $logs_busca[] = "E-mail do gerente encontrado: " . $emails['email_gerente'];
             }
         }
-    } catch (PDOException $e) {
-        $logs_busca[] = "❌ Erro ao buscar e-mail: " . $e->getMessage();
+    } catch (ErpApiErro $e) {
+        $logs_busca[] = "Erro ao buscar e-mail: " . $e->getMessage();
         error_log("Erro ao buscar e-mail adicional: " . $e->getMessage());
     }
 
@@ -717,116 +537,16 @@ function enviarEmailChamado($html_email, $dados, $proximo_id_chamado)
 }
 
 // ============================================
-// FUNÇÕES PARA GERAR QUERIES
+// DADOS PARA A API DO ERP
 // ============================================
 
-function gerarQueryChamado($dados, $proximo_id_chamado)
+// Id do recurso (equipamento, domínio, backup ou produto) gravado nos eventos.
+function obterIdRecursoChamado($dados)
 {
-    $campos = [];
-    $valores = [];
-
-    $campos[] = 'id';
-    $valores[] = intval($proximo_id_chamado);
-
-    if (temValor($dados['id_contrato']) && $dados['id_contrato'] > 0) {
-        $campos[] = 'id_contrato';
-        $valores[] = intval($dados['id_contrato']);
-    }
-
-    if (temValor($dados['id_tipo_contrato'])) {
-        $campos[] = 'id_tipo_contrato';
-        $valores[] = intval($dados['id_tipo_contrato']);
-    }
-
-    if (temValor($dados['id_resp_abertura']) && $dados['id_resp_abertura'] > 0) {
-        $campos[] = 'resp_abertura';
-        $valores[] = intval($dados['id_resp_abertura']);
-    }
-
-    $campos[] = 'resp_fechamento';
-    $valores[] = 'NULL';
-
-    if (temValor($dados['id_tipo_abertura'])) {
-        $campos[] = 'tipo_abertura';
-        $valores[] = intval($dados['id_tipo_abertura']);
-    }
-
-    if (temValor($dados['id_tipo_solicitacao'])) {
-        $campos[] = 'tipo_solicitacao';
-        $valores[] = intval($dados['id_tipo_solicitacao']);
-    }
-
-    if (temValor($dados['id_tipo_atendimento'])) {
-        $campos[] = 'tipo_atendimento';
-        $valores[] = intval($dados['id_tipo_atendimento']);
-    }
-
-    if (temValor($dados['urgencia'])) {
-        $campos[] = 'urgencia';
-        $valores[] = intval($dados['urgencia']);
-    }
-
-    $campos[] = 'data_abertura';
-    $valores[] = 'NOW()';
-
-    $campos[] = 'data_entrada';
-    $valores[] = 'NULL';
-
-    $campos[] = 'data_saida';
-    // Eu registro a data e hora da abertura em data_saida, não em data_entrada.
-    $valores[] = 'NOW()';
-
-    if (temValor($dados['codigoSeguranca'])) {
-        $campos[] = 'seguranca';
-        $valores[] = "'" . addslashes($dados['codigoSeguranca']) . "'";
-    }
-
-    if (temValor($dados['obs'])) {
-        $campos[] = 'obs';
-        $valores[] = "'" . addslashes($dados['obs']) . "'";
-    }
-
-    $campos[] = 'id_causa';
-    $valores[] = 'NULL';
-
-    if (temValor($dados['id_situacao'])) {
-        $campos[] = 'id_situacao';
-        $valores[] = intval($dados['id_situacao']);
-    }
-
-    if (temValor($dados['nome'])) {
-        $campos[] = 'nome';
-        $valores[] = "'" . addslashes($dados['nome']) . "'";
-    }
-
-    if (temValor($dados['telefone'])) {
-        $campos[] = 'telefone';
-        $valores[] = "'" . addslashes($dados['telefone']) . "'";
-    }
-
-    if (temValor($dados['email'])) {
-        $campos[] = 'email';
-        $valores[] = "'" . addslashes($dados['email']) . "'";
-    }
-
-    if (empty($campos)) {
-        return '-- Nenhum dado para inserir na tabela contrato_chamado';
-    }
-
-    $sql = "INSERT INTO bhcloud_bhinfor.contrato_chamado (\n    " . implode(",\n    ", $campos) . "\n) VALUES (\n    " . implode(",\n    ", $valores) . "\n);";
-    return $sql;
-}
-
-function gerarQueryEvento($dados, $tipo, $descricao, $proximo_id_chamado, $arquivo_info = null)
-{
-    $campos = [];
-    $valores = [];
     $id_recurso = (int)($dados['id_equipamento'] ?? 0);
     if ($id_recurso <= 0) {
         switch ((int)($dados['id_tipo_contrato'] ?? 0)) {
             case 2:
-                $id_recurso = (int)($dados['id_dominio'] ?? 0);
-                break;
             case 4:
                 $id_recurso = (int)($dados['id_dominio'] ?? 0);
                 break;
@@ -838,81 +558,35 @@ function gerarQueryEvento($dados, $tipo, $descricao, $proximo_id_chamado, $arqui
                 break;
         }
     }
-
-    $campos[] = 'id_chamado';
-    $valores[] = intval($proximo_id_chamado);
-
-    if (temValor($dados['id_pessoa']) && $dados['id_pessoa'] > 0) {
-        $campos[] = 'id_pessoa';
-        $valores[] = intval($dados['id_pessoa']);
-    }
-
-    if (temValor($dados['id_contato']) && $dados['id_contato'] > 0) {
-        $campos[] = 'id_contato';
-        $valores[] = intval($dados['id_contato']);
-    }
-
-    if ($id_recurso > 0) {
-        $campos[] = 'id_equipamento';
-        $valores[] = $id_recurso;
-    }
-
-    $campos[] = 'id_evento';
-    $valores[] = 'NULL';
-
-    $campos[] = 'data';
-    $valores[] = 'CURDATE()';
-
-    $campos[] = 'hora';
-    $valores[] = 'CURTIME()';
-
-    $campos[] = 'horas_total';
-    $valores[] = 'NULL';
-
-    $campos[] = 'tipo';
-    $valores[] = "'" . $tipo . "'";
-
-    $desc = $descricao;
-    if ($arquivo_info && $tipo === 'F') {
-        $desc = $arquivo_info['caminho_completo'];
-    }
-
-    if (temValor($desc)) {
-        $campos[] = 'descricao';
-        $valores[] = "'" . addslashes($desc) . "'";
-    }
-
-    $campos[] = 'status';
-    $valores[] = '1';
-
-    $campos[] = 'tempo_atendimento';
-    $valores[] = 'NULL';
-
-    $campos[] = 'sla_fail';
-    $valores[] = '0';
-
-    $campos[] = 'link';
-    $valores[] = '0';
-
-    if (empty($campos)) {
-        return '-- Nenhum dado para inserir na tabela contrato_chamado_eventos';
-    }
-
-    $sql = "INSERT INTO bhcloud_bhinfor.contrato_chamado_eventos (\n    " . implode(",\n    ", $campos) . "\n) VALUES (\n    " . implode(",\n    ", $valores) . "\n);";
-    return $sql;
+    return $id_recurso;
 }
 
-// ============================================
-// GERAR TODAS AS QUERIES
-// ============================================
-$sql_chamado = gerarQueryChamado($dados, $proximo_id_chamado);
+$chamado_api = [
+    'id_contrato' => $dados['id_contrato'] ?? null,
+    'id_tipo_contrato' => $dados['id_tipo_contrato'] ?? null,
+    'resp_abertura' => $dados['id_resp_abertura'] ?? null,
+    'tipo_abertura' => $dados['id_tipo_abertura'] ?? null,
+    'tipo_solicitacao' => $dados['id_tipo_solicitacao'] ?? null,
+    'tipo_atendimento' => $dados['id_tipo_atendimento'] ?? null,
+    'urgencia' => $dados['urgencia'] ?? null,
+    'id_situacao' => $dados['id_situacao'] ?? null,
+    'seguranca' => $dados['codigoSeguranca'] ?? '',
+    'obs' => $dados['obs'] ?? '',
+    'nome' => $dados['nome'] ?? '',
+    'telefone' => $dados['telefone'] ?? '',
+    'email' => $dados['email'] ?? '',
+];
+$evento_base_api = [
+    'id_pessoa' => (int)($dados['id_pessoa'] ?? 0),
+    'id_contato' => (int)($dados['id_contato'] ?? 0),
+    'id_equipamento' => obterIdRecursoChamado($dados),
+];
 
-$queries_evento = [];
+$eventos_api = [];
 $eventos_para_visualizar = [];
 
 // Evento de Abertura
-$sql_evento_abertura = gerarQueryEvento($dados, 'A', $dados['solicitacao'] ?? 'Abertura do chamado', $proximo_id_chamado);
-$queries_evento[] = $sql_evento_abertura;
+$eventos_api[] = ['tipo' => 'A', 'descricao' => $dados['solicitacao'] ?? 'Abertura do chamado'];
 $eventos_para_visualizar[] = [
     'tipo' => 'A',
     'label' => 'Abertura',
@@ -922,8 +596,7 @@ $eventos_para_visualizar[] = [
 
 // Evento de Observação
 if (temValor($dados['obs'])) {
-    $sql_evento_obs = gerarQueryEvento($dados, 'O', $dados['obs'], $proximo_id_chamado);
-    $queries_evento[] = $sql_evento_obs;
+    $eventos_api[] = ['tipo' => 'O', 'descricao' => $dados['obs']];
     $eventos_para_visualizar[] = [
         'tipo' => 'O',
         'label' => 'Observação',
@@ -932,10 +605,8 @@ if (temValor($dados['obs'])) {
     ];
 }
 
-// Evento de Arquivo
+// Evento de Arquivo (gravado depois que o arquivo é salvo na pasta do chamado)
 if ($arquivo_info) {
-    $sql_evento_arquivo = gerarQueryEvento($dados, 'F', '', $proximo_id_chamado, $arquivo_info);
-    $queries_evento[] = $sql_evento_arquivo;
     $eventos_para_visualizar[] = [
         'tipo' => 'F',
         'label' => 'Arquivo',
@@ -944,6 +615,7 @@ if ($arquivo_info) {
         'arquivo' => $arquivo_info
     ];
 }
+
 
 // ============================================
 // FUNÇÃO PARA GERAR HTML DO E-MAIL
@@ -1131,9 +803,24 @@ $email_enviado = false;
 if ($dados_submetidos) {
     try {
         // ============================================
-        // 1. SALVA O ARQUIVO FISICAMENTE
+        // 1. GRAVA O CHAMADO E OS EVENTOS NO ERP (via API)
         // ============================================
-        $arquivo_salvo = null;
+        $criado = erp_api('chamado.abrir_visitante', [
+            'chamado' => $chamado_api,
+            'evento_base' => $evento_base_api,
+            'eventos' => $eventos_api,
+        ]);
+        $proximo_id_chamado = (int)($criado['id'] ?? 0);
+        if ($proximo_id_chamado <= 0) {
+            throw new Exception('A API do ERP não retornou o número do chamado.');
+        }
+        $chamado_criado = true;
+        $id_chamado_criado = $proximo_id_chamado;
+
+        // ============================================
+        // 2. SALVA O ARQUIVO NA PASTA DO CHAMADO E REGISTRA O EVENTO
+        // ============================================
+        $anexo_falhou = false;
         if ($arquivo_info && isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK) {
             $resultado_salvar = salvarArquivoChamado(
                 $_FILES['arquivo']['tmp_name'],
@@ -1142,50 +829,30 @@ if ($dados_submetidos) {
             );
 
             if ($resultado_salvar['status'] === 'sucesso') {
-                $arquivo_salvo = $resultado_salvar;
                 $arquivo_info['caminho_completo'] = $resultado_salvar['caminho_completo'];
                 $arquivo_info['nome_renomeado'] = $resultado_salvar['nome_renomeado'];
-                error_log("✅ Arquivo salvo com sucesso: " . $resultado_salvar['caminho_completo']);
-            } else {
-                throw new Exception("Erro ao salvar o arquivo: " . $resultado_salvar['mensagem']);
-            }
-        }
-
-        // ============================================
-        // 2. INSERE NO BANCO DE DADOS
-        // ============================================
-        $pdo->beginTransaction();
-
-        // 2.1 INSERT contrato_chamado
-        $stmt = $pdo->prepare($sql_chamado);
-        $stmt->execute();
-
-        // 2.2 Atualiza query do evento de arquivo com caminho real
-        if ($arquivo_salvo) {
-            $sql_evento_arquivo_atualizado = gerarQueryEvento($dados, 'F', '', $proximo_id_chamado, [
-                'caminho_completo' => $arquivo_salvo['caminho_completo']
-            ]);
-
-            foreach ($queries_evento as $index => $query) {
-                if (strpos($query, "tipo = 'F'") !== false) {
-                    $queries_evento[$index] = $sql_evento_arquivo_atualizado;
-                    break;
+                foreach ($eventos_para_visualizar as $indice => $evento) {
+                    if ($evento['tipo'] === 'F') {
+                        $eventos_para_visualizar[$indice]['descricao'] = $resultado_salvar['caminho_completo'];
+                        $eventos_para_visualizar[$indice]['arquivo'] = $arquivo_info;
+                    }
                 }
+                try {
+                    erp_api('chamado.evento_visitante', array_merge($evento_base_api, [
+                        'id_chamado' => $proximo_id_chamado,
+                        'tipo' => 'F',
+                        'descricao' => $resultado_salvar['caminho_completo'],
+                    ]));
+                } catch (ErpApiErro $e) {
+                    $anexo_falhou = true;
+                    error_log('Chamado ' . $proximo_id_chamado . ': anexo salvo, mas evento não registrado: ' . $e->getMessage());
+                }
+            } else {
+                // O chamado já existe; segue sem o anexo e avisa na tela de resultado.
+                $anexo_falhou = true;
+                error_log('Chamado ' . $proximo_id_chamado . ': erro ao salvar anexo: ' . $resultado_salvar['mensagem']);
             }
         }
-
-        // 2.3 INSERT eventos
-        foreach ($queries_evento as $sql_evento) {
-            if (!empty($sql_evento)) {
-                $stmt = $pdo->prepare($sql_evento);
-                $stmt->execute();
-            }
-        }
-
-        // Confirma a transação
-        $pdo->commit();
-        $chamado_criado = true;
-        $id_chamado_criado = $proximo_id_chamado;
 
         // ============================================
         // 3. ENVIA E-MAIL APÓS CRIAR O CHAMADO
@@ -1201,30 +868,17 @@ if ($dados_submetidos) {
         // 4. REDIRECIONA PARA chamados_abrir_resultado COM O ID
         // ============================================
         $parametro_email = $email_enviado ? '' : '&email=failed';
-        header("Location: index.php?page=visitante-abrir-chamado-resultado&id=" . $proximo_id_chamado . "&seguranca=" . $dados['codigoSeguranca'] . $parametro_email);
-        exit;
-    } catch (PDOException $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        if (isset($arquivo_salvo) && file_exists($arquivo_salvo['caminho_absoluto'])) {
-            unlink($arquivo_salvo['caminho_absoluto']);
-        }
-        $erro_envio = 'Erro ao salvar o chamado: ' . $e->getMessage();
-        error_log('❌ Erro ao criar chamado: ' . $e->getMessage());
-        error_log('SQL Chamado: ' . $sql_chamado);
-
-        // Redireciona com erro
-        header("Location: index.php?page=visitante-abrir-chamado-resultado&erro=" . urlencode($e->getMessage()));
+        $parametro_anexo = $anexo_falhou ? '&anexo=failed' : '';
+        header("Location: index.php?page=visitante-abrir-chamado-resultado&id=" . $proximo_id_chamado
+            . "&seguranca=" . rawurlencode($dados['codigoSeguranca']) . $parametro_email . $parametro_anexo);
         exit;
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-        if (isset($arquivo_salvo) && file_exists($arquivo_salvo['caminho_absoluto'])) {
-            unlink($arquivo_salvo['caminho_absoluto']);
-        }
-        $erro_envio = 'Erro: ' . $e->getMessage();
-        error_log('❌ Erro geral: ' . $e->getMessage());
-
-        // Redireciona com erro
-        header("Location: index.php?page=visitante-abrir-chamado-resultado&erro=" . urlencode($e->getMessage()));
+        // Detalhes técnicos só no log; o visitante recebe mensagem simples.
+        error_log('Erro ao criar chamado: ' . $e->getMessage());
+        $mensagem = $chamado_criado
+            ? 'O chamado #' . $id_chamado_criado . ' foi aberto, mas houve um erro ao concluir o envio.'
+            : 'Não foi possível abrir o chamado agora. Tente novamente em instantes.';
+        header("Location: index.php?page=visitante-abrir-chamado-resultado&erro=" . urlencode($mensagem));
         exit;
     }
 }
@@ -1234,4 +888,3 @@ if (!$dados_submetidos) {
     header('Location: index.php?page=visitante-abrir-chamado');
     exit;
 }
-?>
