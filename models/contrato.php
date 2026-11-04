@@ -53,6 +53,10 @@ function obterEquipamentosParaRelatorio($contratos) {
 }
 
 function obterNomeContato($id_contato) {
+    // Equipamento sem contato: devolve vazio (a API recusa id 0 e a página parava de carregar).
+    if ((int)$id_contato <= 0) {
+        return false;
+    }
     return erp_api('contato.obter', ['id' => (int)$id_contato]) ?: false;
 }
 

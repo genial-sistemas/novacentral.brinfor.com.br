@@ -32,10 +32,10 @@ include 'header.php'
                                 <?php foreach($contratos_outsourcing_equipamentos as $co): ?>
                                     <?php 
                                         $codigo = str_pad($co['codigo'], 4, "0", STR_PAD_LEFT); 
-                                        $contato_info = obterNomeContato($co['contato']);  
-                                        $contato_nome = $contato_info["nome"];
-                                        $contato_email = $contato_info["email"];
-                                        $contato_telefone = $contato_info["cel"];
+                                        $contato_info = obterNomeContato($co['contato']) ?: [];
+                                        $contato_nome = $contato_info["nome"] ?? '';
+                                        $contato_email = $contato_info["email"] ?? '';
+                                        $contato_telefone = $contato_info["cel"] ?? '';
                                         $numero_serie = trim((string)($co['sn'] ?? ''));
                                     ?>
                                     <option value="<?=htmlspecialchars((string)$co['id'], ENT_QUOTES, 'UTF-8')?>" data-codigo="<?=htmlspecialchars((string)$codigo, ENT_QUOTES, 'UTF-8')?>" data-nome="<?=htmlspecialchars((string)$contato_nome, ENT_QUOTES, 'UTF-8')?>" data-email="<?=htmlspecialchars((string)$contato_email, ENT_QUOTES, 'UTF-8')?>" data-telefone="<?=htmlspecialchars((string)$contato_telefone, ENT_QUOTES, 'UTF-8')?>"<?php if($co['id']==$frm_codigo_equipamento){ echo "selected"; } ?>><?=htmlspecialchars((string)$codigo, ENT_QUOTES, 'UTF-8')?> - <?=htmlspecialchars((string)$co['descricao'], ENT_QUOTES, 'UTF-8')?> - <?=htmlspecialchars((string)validaNomeContato($contato_nome), ENT_QUOTES, 'UTF-8')?><?php if ($numero_serie !== ''): ?> -- S/N: <?=htmlspecialchars($numero_serie, ENT_QUOTES, 'UTF-8')?><?php endif; ?></option>
