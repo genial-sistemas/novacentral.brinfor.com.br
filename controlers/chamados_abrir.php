@@ -173,8 +173,9 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'abrir_chamado') {
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>';
-            $_SESSION['id_chamado'] = obterUltimoChamado()["id"];
-            $_SESSION['id_seguranca'] = obterUltimoChamado()["seguranca"];
+            // A API devolve o id e o código do chamado criado (antes pegava o último chamado da tabela).
+            $_SESSION['id_chamado'] = $retorno['id'];
+            $_SESSION['id_seguranca'] = $retorno['seguranca'];
             header('Location: chamados_abrir-resultado');
             exit;
         }else{

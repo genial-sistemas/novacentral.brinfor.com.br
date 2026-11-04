@@ -4,4 +4,4 @@ chamados/
 .logs/
 logs/*.txt
 logs/*.txt.*
-.vscode/sftp.json
+.vscode/sftp.jsonmodels/erp_config.php

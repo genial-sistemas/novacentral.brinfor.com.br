@@ -1,227 +1,79 @@
 <?php
-require_once 'conexao.php';
+require_once __DIR__ . '/erp_api.php';
 require_once __DIR__ . '/email.php';
 
 const CHAMADO_STATUS_RESP_CLIENTE = 6;
 
-function obterTiposSolicitacao() {
-    $consulta = "SELECT * FROM `contrato_chamado_tipo_solicitacao`";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+function chamado_ids_contratos($contratos): array {
+    return array_values(array_unique(array_filter(array_map('intval', (array)$contratos), static fn($id) => $id > 0)));
 }
 
+function obterTiposSolicitacao() {
+    return erp_api('chamado.tipos_solicitacao') ?: [];
+}
 
 function obterUrgenciaSolicitacao() {
-    $consulta = "SELECT * FROM `contrato_chamado_tipo_urgencia`";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+    return erp_api('chamado.urgencias') ?: [];
 }
 
-// Para revisar
-
 function obterUltimosChamados($contratos, $qtd, $filtro='todos') {
-    $limit = "";
-    $condicao1 = "";
-
-    if ($qtd>0) $limit = "LIMIT ".$qtd;
-    if ($filtro=='aberto') $condicao1 = "AND id_situacao <= 6";
-    elseif ($filtro=='fechado') $condicao1 = "AND id_situacao = 7";
-
-    $contrato_string = implode(", ", $contratos);
-    $consulta = "SELECT a.*, b.status as 'situacao', c.descricao as 'tipo_contrato'
-    FROM contrato_chamado a
-    JOIN contrato_chamado_status b ON a.id_situacao = b.id
-    JOIN contrato_tipo c ON a.id_tipo_contrato=c.id
-    WHERE id_contrato IN (".$contrato_string.")
-    ".$condicao1."
-    ORDER BY data_abertura DESC
-    ".$limit.";";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+    return erp_api('chamado.ultimos', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'qtd' => (int)$qtd,
+        'filtro' => (string)$filtro,
+    ]) ?: [];
 }
 
 function contarChamadosFechados($contratos) {
-    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
-    if (!$contratos) {
-        return 0;
-    }
-
-    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
-    $consulta = getConexao()->prepare("
-        SELECT COUNT(*)
-        FROM contrato_chamado
-        WHERE id_contrato IN ($placeholders) AND id_situacao = 7
-    ");
-    $consulta->execute($contratos);
-    return (int)$consulta->fetchColumn();
+    return (int)erp_api('chamado.contar_fechados', ['contratos' => chamado_ids_contratos($contratos)]);
 }
 
 function obterChamadosFechadosPagina($contratos, $limite, $offset) {
-    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
-    if (!$contratos) {
-        return array();
-    }
-
-    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
-    $consulta = getConexao()->prepare("
-        SELECT chamado.*, status.status AS situacao, tipo.descricao AS tipo_contrato
-        FROM contrato_chamado chamado
-        JOIN contrato_chamado_status status ON status.id = chamado.id_situacao
-        JOIN contrato_tipo tipo ON tipo.id = chamado.id_tipo_contrato
-        WHERE chamado.id_contrato IN ($placeholders) AND chamado.id_situacao = 7
-        ORDER BY chamado.data_abertura DESC, chamado.id DESC
-        LIMIT ? OFFSET ?
-    ");
-    foreach ($contratos as $indice => $idContrato) {
-        $consulta->bindValue($indice + 1, $idContrato, PDO::PARAM_INT);
-    }
-    $consulta->bindValue(count($contratos) + 1, (int)$limite, PDO::PARAM_INT);
-    $consulta->bindValue(count($contratos) + 2, (int)$offset, PDO::PARAM_INT);
-    $consulta->execute();
-
-    return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    return erp_api('chamado.fechados_pagina', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'limite' => (int)$limite,
+        'offset' => (int)$offset,
+    ]) ?: [];
 }
 
 function obterUltimosChamadosDashboard($contratos) {
-    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
-    if (!$contratos) {
-        return array();
-    }
-
-    $marcadores = implode(', ', array_fill(0, count($contratos), '?'));
-    $consulta = "SELECT chamado.id, chamado.data_abertura,
-        COALESCE(ultima.data_ultima_atualizacao, chamado.data_abertura) AS data_ultima_atualizacao,
-        CASE WHEN chamado.id_situacao = 7 THEN 'finalizado' ELSE 'aberto' END AS situacao,
-        tipo.descricao AS tipo_contrato
-    FROM contrato_chamado chamado
-    LEFT JOIN contrato_tipo tipo ON tipo.id = chamado.id_tipo_contrato
-    LEFT JOIN (
-        SELECT id_chamado, MAX(CONCAT(data, ' ', hora)) AS data_ultima_atualizacao
-        FROM contrato_chamado_eventos
-        GROUP BY id_chamado
-    ) ultima ON ultima.id_chamado = chamado.id
-    WHERE chamado.id_contrato IN ($marcadores)
-    ORDER BY data_ultima_atualizacao DESC, chamado.id DESC
-    LIMIT 10";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute($contratos);
-
-    return $sth->fetchAll(PDO::FETCH_ASSOC);
+    return erp_api('chamado.ultimos_dashboard', ['contratos' => chamado_ids_contratos($contratos)]) ?: [];
 }
 
 function obterInteracaoPorTecnico($contratos, $mes_atual, $ano_atual) {
-    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
-    if (!$contratos) {
-        return array();
-    }
-
-    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
-    $condicoes = array("chamado.id_contrato IN ($placeholders)");
-    $parametros = $contratos;
-
-    if ((int)$ano_atual !== 0) {
-        if ((int)$mes_atual !== 0) {
-            $condicoes[] = 'MONTH(evento.data) = ?';
-            $parametros[] = (int)$mes_atual;
-        }
-        $condicoes[] = 'YEAR(evento.data) = ?';
-        $parametros[] = (int)$ano_atual;
-    }
-
-    // Eu conto pela data da interação e mantenho técnicos que atuaram antes de ficarem inativos.
-    $consulta = "SELECT pessoa.nome_pessoa AS tecnico, COUNT(*) AS total
-    FROM contrato_chamado AS chamado
-    INNER JOIN contrato_chamado_eventos AS evento ON evento.id_chamado = chamado.id
-    INNER JOIN funcionario ON funcionario.id_pessoa = evento.id_pessoa
-    INNER JOIN pessoa ON pessoa.id = funcionario.id_pessoa
-    WHERE " . implode(' AND ', $condicoes) . "
-    GROUP BY funcionario.id_pessoa, pessoa.nome_pessoa
-    ORDER BY total DESC, pessoa.nome_pessoa";
-
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute($parametros);
-    return $sth->fetchAll(PDO::FETCH_ASSOC);
+    return erp_api('chamado.interacao_por_tecnico', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'mes' => (int)$mes_atual,
+        'ano' => (int)$ano_atual,
+    ]) ?: [];
 }
 
 function obterQtdChamados($mes_atual, $ano_atual, $contratos) {
-    $contrato_string = implode(", ", $contratos);
-    $options = "id_contrato IN (".$contrato_string.")";
-    if ($ano_atual != 0) {
-        if($mes_atual!=0){
-            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }else{
-            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }
-    }
-    $consulta = "SELECT id FROM contrato_chamado WHERE $options";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
-    return sizeof($res);
+    return (int)erp_api('chamado.quantidade', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'mes' => (int)$mes_atual,
+        'ano' => (int)$ano_atual,
+    ]);
 }
 
 function obterQtdChamadosAbertos($mes_atual, $ano_atual, $contratos) {
-    $contrato_string = implode(", ", $contratos);
-    $options = "id_contrato IN (".$contrato_string.") AND id_situacao <= 6";
-    if ($ano_atual != 0) {
-        if($mes_atual!=0){
-            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }else{
-            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }
-    }
-    $consulta = "SELECT id FROM contrato_chamado WHERE $options";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
-    return sizeof($res);
+    return (int)erp_api('chamado.quantidade', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'mes' => (int)$mes_atual,
+        'ano' => (int)$ano_atual,
+        'somente_abertos' => true,
+    ]);
 }
 
 function obterHorasTrabalhadas($mes_atual, $ano_atual, $contratos) {
-    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos), static function ($id) {
-        return $id > 0;
-    })));
-    if (!$contratos) {
-        return '0:00:00';
-    }
+    // Soma em segundos para preservar totais acima de 24 horas.
+    $segundos = (int)erp_api('chamado.horas_segundos', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'mes' => (int)$mes_atual,
+        'ano' => (int)$ano_atual,
+    ]);
 
-    $condicoes = array('chamado.id_contrato IN (' . implode(', ', array_fill(0, count($contratos), '?')) . ')');
-    $parametros = $contratos;
-    if ((int)$ano_atual !== 0) {
-        if ((int)$mes_atual !== 0) {
-            $condicoes[] = 'MONTH(chamado.data_abertura) = ?';
-            $parametros[] = (int)$mes_atual;
-        }
-        $condicoes[] = 'YEAR(chamado.data_abertura) = ?';
-        $parametros[] = (int)$ano_atual;
-    }
-
-    // Cada horas_total registrada em um evento é uma duração; soma em segundos para preservar totais acima de 24 horas.
-    $consulta = "SELECT COALESCE(SUM(TIME_TO_SEC(evento.horas_total)), 0)
-    FROM contrato_chamado chamado
-    JOIN contrato_chamado_eventos evento ON evento.id_chamado = chamado.id
-    WHERE evento.horas_total IS NOT NULL
-      AND " . implode(' AND ', $condicoes);
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute($parametros);
-    $segundos = (int)$sth->fetchColumn();
-
-    $horas = intdiv($segundos, 3600);
-    $minutos = intdiv($segundos % 3600, 60);
-    $segundos = $segundos % 60;
-
-    return sprintf('%d:%02d:%02d', $horas, $minutos, $segundos);
+    return sprintf('%d:%02d:%02d', intdiv($segundos, 3600), intdiv($segundos % 3600, 60), $segundos % 60);
 }
 
 /**
@@ -236,30 +88,17 @@ function obterResultadoPesquisa($mes_atual, $ano_atual, $contratos) {
         "total_avaliados" => 0
     );
 
-    $contrato_string = implode(", ", $contratos);
-    $options = "id_contrato IN (".$contrato_string.")";
-    if ($ano_atual != 0) {
-        if($mes_atual!=0){
-            $options = "MONTH(data_abertura) = '".$mes_atual."' AND YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }else{
-            $options = "YEAR(data_abertura) = '".$ano_atual."' AND ".$options;
-        }
-    }
+    $notas = erp_api('chamado.notas_pesquisa', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'mes' => (int)$mes_atual,
+        'ano' => (int)$ano_atual,
+    ]) ?: [];
 
-    $consulta = "SELECT *
-    FROM contrato_chamado as chamado LEFT JOIN contrato_chamado_avaliacao ON chamado.id = id_chamado WHERE id_situacao=7 AND $options";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
-
-    foreach($res as $r) {
-        $nota = $r['nota'];
-
-        if($nota==3) $resultado['muito_satisfeito']++;
-        elseif($nota==2) $resultado['satisfeito']++;
-        elseif($nota==1) $resultado['nao_satisfeito']++;
-        elseif(empty($nota)) $resultado['nao_avaliados']++;
+    foreach ($notas as $nota) {
+        if ($nota == 3) $resultado['muito_satisfeito']++;
+        elseif ($nota == 2) $resultado['satisfeito']++;
+        elseif ($nota == 1) $resultado['nao_satisfeito']++;
+        elseif (empty($nota)) $resultado['nao_avaliados']++;
     }
     $resultado['total_avaliados'] = $resultado['muito_satisfeito'] + $resultado['satisfeito'] + $resultado['nao_satisfeito'];
 
@@ -267,206 +106,61 @@ function obterResultadoPesquisa($mes_atual, $ano_atual, $contratos) {
 }
 
 function obterChamadosPorSituacao($mes_atual, $ano_atual, $contratos) {
-    $contratos = array_values(array_unique(array_filter(array_map('intval', $contratos))));
-    if (!$contratos) {
-        return array();
-    }
-
-    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
-    $condicoes = array('chamado.id_contrato IN (' . $placeholders . ')');
-    $parametros = $contratos;
-
-    if ((int)$ano_atual !== 0) {
-        if ((int)$mes_atual !== 0) {
-            $condicoes[] = 'MONTH(chamado.data_abertura) = ?';
-            $parametros[] = (int)$mes_atual;
-        }
-        $condicoes[] = 'YEAR(chamado.data_abertura) = ?';
-        $parametros[] = (int)$ano_atual;
-    }
-
-    // Eu agrupo os chamados pelo status e aplico o mesmo período selecionado no dashboard.
-    $consulta = "SELECT status.status AS situacao, COUNT(*) AS total
-    FROM contrato_chamado chamado
-    JOIN contrato_chamado_status status ON status.id = chamado.id_situacao
-    WHERE " . implode(' AND ', $condicoes) . "
-    GROUP BY status.id, status.status
-    ORDER BY status.id";
-
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute($parametros);
-    return $sth->fetchAll(PDO::FETCH_ASSOC);
+    return erp_api('chamado.por_situacao', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'mes' => (int)$mes_atual,
+        'ano' => (int)$ano_atual,
+    ]) ?: [];
 }
 
 function obterChamado($id_chamado) {
-    $consulta = "SELECT a.*, b.status as 'situacao', c.descricao as 'tipo_contrato'
-    FROM contrato_chamado a
-    JOIN contrato_chamado_status b ON a.id_situacao = b.id
-    JOIN contrato_tipo c ON a.id_tipo_contrato=c.id
-    WHERE a.id = $id_chamado";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+    return erp_api('chamado.obter', ['id' => (int)$id_chamado]) ?: [];
 }
 
 function obterUltimoChamado() {
-    $consulta = "SELECT id, seguranca 
-    FROM contrato_chamado
-    ORDER BY id DESC LIMIT 1";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-
-    return $sth->fetch();
+    return erp_api('chamado.ultimo') ?: false;
 }
 
 function obterInteracoesPorChamados($id_chamado) {
-    $consulta = "SELECT a.*, b.nome_pessoa
-    FROM contrato_chamado_eventos a
-    LEFT JOIN pessoa b ON a.id_pessoa=b.id
-    WHERE a.id_chamado=$id_chamado
-    ORDER BY a.data ASC, a.hora ASC, COALESCE(a.id_evento, a.id) ASC";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+    return erp_api('chamado.interacoes', ['id' => (int)$id_chamado]) ?: [];
 }
 
 function obterRotuloEquipamentoChamado($id_tipo_contrato, $id_contrato, $id_equipamento) {
     $id_tipo_contrato = (int)$id_tipo_contrato;
-    $id_contrato = (int)$id_contrato;
     $id_equipamento = (int)$id_equipamento;
-    $dbh = getConexao();
-    if ($id_tipo_contrato === 1) {
-        $sql = 'SELECT equipamento.id, equipamento.codigo, tipo.tipo AS tipo_equipamento, contato.nome, contrato.etiqueta
-            FROM contrato_outsourcing_equipamentos equipamento
-            LEFT JOIN contrato_outsourcing_equipamentos_tipo tipo ON tipo.id = equipamento.tipo
-            LEFT JOIN pessoa_juridica_contatos contato ON contato.id = equipamento.contato
-            LEFT JOIN contrato_outsourcing contrato ON contrato.id_contrato = equipamento.contrato
-            WHERE equipamento.contrato = :contrato';
-        if ($id_equipamento > 0) {
-            $sql .= ' AND equipamento.id = :id';
-        } else {
-            $sql .= " AND equipamento.status = 'a'";
+    $linhas = erp_api('chamado.rotulo_equipamento', [
+        'id_tipo_contrato' => $id_tipo_contrato,
+        'id_contrato' => (int)$id_contrato,
+        'id_equipamento' => $id_equipamento,
+    ]) ?: [];
+
+    $coluna = static fn(string $nome) => array_values(array_filter(array_map('trim', array_column($linhas, $nome))));
+
+    if ($id_tipo_contrato === 1 && $linhas) {
+        $rotulos = array();
+        foreach ($linhas as $equipamento) {
+            $tipo = trim((string)($equipamento['tipo_equipamento'] ?? 'Equipamento'));
+            $etiqueta = str_pad(trim((string)($equipamento['etiqueta'] ?? '')), 2, '0', STR_PAD_LEFT);
+            $codigo = str_pad((string)$equipamento['codigo'], 4, '0', STR_PAD_LEFT);
+            $contato = trim((string)($equipamento['nome'] ?? ''));
+            $rotulos[] = $tipo . ' [' . $etiqueta . '|' . $codigo . ']' . ($contato !== '' ? ' - ' . $contato : '');
         }
-        $sql .= ' ORDER BY equipamento.codigo';
-        $consulta = $dbh->prepare($sql);
-        $parametros = array(':contrato' => $id_contrato);
-        if ($id_equipamento > 0) {
-            $parametros[':id'] = $id_equipamento;
+        return 'Equipamento: ' . implode('; ', $rotulos);
+    } elseif ($id_tipo_contrato === 2 && ($sites = $coluna('dominio'))) {
+        return 'Site: ' . implode('; ', $sites);
+    } elseif ($id_tipo_contrato === 4 && ($dominios = $coluna('dominio'))) {
+        return 'Domínio: ' . implode('; ', $dominios);
+    } elseif ($id_tipo_contrato === 5 && ($planos = $coluna('plano'))) {
+        return 'Plano de backup: ' . implode('; ', $planos);
+    } elseif ($id_tipo_contrato === 6 && ($produtos = $coluna('descricao'))) {
+        return 'Produto/serviço: ' . implode('; ', array_unique($produtos));
+    } elseif ($id_tipo_contrato === 7 && $linhas) {
+        $rotulos = array();
+        foreach ($linhas as $equipamento) {
+            $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
+            $rotulos[] = ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao'];
         }
-        $consulta->execute($parametros);
-        $equipamentos = $consulta->fetchAll(PDO::FETCH_ASSOC);
-        if ($equipamentos) {
-            $rotulos = array();
-            foreach ($equipamentos as $equipamento) {
-                $tipo = trim((string)($equipamento['tipo_equipamento'] ?? 'Equipamento'));
-                $etiqueta = str_pad(trim((string)($equipamento['etiqueta'] ?? '')), 2, '0', STR_PAD_LEFT);
-                $codigo = str_pad((string)$equipamento['codigo'], 4, '0', STR_PAD_LEFT);
-                $contato = trim((string)($equipamento['nome'] ?? ''));
-                $rotulos[] = $tipo . ' [' . $etiqueta . '|' . $codigo . ']' . ($contato !== '' ? ' - ' . $contato : '');
-            }
-            return 'Equipamento: ' . implode('; ', $rotulos);
-        }
-    } elseif ($id_tipo_contrato === 2) {
-        $sql = 'SELECT dominio
-            FROM contrato_hosting
-            WHERE id_contrato = :contrato';
-        if ($id_equipamento > 0) {
-            $sql .= ' AND id = :id';
-        }
-        $consulta = $dbh->prepare($sql);
-        $parametros = array(':contrato' => $id_contrato);
-        if ($id_equipamento > 0) {
-            $parametros[':id'] = $id_equipamento;
-        }
-        $consulta->execute($parametros);
-        $sites = array_column($consulta->fetchAll(PDO::FETCH_ASSOC), 'dominio');
-        $sites = array_values(array_filter(array_map('trim', $sites)));
-        if ($sites) {
-            return 'Site: ' . implode('; ', $sites);
-        }
-    } elseif ($id_tipo_contrato === 4) {
-        $sql = 'SELECT dominio
-            FROM contrato_dominio
-            WHERE id_contrato = :contrato';
-        if ($id_equipamento > 0) {
-            $sql .= ' AND id = :id';
-        }
-        $consulta = $dbh->prepare($sql);
-        $parametros = array(':contrato' => $id_contrato);
-        if ($id_equipamento > 0) {
-            $parametros[':id'] = $id_equipamento;
-        }
-        $consulta->execute($parametros);
-        $dominios = array_column($consulta->fetchAll(PDO::FETCH_ASSOC), 'dominio');
-        $dominios = array_values(array_filter(array_map('trim', $dominios)));
-        if ($dominios) {
-            return 'Domínio: ' . implode('; ', $dominios);
-        }
-    } elseif ($id_tipo_contrato === 5) {
-        $sql = 'SELECT plano.plano
-            FROM contrato_backup backup
-            JOIN contrato_backup_planos plano ON plano.id = backup.id_plano
-            WHERE backup.id_contrato = :contrato';
-        if ($id_equipamento > 0) {
-            $sql .= ' AND backup.id = :id';
-        }
-        $consulta = $dbh->prepare($sql);
-        $parametros = array(':contrato' => $id_contrato);
-        if ($id_equipamento > 0) {
-            $parametros[':id'] = $id_equipamento;
-        }
-        $consulta->execute($parametros);
-        $planos = array_column($consulta->fetchAll(PDO::FETCH_ASSOC), 'plano');
-        $planos = array_values(array_filter(array_map('trim', $planos)));
-        if ($planos) {
-            return 'Plano de backup: ' . implode('; ', $planos);
-        }
-    } elseif ($id_tipo_contrato === 6) {
-        $sql = 'SELECT produto.descricao
-            FROM contrato_suporte suporte
-            JOIN contrato_suporte_produto produto ON produto.id = suporte.id_produto
-            WHERE suporte.id_contrato = :contrato';
-        if ($id_equipamento > 0) {
-            $sql .= ' AND produto.id = :id';
-        }
-        $consulta = $dbh->prepare($sql);
-        $parametros = array(':contrato' => $id_contrato);
-        if ($id_equipamento > 0) {
-            $parametros[':id'] = $id_equipamento;
-        }
-        $consulta->execute($parametros);
-        $produtos = array_column($consulta->fetchAll(PDO::FETCH_ASSOC), 'descricao');
-        $produtos = array_values(array_filter(array_map('trim', $produtos)));
-        if ($produtos) {
-            return 'Produto/serviço: ' . implode('; ', array_unique($produtos));
-        }
-    } elseif ($id_tipo_contrato === 7) {
-        $sql = 'SELECT equipamento.descricao, equipamento.patrimonio
-            FROM contrato_locacao_equipamentos_locados locado
-            JOIN contrato_locacao_equipamentos equipamento ON equipamento.id = locado.id_equipamento
-            WHERE locado.id_contrato = :contrato';
-        if ($id_equipamento > 0) {
-            $sql .= ' AND equipamento.id = :id_equipamento';
-        }
-        $consulta = $dbh->prepare($sql);
-        $parametros = array(':contrato' => $id_contrato);
-        if ($id_equipamento > 0) {
-            $parametros[':id_equipamento'] = $id_equipamento;
-        }
-        $consulta->execute($parametros);
-        $equipamentos = $consulta->fetchAll(PDO::FETCH_ASSOC);
-        if ($equipamentos) {
-            $rotulos = array();
-            foreach ($equipamentos as $equipamento) {
-                $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
-                $rotulos[] = ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao'];
-            }
-            return 'Equipamento: ' . implode('; ', $rotulos);
-        }
+        return 'Equipamento: ' . implode('; ', $rotulos);
     }
 
     return $id_equipamento > 0 ? 'Item #' . $id_equipamento : 'Não informado';
@@ -480,142 +174,59 @@ function obterUltimasInteracoesPorChamados($chamados) {
             $ids_chamados[] = $id_chamado;
         }
     }
-
     $ids_chamados = array_values(array_unique($ids_chamados));
     if (!$ids_chamados) {
         return array();
     }
 
-    $placeholders = implode(', ', array_fill(0, count($ids_chamados), '?'));
-    $consulta = "SELECT ultima.id_chamado, ultima.id_pessoa, ultima.id_equipamento,
-                        ultima.data, ultima.hora, pessoa.nome_pessoa
-    FROM (
-        SELECT evento.id_chamado, evento.id_pessoa, evento.id_equipamento,
-               evento.data, evento.hora,
-               ROW_NUMBER() OVER (
-                   PARTITION BY evento.id_chamado
-                   ORDER BY evento.data DESC, evento.hora DESC, COALESCE(evento.id_evento, evento.id) DESC
-               ) AS ordem
-        FROM contrato_chamado_eventos evento
-        WHERE evento.id_chamado IN ($placeholders)
-    ) ultima
-    LEFT JOIN pessoa ON pessoa.id = ultima.id_pessoa
-    WHERE ultima.ordem = 1";
-
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute($ids_chamados);
-
     $interacoes = array();
-    foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $interacao) {
+    foreach (erp_api('chamado.ultimas_interacoes', ['ids' => $ids_chamados]) ?: [] as $interacao) {
         $interacoes[(int)$interacao['id_chamado']] = $interacao;
     }
     return $interacoes;
 }
 
 function criarInteracao($chamado_id, $id_pessoa, $id_equipamento, $descricao, $status, $situacao_chamado = null) {
-    $data = date('Y-m-d');
-    $hora = date('H:i:s');
-    $dbh = getConexao();
     try {
-        $dbh->beginTransaction();
-        $consulta = $dbh->prepare('INSERT INTO contrato_chamado_eventos(id_chamado, id_pessoa, id_equipamento, data, hora, descricao, status)
-            VALUES (:chamado, :pessoa, :equipamento, :data, :hora, :descricao, :status)');
-        $consulta->execute(array(
-            ':chamado' => (int)$chamado_id,
-            ':pessoa' => (int)$id_pessoa,
-            ':equipamento' => (int)$id_equipamento,
-            ':data' => $data,
-            ':hora' => $hora,
-            ':descricao' => $descricao,
-            ':status' => (int)$status
-        ));
-
-        if ($situacao_chamado !== null) {
-            // Eu registro a resposta e devolvo o chamado ao cliente na mesma transação.
-            $atualizacao = $dbh->prepare('UPDATE contrato_chamado SET id_situacao = :situacao WHERE id = :chamado AND id_situacao <> 7');
-            $atualizacao->execute(array(':situacao' => (int)$situacao_chamado, ':chamado' => (int)$chamado_id));
-        }
-
-        $dbh->commit();
-        return true;
-    } catch (Throwable $erro) {
-        if ($dbh->inTransaction()) {
-            $dbh->rollBack();
-        }
+        return (bool)erp_api('chamado.criar_interacao', [
+            'id_chamado' => (int)$chamado_id,
+            'id_pessoa' => (int)$id_pessoa,
+            'id_equipamento' => (int)$id_equipamento,
+            'descricao' => (string)$descricao,
+            'status' => (int)$status,
+            'situacao_chamado' => $situacao_chamado === null ? null : (int)$situacao_chamado,
+        ]);
+    } catch (ErpApiErro $erro) {
         return false;
     }
 }
 
+/**
+ * Abre o chamado e registra a primeira interação na mesma transação (no ERP).
+ * Retorna ['id' => ..., 'seguranca' => ...] ou false.
+ */
 function abrirChamado($contrato_id, $id_tipo_contrato,  $tipo_solicitacao, $frm_nome, $frm_email, $frm_telefone, $frm_codigo_equipamento, $frm_descricao_solicitacao) {
-    $data_abertura = date('Y-m-d H:i:s');
-    $id_situacao = 1;
-    $tipo_abertura = 2;
-    $tipo_atendimento = 2;
-    $resp_abertura = 0;
-    $urgencia = 4;
-    $seguranca = random_bytes(13);
-    // Eu gravo a hora de abertura em data_saida e deixo data_entrada vazia.
-    $consulta = "INSERT INTO contrato_chamado(id_contrato, id_tipo_contrato, resp_abertura, tipo_abertura, tipo_solicitacao, tipo_atendimento, urgencia, data_abertura, data_entrada, data_saida, id_situacao, seguranca, nome, email, telefone)
-    VALUES('$contrato_id', '$id_tipo_contrato', '$resp_abertura', '$tipo_abertura', '$tipo_solicitacao', '$tipo_atendimento', '$urgencia', '$data_abertura', NULL, '$data_abertura', '$id_situacao', '$seguranca', '$frm_nome', '$frm_email', '$frm_telefone')";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-
-    $interacaoCriada = false;
-    if($sth->rowCount()>0) {    
-        $consulta = "SELECT id
-        FROM contrato_chamado
-        ORDER BY id DESC
-        LIMIT 1";
-        $dbh = getConexao();
-        $sth = $dbh->prepare($consulta);
-        $sth->execute();
-        $id_chamado = $sth->fetchAll()[0]['id'];
-
-        $interacaoCriada = criarInteracao($id_chamado, 0, $frm_codigo_equipamento, $frm_descricao_solicitacao, 1);
+    try {
+        $chamado = erp_api('chamado.abrir', [
+            'id_contrato' => (int)$contrato_id,
+            'id_tipo_contrato' => (int)$id_tipo_contrato,
+            'tipo_solicitacao' => (int)$tipo_solicitacao,
+            'nome' => (string)$frm_nome,
+            'email' => (string)$frm_email,
+            'telefone' => (string)$frm_telefone,
+            'id_equipamento' => (int)$frm_codigo_equipamento,
+            'descricao' => (string)$frm_descricao_solicitacao,
+        ]);
+        return is_array($chamado) && !empty($chamado['id']) ? $chamado : false;
+    } catch (ErpApiErro $erro) {
+        return false;
     }
-    return $interacaoCriada;
 }
 
 function reabrirChamado($id_chamado) {
-    $dbh = getConexao();
     try {
-        $dbh->beginTransaction();
-        $atualizacao = $dbh->prepare('UPDATE contrato_chamado
-            SET id_situacao = 1
-            WHERE id = :id_chamado AND id_situacao = 7');
-        $atualizacao->execute(array(':id_chamado' => (int)$id_chamado));
-        if ($atualizacao->rowCount() === 0) {
-            $dbh->rollBack();
-            return false;
-        }
-
-        $consultaEquipamento = $dbh->prepare('SELECT id_equipamento
-            FROM contrato_chamado_eventos
-            WHERE id_chamado = :id_chamado
-            ORDER BY data DESC, hora DESC, COALESCE(id_evento, id) DESC
-            LIMIT 1');
-        $consultaEquipamento->execute(array(':id_chamado' => (int)$id_chamado));
-        $idEquipamento = (int)($consultaEquipamento->fetchColumn() ?: 0);
-
-        $evento = $dbh->prepare('INSERT INTO contrato_chamado_eventos
-            (id_chamado, id_pessoa, id_equipamento, data, hora, descricao, status)
-            VALUES (:id_chamado, 0, :id_equipamento, :data, :hora, :descricao, 3)');
-        $evento->execute(array(
-            ':id_chamado' => (int)$id_chamado,
-            ':id_equipamento' => $idEquipamento,
-            ':data' => date('Y-m-d'),
-            ':hora' => date('H:i:s'),
-            ':descricao' => 'Chamado foi reaberto pelo Usuário'
-        ));
-
-        $dbh->commit();
-        return true;
-    } catch (Throwable $erro) {
-        if ($dbh->inTransaction()) {
-            $dbh->rollBack();
-        }
+        return (bool)erp_api('chamado.reabrir', ['id' => (int)$id_chamado]);
+    } catch (ErpApiErro $erro) {
         error_log('Falha ao reabrir chamado ' . (int)$id_chamado . ': ' . $erro->getMessage());
         return false;
     }
@@ -624,10 +235,7 @@ function reabrirChamado($id_chamado) {
 function notificarReaberturaChamado($chamado) {
     $emailGerente = '';
     try {
-        $dbh = getConexao();
-        $consulta = $dbh->prepare('SELECT email_gerente FROM contrato WHERE id = :id_contrato');
-        $consulta->execute(array(':id_contrato' => (int)$chamado['id_contrato']));
-        $emailGerente = trim((string)$consulta->fetchColumn());
+        $emailGerente = trim((string)erp_api('contrato.email_gerente', ['id' => (int)$chamado['id_contrato']]));
     } catch (Throwable $erro) {
         error_log('Falha ao buscar o e-mail do gerente do contrato do chamado ' . (int)$chamado['id'] . ': ' . $erro->getMessage());
     }
@@ -758,109 +366,34 @@ function notificarReaberturaChamado($chamado) {
 }
 
 function obterChamadosPorPeriodo($contrato, $data_inicial, $data_final) {
-    $consulta = "SELECT a.*, b.nome_pessoa
-    FROM contrato_chamado a
-    JOIN pessoa b ON a.resp_abertura=b.id
-    WHERE a.id_contrato = :contrato
-      AND a.data_abertura >= :data_inicial
-      AND a.data_abertura < DATE_ADD(:data_final, INTERVAL 1 DAY)";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute(array(
-        ':contrato' => (int)$contrato,
-        ':data_inicial' => $data_inicial,
-        ':data_final' => $data_final
-    ));
-    return $sth->fetchAll();
+    return erp_api('chamado.por_periodo', [
+        'contrato' => (int)$contrato,
+        'data_inicial' => (string)$data_inicial,
+        'data_final' => (string)$data_final,
+    ]) ?: [];
 }
 
 function obterChamadosFechadosPorPeriodo($contrato, $data_inicial, $data_final) {
-    $consulta = "SELECT chamado.*, pessoa.nome_pessoa,
-        fechamento.data_fechamento,
-        fechamento.horas_totais_segundos
-    FROM contrato_chamado chamado
-    LEFT JOIN pessoa ON pessoa.id = chamado.resp_abertura
-    JOIN (
-        SELECT id_chamado,
-               MAX(CONCAT(data, ' ', hora)) AS data_fechamento,
-               COALESCE(SUM(TIME_TO_SEC(horas_total)), 0) AS horas_totais_segundos
-        FROM contrato_chamado_eventos
-        GROUP BY id_chamado
-    ) fechamento ON fechamento.id_chamado = chamado.id
-    WHERE chamado.id_contrato = :contrato
-      AND chamado.id_situacao = 7
-      AND fechamento.data_fechamento >= :data_inicial
-      AND fechamento.data_fechamento < DATE_ADD(:data_final, INTERVAL 1 DAY)
-    ORDER BY data_fechamento DESC, chamado.id DESC";
-
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute(array(
-        ':contrato' => (int)$contrato,
-        ':data_inicial' => $data_inicial . ' 00:00:00',
-        ':data_final' => $data_final . ' 00:00:00'
-    ));
-
-    return $sth->fetchAll(PDO::FETCH_ASSOC);
+    return erp_api('chamado.fechados_por_periodo', [
+        'contrato' => (int)$contrato,
+        'data_inicial' => (string)$data_inicial,
+        'data_final' => (string)$data_final,
+    ]) ?: [];
 }
 
 function obterChamadosPorEquipamentoPeriodo($contrato, $equipamento, $data_inicial, $data_final) {
-    $consulta = "SELECT chamado.*, pessoa.nome_pessoa, fechamento.data_fechamento
-    FROM contrato_chamado chamado
-    JOIN pessoa ON pessoa.id = chamado.resp_abertura
-    JOIN (
-        SELECT id_chamado, MAX(CONCAT(data, ' ', hora)) AS data_fechamento
-        FROM contrato_chamado_eventos
-        GROUP BY id_chamado
-    ) fechamento ON fechamento.id_chamado = chamado.id
-    WHERE chamado.id_contrato = :contrato
-      AND chamado.id_situacao = 7
-      AND fechamento.data_fechamento >= :data_inicial
-      AND fechamento.data_fechamento < DATE_ADD(:data_final, INTERVAL 1 DAY)
-      AND EXISTS (
-          SELECT 1
-          FROM contrato_chamado_eventos evento
-          WHERE evento.id_chamado = chamado.id
-            AND evento.id_equipamento = :equipamento
-      )
-    ORDER BY fechamento.data_fechamento DESC";
-
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute(array(
-        ':contrato' => (int)$contrato,
-        ':equipamento' => (int)$equipamento,
-        ':data_inicial' => $data_inicial,
-        ':data_final' => $data_final
-    ));
-    return $sth->fetchAll();
+    return erp_api('chamado.por_equipamento_periodo', [
+        'contrato' => (int)$contrato,
+        'equipamento' => (int)$equipamento,
+        'data_inicial' => (string)$data_inicial,
+        'data_final' => (string)$data_final,
+    ]) ?: [];
 }
 
 function obterChamadosTodosEquipamentosPeriodo($contratos, $data_inicial, $data_final) {
-    $contratos = array_values(array_unique(array_map('intval', $contratos)));
-    if (!$contratos) {
-        return array();
-    }
-
-    $placeholders = implode(', ', array_fill(0, count($contratos), '?'));
-    $consulta = "SELECT DISTINCT chamado.*, pessoa.nome_pessoa, evento.id_equipamento, fechamento.data_fechamento
-    FROM contrato_chamado chamado
-    JOIN pessoa ON pessoa.id = chamado.resp_abertura
-    JOIN contrato_chamado_eventos evento ON evento.id_chamado = chamado.id
-    JOIN (
-        SELECT id_chamado, MAX(CONCAT(data, ' ', hora)) AS data_fechamento
-        FROM contrato_chamado_eventos
-        GROUP BY id_chamado
-    ) fechamento ON fechamento.id_chamado = chamado.id
-    WHERE chamado.id_contrato IN ($placeholders)
-      AND chamado.id_situacao = 7
-      AND fechamento.data_fechamento >= ?
-      AND fechamento.data_fechamento < DATE_ADD(?, INTERVAL 1 DAY)
-      AND evento.id_equipamento > 0
-    ORDER BY fechamento.data_fechamento DESC";
-
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute(array_merge($contratos, array($data_inicial, $data_final)));
-    return $sth->fetchAll();
+    return erp_api('chamado.todos_equipamentos_periodo', [
+        'contratos' => chamado_ids_contratos($contratos),
+        'data_inicial' => (string)$data_inicial,
+        'data_final' => (string)$data_final,
+    ]) ?: [];
 }

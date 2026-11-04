@@ -1,72 +1,24 @@
 <?php
-require_once 'conexao.php';
+require_once __DIR__ . '/erp_api.php';
 
 function obterContratosTiposAtivos() {
-    $consulta = "SELECT id, descricao FROM contrato_tipo WHERE status='a'";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+    return erp_api('contrato.tipos_ativos') ?: [];
 }
 
 function obterContratosAtivos($ids_contatos) {
-
-    $contratos_string = implode(", ", $ids_contatos);
-    $consulta = "SELECT c.id, p.nome_pessoa as gerente, t.id as id_tipo, t.descricao as tipo_contrato, c.dia_vencimento, c.valor,
-    (SELECT GROUP_CONCAT(DISTINCT h.dominio ORDER BY h.dominio SEPARATOR ', ') FROM contrato_hosting h WHERE h.id_contrato=c.id) AS dominio
-    FROM contrato as c
-    LEFT JOIN contrato_tipo as t ON c.id_tipo=t.id
-    LEFT JOIN pessoa as p ON c.vendedor=p.id
-    WHERE c.id IN ($contratos_string) AND c.status=2";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $contratosAtivos = $sth->fetchAll();
-
-    return $contratosAtivos;
+    return erp_api('contrato.ativos', ['contratos' => array_values((array)$ids_contatos)]) ?: [];
 }
 
 function obterContratoOutsourcingEquipamentosaAtivos($id_contato) {
-    $consulta = "SELECT equipamento.*, contato.nome AS nome_contato
-    FROM contrato_outsourcing_equipamentos equipamento
-    LEFT JOIN pessoa_juridica_contatos contato ON contato.id = equipamento.contato
-    WHERE equipamento.contrato = :contrato
-    AND equipamento.status = 'a'
-    ORDER BY equipamento.codigo ASC";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute(array(':contrato' => (int)$id_contato));
-    return $sth->fetchAll();
+    return erp_api('contrato.outsourcing_equipamentos_ativos', ['id_contrato' => (int)$id_contato]) ?: [];
 }
 
 function obterEquipamentosLocacaoContratos($contratos) {
-    $ids = array_values(array_unique(array_filter(array_map('intval', $contratos))));
-    if (!$ids) {
-        return array();
-    }
-
-    $marcadores = implode(', ', array_fill(0, count($ids), '?'));
-    $consulta = getConexao()->prepare("
-        SELECT locado.id AS id_locacao, locado.id_contrato, locado.id_equipamento,
-               equipamento.descricao, equipamento.patrimonio,
-               contato.nome, contato.email, contato.cel AS telefone
-        FROM contrato_locacao_equipamentos_locados locado
-        JOIN contrato_locacao_equipamentos equipamento ON equipamento.id = locado.id_equipamento
-        JOIN contrato contrato ON contrato.id = locado.id_contrato
-        LEFT JOIN pessoa_juridica_contatos contato ON contato.id = locado.id_contato
-        WHERE locado.id_contrato IN ($marcadores)
-          AND contrato.id_tipo = 7
-          AND contrato.status = 2
-          AND equipamento.status = 1
-        ORDER BY locado.id_contrato, equipamento.descricao
-    ");
-    $consulta->execute($ids);
-    return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    return erp_api('contrato.locacao_equipamentos', ['contratos' => array_values((array)$contratos)]) ?: [];
 }
 
 function obterEquipamentosParaRelatorio($contratos) {
     $equipamentos = array();
-    $dbh = getConexao();
 
     foreach ($contratos as $contrato) {
         $id_contrato = (int)$contrato['id'];
@@ -87,15 +39,7 @@ function obterEquipamentosParaRelatorio($contratos) {
                 $equipamentos[] = $equipamento;
             }
         } elseif ($id_tipo === 7) {
-            $consulta = "SELECT DISTINCT equipamento.id, equipamento.descricao, equipamento.patrimonio
-            FROM contrato_locacao_equipamentos_locados locado
-            JOIN contrato_locacao_equipamentos equipamento ON equipamento.id = locado.id_equipamento
-            WHERE locado.id_contrato = :id_contrato
-            ORDER BY equipamento.descricao";
-            $sth = $dbh->prepare($consulta);
-            $sth->execute(array(':id_contrato' => $id_contrato));
-
-            foreach ($sth->fetchAll(PDO::FETCH_ASSOC) as $equipamento) {
+            foreach (erp_api('contrato.locacao_equipamentos_relatorio', ['id_contrato' => $id_contrato]) ?: [] as $equipamento) {
                 $equipamento['id_contrato'] = $id_contrato;
                 $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
                 $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
@@ -109,116 +53,41 @@ function obterEquipamentosParaRelatorio($contratos) {
 }
 
 function obterNomeContato($id_contato) {
-    $consulta = "SELECT * FROM pessoa_juridica_contatos 
-    WHERE id=$id_contato";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $resultado = $sth->fetch();
-
-    return $resultado;
+    return erp_api('contato.obter', ['id' => (int)$id_contato]) ?: false;
 }
 
 function obterEtiqueta($id_contato) {
-    $consulta = "SELECT etiqueta FROM contrato_outsourcing WHERE id_contrato=$id_contato";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $resultado = $sth->fetch();
-    return $resultado['etiqueta'];
+    return erp_api('contrato.etiqueta', ['id_contrato' => (int)$id_contato]);
 }
-
 
 function obterContratos($contratos_ids) {
-    $contratos_string = implode(", ", $contratos_ids);
-    $consulta = "SELECT a.*, b.descricao AS 'tipo_nome'
-    FROM contrato a
-    JOIN contrato_tipo b ON a.id_tipo=b.id
-    WHERE a.id IN ($contratos_string)";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll();
+    return erp_api('contrato.lista', ['contratos' => array_values((array)$contratos_ids)]) ?: [];
 }
-
 
 function obterContratoOutsourcingPorId($id) {
-    $consulta = "SELECT * FROM contrato_outsourcing_equipamentos WHERE id=$id";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll()[0];
+    return erp_api('contrato.outsourcing_equipamento', ['id' => (int)$id]);
 }
 
-
-
-
 function obterMaquinasAtivas($contratos) {
-    $contrato_string = implode(", ", $contratos);
-    $consulta = "SELECT id,contrato,status,codigo,usuario, patrimonio 
-    FROM contrato_outsourcing_equipamentos 
-    WHERE contrato IN (".$contrato_string.")
-    AND status='a'";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
-    return sizeof($res);
+    return (int)erp_api('contrato.qtd_maquinas', ['contratos' => array_values((array)$contratos), 'status' => 'a']);
 }
 
 function obterMaquinasInativas($contratos) {
-    $contrato_string = implode(", ", $contratos);
-    $consulta = "SELECT id,contrato,status,codigo,usuario, patrimonio 
-    FROM contrato_outsourcing_equipamentos 
-    WHERE contrato IN (".$contrato_string.")
-    AND status='i'";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    $res = $sth->fetchAll();
-    return sizeof($res);
+    return (int)erp_api('contrato.qtd_maquinas', ['contratos' => array_values((array)$contratos), 'status' => 'i']);
 }
 
-
 function obterContratoHospedagem($contrato_id) {
-    $consulta = "SELECT *
-    FROM contrato_hosting
-    WHERE id_contrato=$contrato_id";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll()[0];
+    return erp_api('contrato.hospedagem', ['id_contrato' => (int)$contrato_id]);
 }
 
 function obterContratoHospedagemPorId($id) {
-    $consulta = "SELECT *
-    FROM contrato_hosting
-    WHERE id=$id";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll()[0];
+    return erp_api('contrato.hospedagem_por_id', ['id' => (int)$id]);
 }
-
 
 function obterContratoBackup($contrato_id) {
-    $consulta = "SELECT a.*, b.plano
-    FROM contrato_backup a
-    JOIN contrato_backup_planos b ON a.id_plano=b.id
-    WHERE a.id_contrato = $contrato_id";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll()[0];
+    return erp_api('contrato.backup', ['id_contrato' => (int)$contrato_id]);
 }
 
-
 function obterContratoBackupPorId($id) {
-    $consulta = "SELECT *
-    FROM contrato_backup
-    WHERE id=$id";
-    $dbh = getConexao();
-    $sth = $dbh->prepare($consulta);
-    $sth->execute();
-    return $sth->fetchAll()[0];
+    return erp_api('contrato.backup_por_id', ['id' => (int)$id]);
 }
