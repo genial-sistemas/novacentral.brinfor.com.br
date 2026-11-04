@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../models/conexao.php';
 require_once __DIR__ . '/../models/equipamentos_cliente.php';
 
 $token = (string)($_POST['token'] ?? $_GET['token'] ?? '');

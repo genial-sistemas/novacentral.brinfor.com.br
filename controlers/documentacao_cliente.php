@@ -43,7 +43,7 @@ if ($cacheValido) {
     $idContrato = (int)$cachePdf['id_contrato'];
     $dbh = null;
 } else {
-    $dbh = getConexao();
+    $dbh = null; // dados via API do ERP (models/erp_api.php)
     $idContrato = obterContratoHelpdesk($_SESSION['contratos'], $dbh);
 
     if (!$idContrato) {

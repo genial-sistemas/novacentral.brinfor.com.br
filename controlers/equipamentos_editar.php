@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../models/conexao.php';
 require_once __DIR__ . '/../models/documentacao_cliente.php';
 require_once __DIR__ . '/../models/equipamentos_cliente.php';
 
@@ -8,7 +7,7 @@ if (empty($_SESSION['id_pessoa']) || !is_array($_SESSION['contratos'] ?? null)) 
     exit;
 }
 
-$dbh = getConexao();
+$dbh = null; // dados via API do ERP (models/erp_api.php)
 if (obterContratoHelpdesk($_SESSION['contratos'], $dbh) === null) {
     http_response_code(403);
     include __DIR__ . '/../views/404.php';
