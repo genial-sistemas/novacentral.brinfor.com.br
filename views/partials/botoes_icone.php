@@ -11,4 +11,8 @@
 .btn-reabrir { color: #0168fa; }
 .btn-reabrir:hover { background: #0168fa; border-color: #0168fa; color: #fff; }
 .chamados-detalhes { color: #596882; font-size: 12px; }
+/* Urgência: 1 Crítica, 2 Alta, 3 Baixa, 4 Padrão (tabela contrato_chamado_tipo_urgencia) */
+.urgencia { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; background: #eef0f4; color: #596882; }
+.urgencia-1 { background: #fdecea; color: #c62828; }
+.urgencia-2 { background: #fff4ec; color: #d9661f; }
 </style>

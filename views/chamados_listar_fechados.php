@@ -21,6 +21,7 @@ include __DIR__ . '/partials/botoes_icone.php'; ?>
                         <th scope="col">Aberto por</th>
                         <th scope="col">Detalhes</th>
                         <th scope="col">Última Interação</th>
+                        <th scope="col">Urgência</th>
                         <th scope="col">Status</th>
                         <th scope="col">Opções</th>
                 </tr>
@@ -38,6 +39,7 @@ include __DIR__ . '/partials/botoes_icone.php'; ?>
                             <td><?=$h(trim((string)$cf['solicitante']) !== '' ? $cf['solicitante'] : 'Não informado')?></td>
                             <td class="chamados-detalhes"><?=$h($detalhes !== '' ? $detalhes : '-')?></td>
                             <td><?=$h($ultima)?></td>
+                            <td><span class="urgencia urgencia-<?=(int)($cf['id_urgencia'] ?? 0)?>"><?=$h($cf['urgencia'] ?: 'Padrão')?></span></td>
                             <td><?=$h($cf['situacao'])?></td>
                             <td>
                                 <div class="chamados-acoes">
@@ -59,7 +61,7 @@ include __DIR__ . '/partials/botoes_icone.php'; ?>
                 <?php endforeach; ?>
                 <?php if (!$chamados_fechados): ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted">Nenhum chamado fechado encontrado.</td>
+                            <td colspan="8" class="text-center text-muted">Nenhum chamado fechado encontrado.</td>
                         </tr>
                 <?php endif; ?>
             </tbody>

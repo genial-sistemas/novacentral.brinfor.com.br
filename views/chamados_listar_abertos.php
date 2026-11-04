@@ -33,6 +33,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                             <th>Aberto por</th>
                             <th>Detalhes</th>
                             <th>Última Interação</th>
+                            <th>Urgência</th>
                             <th>Status</th>
                             <th>Opções</th>
                         </tr>
@@ -40,7 +41,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                     <tbody>
                     <?php if (empty($chamados_abertos)): ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted">Não existem chamados em aberto.</td>
+                            <td colspan="8" class="text-center text-muted">Não existem chamados em aberto.</td>
                         </tr>
                     <?php else: ?>
                     <?php foreach ($chamados_abertos as $ca):
@@ -55,6 +56,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                             <td><?=$h(trim((string)$ca['solicitante']) !== '' ? $ca['solicitante'] : 'Não informado')?></td>
                             <td class="chamados-detalhes"><?=$h($detalhes !== '' ? $detalhes : '-')?></td>
                             <td><?=$h($ultima)?></td>
+                            <td><span class="urgencia urgencia-<?=(int)($ca['id_urgencia'] ?? 0)?>"><?=$h($ca['urgencia'] ?: 'Padrão')?></span></td>
                             <td><?=$h($ca['situacao'])?></td>
                             <td>
                                 <div class="chamados-acoes">

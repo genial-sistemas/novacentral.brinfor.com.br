@@ -167,33 +167,37 @@
     overflow-wrap: anywhere;
 }
 
-/* 7 colunas: ID, Tipo, Aberto por, Detalhes, Última Interação, Status, Opções */
+/* 8 colunas: ID, Tipo, Aberto por, Detalhes, Última Interação, Urgência, Status, Opções */
 .chamados-fechados-table th:nth-child(1) {
     width: 6%;
 }
 
 .chamados-fechados-table th:nth-child(2) {
-    width: 13%;
+    width: 12%;
 }
 
 .chamados-fechados-table th:nth-child(3) {
-    width: 16%;
-}
-
-.chamados-fechados-table th:nth-child(4) {
-    width: 25%;
-}
-
-.chamados-fechados-table th:nth-child(5) {
     width: 15%;
 }
 
-.chamados-fechados-table th:nth-child(6) {
+.chamados-fechados-table th:nth-child(4) {
+    width: 22%;
+}
+
+.chamados-fechados-table th:nth-child(5) {
     width: 13%;
 }
 
+.chamados-fechados-table th:nth-child(6) {
+    width: 10%;
+}
+
 .chamados-fechados-table th:nth-child(7) {
-    width: 12%;
+    width: 11%;
+}
+
+.chamados-fechados-table th:nth-child(8) {
+    width: 11%;
 }
 
 .chamados-fechados-table .chamados-acoes {
