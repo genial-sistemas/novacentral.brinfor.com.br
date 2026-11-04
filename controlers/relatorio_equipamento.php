@@ -16,9 +16,26 @@ $equipamentos_por_referencia = array();
 foreach ($equipamentos as $equipamento) {
     $equipamentos_por_referencia[$equipamento['referencia']] = $equipamento;
 }
+// Filtro Helpdesk/Locação: só aparece quando o cliente tem contrato ativo dos dois tipos.
+$tipos_com_equipamento = array();
+foreach ($contratos as $contrato) {
+    if (in_array((int)$contrato['id_tipo'], array(1, 7), true)) {
+        $tipos_com_equipamento[(int)$contrato['id_tipo']] = true;
+    }
+}
+$mostrar_filtro_tipo = count($tipos_com_equipamento) > 1;
+$tipo_filtro = (int)($_POST['tipo_contrato'] ?? 0);
+if (!$mostrar_filtro_tipo || !in_array($tipo_filtro, array(1, 7), true)) {
+    $tipo_filtro = 0; // 0 = todos os tipos
+}
+
 $chamados = array();
 $chamados_primeira_interacao = array();
 $equipamento_selecionado = $equipamentos_por_referencia[$referencia] ?? null;
+// O equipamento escolhido precisa ser do tipo filtrado.
+if ($equipamento_selecionado && $tipo_filtro && (int)$equipamento_selecionado['id_tipo'] !== $tipo_filtro) {
+    $equipamento_selecionado = null;
+}
 $erro_relatorio = null;
 $relatorio_executado = false;
 
@@ -49,7 +66,8 @@ if (isset($_POST['acao']) && $_POST['acao'] === 'filtrar') {
         if ($referencia === 'todos') {
             $contratos_com_equipamentos = array();
             foreach ($contratos as $contrato) {
-                if (in_array((int)$contrato['id_tipo'], array(1, 7), true)) {
+                $tipo_contrato = (int)$contrato['id_tipo'];
+                if (in_array($tipo_contrato, array(1, 7), true) && (!$tipo_filtro || $tipo_contrato === $tipo_filtro)) {
                     $contratos_com_equipamentos[] = (int)$contrato['id'];
                 }
             }

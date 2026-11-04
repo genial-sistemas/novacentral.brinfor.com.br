@@ -20,20 +20,32 @@
                     <input type="text" class="form-control" id="data_final" name="data_final" value="<?=htmlspecialchars($data_final_texto, ENT_QUOTES, 'UTF-8')?>" placeholder="DD/MM/AAAA" inputmode="numeric" required>
                 </div>
             </div>
-            <div class="col-md-4">
+            <?php if ($mostrar_filtro_tipo): ?>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="tipo_contrato">Tipo de contrato</label>
+                    <select class="form-control" id="tipo_contrato" name="tipo_contrato">
+                        <option value="0" <?=($tipo_filtro === 0 ? 'selected' : '')?>>Todos</option>
+                        <option value="1" <?=($tipo_filtro === 1 ? 'selected' : '')?>>Helpdesk</option>
+                        <option value="7" <?=($tipo_filtro === 7 ? 'selected' : '')?>>Locação</option>
+                    </select>
+                </div>
+            </div>
+            <?php endif; ?>
+            <div class="<?=$mostrar_filtro_tipo ? 'col-md-3' : 'col-md-4'?>">
                 <div class="form-group">
                     <label for="equipamento">Equipamento</label>
                     <select class="form-control" id="equipamento" name="equipamento" required>
                         <option value="todos" <?=($referencia === 'todos' ? 'selected' : '')?>>Todos os equipamentos</option>
                         <?php foreach ($equipamentos as $equipamento): ?>
-                            <option value="<?=htmlspecialchars($equipamento['referencia'], ENT_QUOTES, 'UTF-8')?>" <?=($referencia === $equipamento['referencia'] ? 'selected' : '')?>>
+                            <option value="<?=htmlspecialchars($equipamento['referencia'], ENT_QUOTES, 'UTF-8')?>" data-tipo="<?=(int)$equipamento['id_tipo']?>" <?=($referencia === $equipamento['referencia'] ? 'selected' : '')?>>
                                 <?=htmlspecialchars($equipamento['rotulo'], ENT_QUOTES, 'UTF-8')?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="<?=$mostrar_filtro_tipo ? 'col-md-1' : 'col-md-2'?>">
                 <div class="form-group">
                     <label></label>
                     <button type="submit" class="btn btn-az-primary relatorio-listar" name="acao" value="filtrar">Listar</button>
@@ -41,6 +53,28 @@
             </div>
         </div>
     </form>
+    <?php if ($mostrar_filtro_tipo): ?>
+    <script>
+    // Mostra no campo Equipamento só os equipamentos do tipo de contrato escolhido.
+    (function () {
+        var tipo = document.getElementById('tipo_contrato');
+        var equipamento = document.getElementById('equipamento');
+        function filtrar() {
+            var escolhido = tipo.value;
+            for (var i = 0; i < equipamento.options.length; i++) {
+                var opcao = equipamento.options[i];
+                if (!opcao.dataset.tipo) continue; // "Todos os equipamentos"
+                var visivel = escolhido === '0' || opcao.dataset.tipo === escolhido;
+                opcao.hidden = !visivel;
+                opcao.disabled = !visivel;
+                if (!visivel && opcao.selected) equipamento.value = 'todos';
+            }
+        }
+        tipo.addEventListener('change', filtrar);
+        filtrar();
+    })();
+    </script>
+    <?php endif; ?>
 
     <?php if ($erro_relatorio !== null): ?>
         <div class="alert alert-danger" role="alert"><?=htmlspecialchars($erro_relatorio, ENT_QUOTES, 'UTF-8')?></div>

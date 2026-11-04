@@ -27,6 +27,7 @@ function obterEquipamentosParaRelatorio($contratos) {
         if ($id_tipo === 1) {
             foreach (obterContratoOutsourcingEquipamentosaAtivos($id_contrato) as $equipamento) {
                 $equipamento['id_contrato'] = $id_contrato;
+                $equipamento['id_tipo'] = 1; // Helpdesk
                 $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
                 $responsavel = trim((string)($equipamento['usuario'] ?? ''));
                 if ($responsavel === '') {
@@ -41,6 +42,7 @@ function obterEquipamentosParaRelatorio($contratos) {
         } elseif ($id_tipo === 7) {
             foreach (erp_api('contrato.locacao_equipamentos_relatorio', ['id_contrato' => $id_contrato]) ?: [] as $equipamento) {
                 $equipamento['id_contrato'] = $id_contrato;
+                $equipamento['id_tipo'] = 7; // Locação
                 $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
                 $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
                 $equipamento['rotulo'] = $id_contrato . ' - ' . ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao'];
