@@ -176,6 +176,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
         preencher('ultima', dados.ultima_interacao);
         preencher('tipo', c.tipo_contrato);
         preencher('atendimento', c.tipo_atendimento);
+        preencher('aberto_por', c.aberto_por);
         preencher('abertura', c.data_abertura);
         preencher('numero', c.id);
         if (dados.equipamento !== undefined) preencher('equipamento', dados.equipamento);

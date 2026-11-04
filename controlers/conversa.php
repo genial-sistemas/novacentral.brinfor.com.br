@@ -118,6 +118,8 @@ try {
         'chamado' => [
             'id' => (int)$chamado['id'],
             'tipo_contrato' => (string)($chamado['tipo_contrato'] ?? ''),
+            // resp_abertura <> 0: nome do cadastro da pessoa; senão o nome digitado na abertura (regra na API).
+            'aberto_por' => trim((string)($chamado['aberto_por'] ?? '')) !== '' ? $chamado['aberto_por'] : 'Não informado',
             'tipo_atendimento' => trim((string)($chamado['tipo_atendimento'] ?? '')) !== '' ? $chamado['tipo_atendimento'] : 'Não informado',
             'situacao' => (string)($chamado['situacao'] ?? ''),
             'id_situacao' => (int)$chamado['id_situacao'],

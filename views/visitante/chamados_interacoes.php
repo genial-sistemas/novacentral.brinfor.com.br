@@ -56,7 +56,7 @@ $h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF
                 <span class="rotulo">Tipo Atendimento</span>
                 <span class="valor" data-conversa="atendimento">…</span>
                 <span class="rotulo">Aberto por</span>
-                <span class="valor"><?=$h(trim((string)($chamado['nome'] ?? '')) !== '' ? $chamado['nome'] : 'Não informado')?></span>
+                <span class="valor" data-conversa="aberto_por">…</span>
                 <span class="rotulo">Técnico responsável</span>
                 <span class="valor" data-conversa="tecnico">…</span>
             </div>
