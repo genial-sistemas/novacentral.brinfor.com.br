@@ -33,7 +33,9 @@ include 'header.php'
         <section class="chamado-info" aria-label="Dados do chamado">
             <dl>
                 <dt>Chamado</dt>
-                <dd>#<?=$h($chamado['id'])?> · <span data-conversa="tipo"><?=$h($chamado['tipo_contrato'])?></span></dd>
+                <dd>#<?=$h($chamado['id'])?></dd>
+                <dt>Tipo Chamado</dt>
+                <dd data-conversa="tipo"><?=$h($chamado['tipo_contrato'])?></dd>
                 <dt>Técnico responsável</dt>
                 <dd data-conversa="tecnico">…</dd>
             </dl>
