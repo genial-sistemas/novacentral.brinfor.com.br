@@ -40,7 +40,7 @@
         'login', 'autenticacao', 'logout',
         'visualizar-chamado', 'visitante-abrir-chamado', 'abrir-chamado',
         'visitante-abrir-chamado-resultado', 'visitante-chamados-interacoes',
-        'buscar-contrato', 'registrar-erro-cliente', 'equipamentos_desativacao_aprovar',
+        'buscar-contrato', 'conversa', // conversa confere sessão ou código de segurança no próprio controller 'registrar-erro-cliente', 'equipamentos_desativacao_aprovar',
     );
     // Interação por link de e-mail é pública só quando vem com o código de segurança.
     if (in_array($pagina, array('interagir-chamado', 'visitante-interagir-chamado'), true)
@@ -136,6 +136,9 @@
             break;
         case 'logout':
             include 'controlers/logoff.php';
+            break;
+        case 'conversa':
+            include 'controlers/conversa.php';
             break;
         case 'buscar-contrato':
             include 'controlers/buscar_contrato.php';
