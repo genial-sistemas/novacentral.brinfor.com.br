@@ -9,3 +9,4 @@ logs/*.txt.*
 models/conexao.php
 models/erp_config.php
 CHAVE-API-*.txt
+.DS_Store

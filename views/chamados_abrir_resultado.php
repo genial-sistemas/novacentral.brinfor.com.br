@@ -27,13 +27,8 @@ if (!$id_chamado || !$id_seguranca) {
 
 // Validação final
 if (!$id_chamado || !$id_seguranca) {
-    // Em vez de die(), mostra uma mensagem mais informativa
-    echo '<h3>Erro: Parâmetros não encontrados</h3>';
-    echo '<p>URL acessada: ' . htmlspecialchars($_SERVER['REQUEST_URI'] ?? '') . '</p>';
-    echo '<p>QUERY_STRING: ' . htmlspecialchars($_SERVER['QUERY_STRING'] ?? '') . '</p>';
-    echo '<p>$_GET: </p><pre>';
-    var_dump($_GET);
-    echo '</pre>';
+    // Sem dados de depuração na tela (o var_dump($_GET) permitia XSS).
+    header('Location: dashboard');
     exit;
 }
 

@@ -19,7 +19,12 @@ function obterContatos() {
 function obterContato($idContato, $dbh = null) {
     $idContato = filter_var($idContato, FILTER_VALIDATE_INT);
     if ($idContato === false || $idContato <= 0) { return null; }
-    return erp_api('contato.obter', ['id' => $idContato]) ?: null;
+    $contato = erp_api('contato.obter', ['id' => $idContato]) ?: null;
+    // Só devolve contatos da empresa logada (antes qualquer id abria funcionário de outra empresa).
+    if ($contato && (int)($contato['id_cliente'] ?? 0) !== (int)($_SESSION['id_pessoa'] ?? -1)) {
+        return null;
+    }
+    return $contato;
 }
 
 /**

@@ -2,9 +2,8 @@
 // ============================================
 // chamados_interacoes.php - VERSÃO FUNCIONAL
 // ============================================
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Página pública: erros vão só para o log, nunca para a tela.
+ini_set('display_errors', '0');
 
 // ============================================
 // CAPTURA OS PARÂMETROS
@@ -199,39 +198,7 @@ if ($viewData['error']) {
 // ============================================
 
 // ============================================
-// TENTA CARREGAR A VIEW ORIGINAL
 // ============================================
-$viewPath = __DIR__ . '/../../views/visitante/chamados_interacoes.php';
-
-if (file_exists($viewPath)) {
-    //echo "<h2>✅ View encontrada: " . $viewPath . "</h2>";
-    include $viewPath;
-} else {
-    // Se a view não existir, mostra os dados diretamente
-    echo "<h1>Chamado #{$viewData['idChamado']}</h1>";
-    echo "<h3>Dados do Chamado</h3>";
-    echo "<table border='1' cellpadding='10'>";
-    echo "<tr><th>Campo</th><th>Valor</th></tr>";
-    echo "<tr><td>ID</td><td>{$viewData['idChamado']}</td></tr>";
-    echo "<tr><td>Nome</td><td>{$viewData['nome']}</td></tr>";
-    echo "<tr><td>Email</td><td>{$viewData['email']}</td></tr>";
-    echo "<tr><td>Telefone</td><td>{$viewData['telefone']}</td></tr>";
-    echo "<tr><td>Data Abertura</td><td>{$viewData['dataAbertura']}</td></tr>";
-    echo "<tr><td>Situação</td><td>{$viewData['situacao']}</td></tr>";
-    echo "</table>";
-    
-    if (!empty($viewData['interacoes'])) {
-        echo "<h3>Interações ({$viewData['interacoes']})</h3>";
-        echo "<table border='1' cellpadding='10'>";
-        echo "<tr><th>Data</th><th>Hora</th><th>Tipo</th><th>Descrição</th></tr>";
-        foreach ($viewData['interacoes'] as $interacao) {
-            echo "<tr>";
-            echo "<td>" . ($interacao['data'] ?? '') . "</td>";
-            echo "<td>" . ($interacao['hora'] ?? '') . "</td>";
-            echo "<td>" . ($interacao['tipo'] ?? '') . "</td>";
-            echo "<td>" . ($interacao['descricao'] ?? '') . "</td>";
-            echo "</tr>";
-        }
-        echo "</table>";
-    }
-}
+// CARREGA A VIEW
+// ============================================
+include __DIR__ . '/../../views/visitante/chamados_interacoes.php';

@@ -1003,9 +1003,9 @@
 
                     if (descricao && descricao.toLowerCase().includes('invalida')) {
                         sysDiv.classList.add('invalida');
-                        bubble.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${descricao}`;
+                        bubble.innerHTML = '<i class="fas fa-exclamation-circle"></i> '; bubble.appendChild(document.createTextNode(descricao));
                     } else {
-                        bubble.innerHTML = `<i class="fas fa-clock"></i> ${descricao}`;
+                        bubble.innerHTML = '<i class="fas fa-clock"></i> '; bubble.appendChild(document.createTextNode(descricao));
                     }
 
                     sysDiv.appendChild(bubble);

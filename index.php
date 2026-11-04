@@ -34,6 +34,23 @@
         }
     }
 
+    // Só estas páginas abrem sem login. Antes o valor 'login' definido em autenticacao.php
+    // era sobrescrito acima, e qualquer página interna abria sem sessão.
+    $paginasPublicas = array(
+        'login', 'autenticacao', 'logout',
+        'visualizar-chamado', 'visitante-abrir-chamado', 'abrir-chamado',
+        'visitante-abrir-chamado-resultado', 'visitante-chamados-interacoes',
+        'buscar-contrato', 'registrar-erro-cliente', 'equipamentos_desativacao_aprovar',
+    );
+    // Interação por link de e-mail é pública só quando vem com o código de segurança.
+    if (in_array($pagina, array('interagir-chamado', 'visitante-interagir-chamado'), true)
+        && (!empty($_GET['seguranca']) || !empty($_POST['seguranca']))) {
+        $paginasPublicas[] = $pagina;
+    }
+    if (empty($_SESSION['id_pessoa']) && !in_array($pagina, $paginasPublicas, true)) {
+        $pagina = 'login';
+    }
+
     switch($pagina) {
         case 'visualizar-chamado':
             include 'controlers/visitante/visualizar-chamado.php';

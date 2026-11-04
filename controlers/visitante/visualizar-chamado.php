@@ -5,9 +5,8 @@
 // ============================================
 // INÍCIO - TRATAMENTO DE ERROS E CONEXÃO
 // ============================================
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Página pública: erros vão só para o log, nunca para a tela (vazavam caminhos do servidor).
+ini_set('display_errors', '0');
 date_default_timezone_set('America/Sao_Paulo');
 
 require_once __DIR__ . '/../../models/erp_api.php';
@@ -82,10 +81,8 @@ if (!$dados_submetidos && empty($_FILES['arquivo'])) {
 // ============================================
 function gerarCodigoSeguranca()
 {
-    $seguranca = rand(123456789, 987654321);
-    $datacod = date('hYsHdim');
-    $codigo = $seguranca . $datacod;
-    return sha1($codigo);
+    // 40 caracteres hexadecimais aleatórios (mesmo tamanho do sha1 usado antes, que era previsível).
+    return bin2hex(random_bytes(20));
 }
 
 // ============================================
@@ -232,12 +229,13 @@ $dados = [
     'id_dominio' => $_POST['id_dominio'] ?? '0',
     'id_backup' => $_POST['id_backup'] ?? '0',
     'id_suporte' => $_POST['id_suporte'] ?? '0',
-    'id_pessoa' => $_POST['id_pessoa'] ?? '0',
-    'id_situacao' => $_POST['id_situacao'] ?? '1',
-    'id_tipo_abertura' => $_POST['id_tipo_abertura'] ?? '1',
-    'id_tipo_atendimento' => $_POST['id_tipo_atendimento'] ?? '1',
-    'id_resp_abertura' => $_POST['id_resp_abertura'] ?? '0',
-    'codigoSeguranca' => $_POST['codigoSeguranca'] ?? '',
+    // Campos internos fixos: o visitante não escolhe técnico, situação, tipo de abertura nem código de segurança.
+    'id_pessoa' => '0',
+    'id_situacao' => '1',
+    'id_tipo_abertura' => '1',
+    'id_tipo_atendimento' => '1',
+    'id_resp_abertura' => '0',
+    'codigoSeguranca' => gerarCodigoSeguranca(),
     'id_tipo_contrato' => $_POST['id_tipo_contrato'] ?? '',
     'etiqueta_codigo_contrato' => $_POST['etiqueta_codigo_contrato'] ?? '',
     'etiqueta_codigo_equipamento' => $_POST['etiqueta_codigo_equipamento'] ?? '',
@@ -251,11 +249,6 @@ $dados = [
     'solicitacao' => $_POST['solicitacao'] ?? '',
     'obs' => $_POST['obs'] ?? '',
 ];
-
-// Se não veio código de segurança do POST, gera um novo
-if (empty($dados['codigoSeguranca'])) {
-    $dados['codigoSeguranca'] = gerarCodigoSeguranca();
-}
 
 // Se o id_contrato veio como 0 e search_type é ID, tenta usar o search_context
 if ($dados['id_contrato'] == 0 && $dados['search_type'] == 'ID') {
@@ -283,7 +276,6 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
             'image/png',
             'image/gif',
             'image/webp',
-            'image/svg+xml',
             'application/pdf',
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -296,8 +288,14 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
             'application/zip',
             'application/x-rar-compressed',
             'application/x-7z-compressed',
-            'application/json',
-            'application/xml'
+            // Tipos detectados pelo conteúdo para formatos Office/compactados.
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/vnd.rar',
+            'application/x-rar',
+            'application/octet-stream',
+            'application/CDFV2',
+            'application/x-ole-storage',
         ];
 
         $extensoes_permitidas = [
@@ -306,7 +304,6 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
             'png',
             'gif',
             'webp',
-            'svg',
             'pdf',
             'doc',
             'docx',
@@ -318,18 +315,24 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] !== UPLOAD_ERR_NO_F
             'csv',
             'zip',
             'rar',
-            '7z',
-            'json',
-            'xml'
+            '7z'
         ];
 
         $nome_original = $arquivo['name'];
-        $tipo_mime = $arquivo['type'];
+        // Tipo real lido do conteúdo do arquivo; o $_FILES['type'] é escolhido por quem envia.
+        $tipo_mime = 'application/octet-stream';
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $tipo_mime = (string)finfo_file($finfo, $arquivo['tmp_name']);
+        }
         $tamanho = $arquivo['size'];
         $nome_temp = $arquivo['tmp_name'];
         $extensao = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
 
-        $tipo_permitido = in_array($tipo_mime, $tipos_permitidos) || in_array($extensao, $extensoes_permitidas);
+        // Extensão E conteúdo precisam estar na lista. Antes era "OU", e um .php enviado como image/png passava.
+        $tipo_permitido = in_array($extensao, $extensoes_permitidas, true)
+            && in_array($tipo_mime, $tipos_permitidos, true)
+            && stripos($tipo_mime, 'php') === false;
         $limite_php_upload = tamanhoIniParaBytes(ini_get('upload_max_filesize'));
         $tamanho_maximo = min(10 * 1024 * 1024, $limite_php_upload);
 
@@ -425,11 +428,16 @@ function salvarArquivoChamado($arquivo_temp, $id_chamado, $nome_original)
             error_log("❌ Erro ao criar pasta: " . $pasta_chamado);
             return ['status' => 'erro', 'mensagem' => 'Não foi possível criar a pasta do chamado: ' . $pasta_chamado];
         }
-        chmod($pasta_chamado, 0777);
+        chmod($pasta_chamado, 0755);
         error_log("📁 Pasta criada: " . $pasta_chamado);
     }
 
+    // Segunda barreira: só grava extensões da lista fechada, nunca .php/.phtml/.phar/.htaccess.
     $extensao = strtolower(pathinfo($nome_original, PATHINFO_EXTENSION));
+    $permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'zip', 'rar', '7z'];
+    if (!in_array($extensao, $permitidas, true)) {
+        return ['status' => 'erro', 'mensagem' => 'Tipo de arquivo não permitido.'];
+    }
     $timestamp = date('Ymd_His');
     $random = substr(md5(uniqid()), 0, 6);
     $nome_arquivo = "chamado_{$id_chamado}_{$timestamp}_{$random}." . $extensao;
@@ -690,17 +698,17 @@ function renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquiv
             
             <div class="info-row">
                 <span class="info-label">Responsável Abertura:</span>
-                <span class="info-value">' . ($dados['nome'] ?: 'Usuário') . '</span>
+                <span class="info-value">' . htmlspecialchars($dados['nome'] ?: 'Usuário') . '</span>
             </div>
             
             <div class="info-row">
                 <span class="info-label">E-mail Abertura:</span>
-                <span class="info-value">' . ($dados['email'] ?: 'Não informado') . '</span>
+                <span class="info-value">' . htmlspecialchars($dados['email'] ?: 'Não informado') . '</span>
             </div>
             
             <div class="info-row">
                 <span class="info-label">Telefone Abertura:</span>
-                <span class="info-value">' . ($dados['telefone'] ?: 'Não informado') . '</span>
+                <span class="info-value">' . htmlspecialchars($dados['telefone'] ?: 'Não informado') . '</span>
             </div>
             
             <div class="info-row">
@@ -730,7 +738,7 @@ function renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquiv
             
             <div class="info-row">
                 <span class="info-label">🔑 Código de Segurança:</span>
-                <span class="info-value" style="font-weight:bold;color:#dc3545;font-size:16px;letter-spacing:2px;">' . $dados['codigoSeguranca'] . '</span>
+                <span class="info-value" style="font-weight:bold;color:#dc3545;font-size:16px;letter-spacing:2px;">' . htmlspecialchars($dados['codigoSeguranca']) . '</span>
             </div>
             
             ' . (temValor($dados['solicitacao']) ? '
@@ -770,7 +778,7 @@ function renderHtmlEmailChamadoVisualizacao($dados, $proximo_id_chamado, $arquiv
         $html .= '
                     <tr>
                         <td>' . date('d/m/Y H:i:s') . '</td>
-                        <td>' . ($dados['nome'] ?: 'Usuário') . '</td>
+                        <td>' . htmlspecialchars($dados['nome'] ?: 'Usuário') . '</td>
                         <td>' . htmlspecialchars($evento['descricao']) . '</td>
                         <td><span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:bold;background:' . $evento['cor'] . ';color:#fff;">' . $evento['label'] . '</span></td>
                     </tr>';

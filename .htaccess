@@ -1,5 +1,38 @@
 RewriteEngine On
+Options -Indexes
 
+# HTTPS obrigatório
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} ^(central|novacentral)\.brinfor\.com\.br$ [NC]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# ------------------------------------------------------------------
+# Segurança: bloqueia acesso direto pela URL (THE_REQUEST = o que o navegador pediu).
+# Tudo deve passar pelo index.php, onde o login é verificado.
+# ------------------------------------------------------------------
+# Única exceção: busca de contrato chamada direto pelo formulário de visitante.
+RewriteCond %{THE_REQUEST} \s/+views/visitante/buscar_contrato\.php[\s?] [NC]
+RewriteRule ^ - [L]
+
+# Código interno, bibliotecas e logs
+RewriteCond %{THE_REQUEST} \s/+(controlers|models|bibliotecas|logs|\.logs)/ [NC]
+RewriteRule ^ - [F,L]
+
+# Scripts dentro de views/ (CSS, JS e imagens continuam liberados)
+RewriteCond %{THE_REQUEST} \s/+views/.*\.(php|phtml|phar|inc)[\s?] [NC]
+RewriteRule ^ - [F,L]
+
+# Anexos de chamados: nunca executar scripts enviados por upload
+RewriteCond %{THE_REQUEST} \s/+chamados/.*\.(php\d?|phtml|phar|pht|phps|cgi|pl|py|sh|htaccess|user\.ini)[\s?] [NC]
+RewriteRule ^ - [F,L]
+
+# Arquivos ocultos (.git, .env, .DS_Store, .vscode...) e backups
+RewriteRule (^|/)\.(?!well-known/) - [F,L]
+RewriteRule \.(bak|old|orig|save|swp|sql|zip|tar|gz|7z|log|ini|env)$ - [F,L,NC]
+
+# ------------------------------------------------------------------
+# Rotas da aplicação
+# ------------------------------------------------------------------
 RewriteCond %{QUERY_STRING} (^|&)acao=editar(&|$) [NC]
 RewriteRule ^funcionarios_cadastrar$ /funcionarios_editar [R=302,L]
 RewriteRule ^funcionarios_editar$ controlers/funcionarios_editar.php [L]
@@ -7,6 +40,12 @@ RewriteRule ^funcionarios_editar$ controlers/funcionarios_editar.php [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?page=$1 [NC,QSA]
-RewriteCond %{SERVER_PORT} 80
-RewriteCond %{HTTP_HOST} ^(central|novacentral)\.brinfor\.com\.br$ [NC]
-RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# Cabeçalhos de segurança
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "same-origin"
+    Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+

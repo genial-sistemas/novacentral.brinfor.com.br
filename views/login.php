@@ -27,11 +27,9 @@
                 <?php elseif (isset($_GET['erro']) && $_GET['erro'] === 'api'): ?>
                     <div class="alert alert-danger" role="alert">
                         Sistema temporariamente indisponível. Tente novamente em instantes.
-                        <?php if (!empty($_SESSION['erro_api_login'])): ?>
-                            <br><small>Detalhe: <?= htmlspecialchars($_SESSION['erro_api_login'], ENT_QUOTES, 'UTF-8') ?></small>
-                        <?php endif; ?>
                     </div>
-                    <?php unset($_SESSION['erro_api_login']); ?>
+                <?php elseif (isset($_GET['erro']) && $_GET['erro'] === 'bloqueado'): ?>
+                    <div class="alert alert-danger" role="alert">Muitas tentativas de login. Aguarde 15 minutos e tente novamente.</div>
                 <?php endif; ?>
                <form action="autenticacao" method="post">
                     <div class="form-group">
