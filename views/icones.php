@@ -14,7 +14,8 @@ function iconeInterface($nome, $contexto = 'inline')
         'desativar' => '<path d="M12 2v10"/><path d="M6.2 5.8a8 8 0 1 0 11.6 0"/>',
         'usuario' => '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
         'detalhes' => '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8m-8 4h5"/>',
-        'reabrir' => '<path d="M3 7l3-3 3 3"/><path d="M6 4v7a7 7 0 0 0 7 7h5"/><path d="m17 15 3 3-3 3"/>',
+        // Seta circular para trás (↺): símbolo usual de "reabrir".
+        'reabrir' => '<path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/>',
         'mais' => '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
         'baixar' => '<path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v4h14v-4"/>',
         'configuracoes' => '<path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.6.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.6-.9l-1.7.7-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.9l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.6-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.6.9l1.7-.7 1.4 2.4-1.4 1.1a7 7 0 0 1-.1 1.8ZM4 12h1"/>',
