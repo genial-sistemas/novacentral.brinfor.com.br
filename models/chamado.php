@@ -24,6 +24,24 @@ function obterUltimosChamados($contratos, $qtd, $filtro='todos') {
     ]) ?: [];
 }
 
+/** Chamados em aberto com solicitante, equipamento e última interação (uma chamada à API). */
+function obterChamadosAbertosLista($contratos) {
+    return erp_api('chamado.abertos_lista', ['contratos' => chamado_ids_contratos($contratos)]) ?: [];
+}
+
+/** Encerramento pelo cliente logado (situação 7 + evento "Chamado encerrado pelo usuário"). */
+function encerrarChamadoCliente($id_chamado, $contratos) {
+    try {
+        return (bool)erp_api('chamado.encerrar_cliente', [
+            'id' => (int)$id_chamado,
+            'contratos' => chamado_ids_contratos($contratos),
+        ]);
+    } catch (ErpApiErro $erro) {
+        error_log('Falha ao encerrar chamado ' . (int)$id_chamado . ': ' . $erro->getMessage());
+        return false;
+    }
+}
+
 function contarChamadosFechados($contratos) {
     return (int)erp_api('chamado.contar_fechados', ['contratos' => chamado_ids_contratos($contratos)]);
 }

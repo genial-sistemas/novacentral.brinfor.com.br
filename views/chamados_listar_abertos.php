@@ -1,5 +1,16 @@
 <?php
-include 'header.php'; ?>
+include 'header.php';
+$h = static function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); };
+?>
+<style>
+.chamados-acoes { display: flex; gap: 6px; align-items: center; }
+.chamados-acoes form { margin: 0; }
+.btn-icone { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border-radius: 6px; }
+.btn-icone svg { width: 18px; height: 18px; }
+.btn-encerrar { background: #fff; border: 1px solid #cdd4e0; color: #3bb001; }
+.btn-encerrar:hover { background: #3bb001; border-color: #3bb001; color: #fff; }
+.chamados-equipamento { color: #596882; font-size: 12px; }
+</style>
 
 <div class="az-content-header d-block d-md-flex">
     <div>
@@ -13,45 +24,73 @@ include 'header.php'; ?>
     <?php if ($email_reabertura_falhou): ?>
         <div class="alert alert-warning" role="alert">O chamado foi reaberto, mas não foi possível enviar todas as notificações por e-mail.</div>
     <?php endif; ?>
+    <?php if ($chamado_encerrado > 0): ?>
+        <div class="alert alert-success" role="status">Chamado #<?=$chamado_encerrado?> encerrado. Ele está agora em Listar Fechados.</div>
+    <?php endif; ?>
+    <?php if ($erro_encerrar): ?>
+        <div class="alert alert-danger" role="alert">Não foi possível encerrar o chamado. Recarregue a página e tente novamente.</div>
+    <?php endif; ?>
     <div class="row row-sm">
         <div class="col-md-12">
-            <form action="/chamados_interagir" method="post">
-                <div class="table-responsive">
-                    <table class="table mg-b-0">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Tipo</th>
-                                <th>Última Interação</th>
-                                <th>Técnico</th>
-                                <th>Status</th>
-                                <th>Opções</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php if (empty($chamados_abertos)): ?>
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">Não existem chamados em aberto.</td>
-                            </tr>
-                        <?php else: ?>
-                        <?php foreach($chamados_abertos as $ca): ?>
-                            <tr>
-                                <th scope="row"><?=$ca['id']?></th>
-                                <td><?=$ca['tipo_contrato']?></td>
-                                <td><?=data_brasil_datetime($chamados_abertos_ultima_interacao[$ca['id']]['data'].' '.$chamados_abertos_ultima_interacao[$ca['id']]['hora'])?></td>
-                                <td><?=$chamados_abertos_ultima_interacao[$ca['id']]['nome_pessoa']?></td>
-                                <td><?=$ca['situacao']?></td>
-                                <td><button class="btn btn-az-primary" name="chamado_id" value="<?=$ca['id']?>">Interagir</button></td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </form>
+            <div class="table-responsive">
+                <table class="table mg-b-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Aberto por</th>
+                            <th>Equipamento</th>
+                            <th>Última Interação</th>
+                            <th>Status</th>
+                            <th>Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($chamados_abertos)): ?>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Não existem chamados em aberto.</td>
+                        </tr>
+                    <?php else: ?>
+                    <?php foreach ($chamados_abertos as $ca):
+                        $ultima = !empty($ca['ultima_data'])
+                            ? data_brasil_datetime($ca['ultima_data'] . ' ' . $ca['ultima_hora'])
+                            : '-';
+                        $equipamento = trim((string)($ca['equipamento'] ?? ''), " -");
+                    ?>
+                        <tr>
+                            <th scope="row"><?=$h($ca['id'])?></th>
+                            <td><?=$h($ca['tipo_contrato'])?></td>
+                            <td><?=$h(trim((string)$ca['solicitante']) !== '' ? $ca['solicitante'] : 'Não informado')?></td>
+                            <td class="chamados-equipamento"><?=$h($equipamento !== '' ? $equipamento : '-')?></td>
+                            <td><?=$h($ultima)?></td>
+                            <td><?=$h($ca['situacao'])?></td>
+                            <td>
+                                <div class="chamados-acoes">
+                                    <a class="btn btn-az-primary btn-icone" href="/chamados_interagir?id=<?=(int)$ca['id']?>"
+                                       title="Interagir" aria-label="Interagir com o chamado <?=(int)$ca['id']?>">
+                                        <?=iconeInterface('conversa', 'inline')?>
+                                    </a>
+                                    <form method="post" action="/chamados_listar_abertos"
+                                          onsubmit="return confirm('Encerrar o chamado #<?=(int)$ca['id']?>? Depois de encerrado, não será possível enviar novas mensagens.');">
+                                        <input type="hidden" name="acao" value="encerrar">
+                                        <input type="hidden" name="chamado_id" value="<?=(int)$ca['id']?>">
+                                        <input type="hidden" name="token" value="<?=$h($token_chamados)?>">
+                                        <button type="submit" class="btn btn-icone btn-encerrar"
+                                                title="Encerrar chamado" aria-label="Encerrar o chamado <?=(int)$ca['id']?>">
+                                            <?=iconeInterface('encerrar', 'inline')?>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div><!-- az-content-body -->
 <?php
-include 'footer.php'; 
+include 'footer.php';
 ?>
