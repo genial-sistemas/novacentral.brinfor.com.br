@@ -1,4 +1,4 @@
-<?php include 'header.php'; ?>
+<?php include 'header.php'; include __DIR__ . '/partials/botoes_icone.php'; ?>
 
 <div class="az-content-header d-block d-md-flex">
     <div>
@@ -52,10 +52,6 @@
                 </div>
             </div>
         </div>
-        <div class="form-check mg-b-15">
-            <input class="form-check-input" type="checkbox" id="interacoes" name="interacoes" value="1" <?=$mostrar_interacoes ? 'checked' : ''?>>
-            <label class="form-check-label" for="interacoes">Listar as interações de cada chamado</label>
-        </div>
     </form>
     <?php if ($mostrar_filtro_tipo): ?>
     <script>
@@ -92,10 +88,13 @@
             <thead>
                 <tr>
                     <th class="text-center">Chamado</th>
-                    <th class="text-center">Data de fechamento e horas</th>
+                    <th class="text-center">Data de fechamento</th>
+                    <th class="text-center">Horas</th>
                     <th class="text-center">Aberto por</th>
                     <th class="text-center">Finalizado por</th>
                     <th class="relatorio-equipamento-descricao">Motivo da abertura</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Opções</th>
                 </tr>
             </thead>
             <tbody>
@@ -108,17 +107,35 @@
                             <a href="/chamados_interagir?id=<?=(int)$chamado['id']?>"><?=(int)$chamado['id']?></a>
                             <?php if ($referencia === 'todos'): ?><br><small><?=$h($chamado['equipamento_rotulo'])?></small><?php endif; ?>
                         </td>
-                        <td class="text-center">
-                            <?=$h(data_brasil_datetime($chamado['data_fechamento']))?>
-                            <?php if ($horas !== '' && $horas !== '00:00:00'): ?><br><small><?=$h($horas)?></small><?php endif; ?>
-                        </td>
+                        <td class="text-center"><?=$h(data_brasil_datetime($chamado['data_fechamento']))?></td>
+                        <td class="text-center"><?=$h($horas !== '' ? $horas : '-')?></td>
                         <td class="text-center"><?=$h(trim((string)($chamado['aberto_por'] ?? '')) ?: 'Não informado')?></td>
                         <td class="text-center"><?=$h(trim((string)($chamado['tecnico'] ?? '')) ?: 'Não informado')?></td>
                         <td class="relatorio-equipamento-descricao"><?=nl2br($h(stripslashes((string)($chamado['motivo'] ?? ''))))?></td>
+                        <td class="text-center"><?=$h(($chamado['situacao'] ?? '') ?: '-')?></td>
+                        <td>
+                            <div class="chamados-acoes">
+                                <button type="button" class="btn btn-icone btn-interagir" data-interacoes="<?=(int)$chamado['id']?>"
+                                        title="Listar interações" aria-label="Listar as interações do chamado <?=(int)$chamado['id']?>" aria-expanded="false">
+                                    <?=iconeInterface('detalhes', 'inline')?>
+                                </button>
+                                <a class="btn btn-icone btn-interagir" href="/chamados_interagir?id=<?=(int)$chamado['id']?>"
+                                   title="Ver conversa" aria-label="Ver a conversa do chamado <?=(int)$chamado['id']?>">
+                                    <?=iconeInterface('conversa', 'inline')?>
+                                </a>
+                                <form action="/chamados_listar_fechados" method="post"
+                                      onsubmit="return confirm('Reabrir o chamado #<?=(int)$chamado['id']?>?');">
+                                    <input type="hidden" name="chamado_id" value="<?=(int)$chamado['id']?>">
+                                    <button type="submit" class="btn btn-icone btn-reabrir" name="acao" value="reabrir_chamado"
+                                            title="Reabrir chamado" aria-label="Reabrir o chamado <?=(int)$chamado['id']?>">
+                                        <?=iconeInterface('reabrir', 'inline')?>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
-                    <?php if ($mostrar_interacoes): ?>
-                    <tr class="relatorio-equipamento-interacoes">
-                        <td colspan="5">
+                    <tr class="relatorio-equipamento-interacoes" id="interacoes-<?=(int)$chamado['id']?>" hidden>
+                        <td colspan="8">
                             <?php if (!$eventos): ?>
                                 <small class="text-muted">Nenhuma interação registrada.</small>
                             <?php else: ?>
@@ -137,16 +154,25 @@
                             <?php endif; ?>
                         </td>
                     </tr>
-                    <?php endif; ?>
                 <?php endforeach; ?>
                 <?php if (!$chamados): ?>
                     <tr>
-                        <td colspan="5">Nenhum chamado encontrado para o equipamento e período selecionados.</td>
+                        <td colspan="8">Nenhum chamado encontrado para o equipamento e período selecionados.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
+    <script>
+    // Ícone "Listar interações": mostra/esconde as interações do chamado.
+    document.querySelectorAll('[data-interacoes]').forEach(function (botao) {
+        botao.addEventListener('click', function () {
+            var linha = document.getElementById('interacoes-' + botao.dataset.interacoes);
+            linha.hidden = !linha.hidden;
+            botao.setAttribute('aria-expanded', linha.hidden ? 'false' : 'true');
+        });
+    });
+    </script>
     <?php if ($total_paginas > 1):
         $inicio_janela = max(1, min($pagina_atual - 4, $total_paginas - 9));
         $paginas_visiveis = range($inicio_janela, min($total_paginas, $inicio_janela + 9));

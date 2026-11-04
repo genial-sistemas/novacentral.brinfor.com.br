@@ -10,7 +10,6 @@ $pagina = 'Por equipamento';
 $data_inicial_texto = (string)($_GET['data_inicial'] ?? '01/01/' . date('Y'));
 $data_final_texto = (string)($_GET['data_final'] ?? date('d/m/Y'));
 $referencia = trim((string)($_GET['equipamento'] ?? 'todos'));
-$mostrar_interacoes = !empty($_GET['interacoes']);
 $itens_por_pagina = 20;
 $pagina_atual = max(1, (int)($_GET['pagina'] ?? 1));
 $total_chamados = 0;
@@ -103,7 +102,8 @@ if (($_GET['acao'] ?? '') === 'filtrar') {
         }
         unset($chamado);
 
-        if ($mostrar_interacoes && $chamados) {
+        // Interações da página numa chamada só; aparecem ao clicar no ícone de cada chamado.
+        if ($chamados) {
             $interacoes_por_chamado = obterInteracoesDosChamados(array_column($chamados, 'id'), $contratos_com_equipamentos);
         }
     }
