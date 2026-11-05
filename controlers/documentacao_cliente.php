@@ -43,7 +43,7 @@ function documentacaoImagemLocal($origem)
         ));
         $conteudo = curl_exec($ch);
         $http = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        if (PHP_VERSION_ID < 80000) { curl_close($ch); } // PHP 8+: fecha sozinho (obsoleto no 8.5)
         if ($conteudo === false || $http !== 200 || $conteudo === '') {
             error_log('Documentação: não foi possível baixar a imagem ' . $origem . ' (HTTP ' . $http . ')');
             return null;
@@ -75,7 +75,7 @@ function documentacaoImagemLocal($origem)
         }
         $png = tempnam(sys_get_temp_dir(), 'doc');
         imagepng($imagem, $png);
-        imagedestroy($imagem);
+        if (PHP_VERSION_ID < 80000) { imagedestroy($imagem); }
         register_shutdown_function(static function () use ($png) { @unlink($png); });
         $cache[$origem] = array('arquivo' => $png, 'tipo' => 'png', 'largura' => $info[0], 'altura' => $info[1]);
         return $cache[$origem];

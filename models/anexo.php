@@ -72,7 +72,7 @@ function anexoCompactarImagem($caminho, $tipo)
         $angulos = [3 => 180, 6 => -90, 8 => 90];
         $orientacao = (int)($exif['Orientation'] ?? 1);
         if (isset($angulos[$orientacao]) && ($girada = imagerotate($origem, $angulos[$orientacao], 0))) {
-            imagedestroy($origem);
+            if (PHP_VERSION_ID < 80000) { imagedestroy($origem); }
             $origem = $girada;
             $largura = imagesx($origem);
             $altura = imagesy($origem);
@@ -88,7 +88,7 @@ function anexoCompactarImagem($caminho, $tipo)
         imagesavealpha($destino, true);
     }
     imagecopyresampled($destino, $origem, 0, 0, 0, 0, $novaLargura, $novaAltura, $largura, $altura);
-    imagedestroy($origem);
+    if (PHP_VERSION_ID < 80000) { imagedestroy($origem); }
 
     $temporario = $caminho . '.tmp';
     if ($tipo === 'image/jpeg') {
@@ -98,7 +98,7 @@ function anexoCompactarImagem($caminho, $tipo)
     } else {
         $ok = imagewebp($destino, $temporario, 80);
     }
-    imagedestroy($destino);
+    if (PHP_VERSION_ID < 80000) { imagedestroy($destino); }
 
     clearstatcache();
     if ($ok && is_file($temporario) && filesize($temporario) > 0 && filesize($temporario) < $tamanho) {
