@@ -31,12 +31,12 @@ include __DIR__ . '/partials/botoes_icone.php';
         <table class="table mg-b-0">
             <thead>
                 <tr>
-                    <th>Vencimento</th>
-                    <th class="text-right">Valor</th>
-                    <th>Status</th>
                     <th>Nosso número</th>
+                    <th>Vencimento</th>
+                    <th>Descrição</th>
                     <th>Emissão</th>
-                    <th>Boleto</th>
+                    <th class="text-right">Valor</th>
+                    <th>Opções</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,11 +50,14 @@ include __DIR__ . '/partials/botoes_icone.php';
                 $cancelado = $statusClasse === 'cancelada';
             ?>
                 <tr class="<?=$cancelado ? 'boleto-cancelado' : ''?>">
-                    <th scope="row"><?=$h($vencimento)?></th>
+                    <th scope="row"><?=$h($boleto['nosso_numero'] ?: '-')?></th>
+                    <td class="text-nowrap">
+                        <?=$h($vencimento)?>
+                        <br><span class="boleto-status <?=$h($statusClasse)?>"><?=$h($statusTexto)?></span>
+                    </td>
+                    <td><?=$h(trim((string)($boleto['descricao'] ?? '')) ?: 'Boleto avulso')?></td>
+                    <td class="text-nowrap"><?=$h($emissao)?></td>
                     <td class="text-right text-nowrap">R$ <?=$h(number_format((float)$boleto['valor'], 2, ',', '.'))?></td>
-                    <td><span class="boleto-status <?=$h($statusClasse)?>"><?=$h($statusTexto)?></span></td>
-                    <td><?=$h($boleto['nosso_numero'] ?: '-')?></td>
-                    <td><?=$h($emissao)?></td>
                     <td>
                         <?php if (!empty($boleto['tem_arquivo']) && !$cancelado): ?>
                             <a class="btn btn-icone btn-pdf" href="/financeiro_boleto_arquivo?id=<?=(int)$boleto['id']?>"
