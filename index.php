@@ -132,6 +132,9 @@
         case 'equipamentos_locacao':
             include 'controlers/equipamentos_locacao.php';
             break;
+        case 'ordens_servico':
+            include 'controlers/ordens_servico.php';
+            break;
         // Financeiro (só com login: não estão na lista de páginas públicas)
         case 'financeiro_notas':
             include 'controlers/financeiro_notas.php';

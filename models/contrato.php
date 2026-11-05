@@ -33,10 +33,16 @@ function obterEquipamentosParaRelatorio($contratos) {
                 if ($responsavel === '') {
                     $responsavel = trim((string)($equipamento['nome_contato'] ?? ''));
                 }
-                $equipamento['rotulo'] = $id_contrato . ' - ' . str_pad($equipamento['codigo'], 4, '0', STR_PAD_LEFT) . ' - ' . $equipamento['descricao'];
-                if ($responsavel !== '') {
-                    $equipamento['rotulo'] .= ' - ' . $responsavel;
+                // Rótulo sem o nº do contrato: código - descrição - nº de série - responsável.
+                $partes = array(str_pad($equipamento['codigo'], 4, '0', STR_PAD_LEFT), trim((string)$equipamento['descricao']));
+                $serie = trim((string)($equipamento['sn'] ?? ''));
+                if ($serie !== '') {
+                    $partes[] = 'S/N ' . $serie;
                 }
+                if ($responsavel !== '') {
+                    $partes[] = $responsavel;
+                }
+                $equipamento['rotulo'] = implode(' - ', $partes);
                 $equipamentos[] = $equipamento;
             }
         } elseif ($id_tipo === 7) {
@@ -45,7 +51,9 @@ function obterEquipamentosParaRelatorio($contratos) {
                 $equipamento['id_tipo'] = 7; // Locação
                 $equipamento['referencia'] = $id_contrato . ':' . (int)$equipamento['id'];
                 $patrimonio = trim((string)($equipamento['patrimonio'] ?? ''));
-                $equipamento['rotulo'] = $id_contrato . ' - ' . ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao'];
+                $serie = trim((string)($equipamento['numero_serie'] ?? $equipamento['sn'] ?? $equipamento['serie'] ?? ''));
+                $equipamento['rotulo'] = ($patrimonio !== '' ? $patrimonio . ' - ' : '') . $equipamento['descricao']
+                    . ($serie !== '' ? ' - S/N ' . $serie : '');
                 $equipamentos[] = $equipamento;
             }
         }

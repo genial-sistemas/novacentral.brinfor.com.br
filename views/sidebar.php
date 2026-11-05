@@ -65,6 +65,13 @@ $contratosLocacao = obterContratosLocacaoCliente(
                     </nav>
                 </li>
             <?php endif; ?>
+            <li class="nav-item <?=($menu=='Ordens de Serviço'?'active show':'')?>">
+                <a href="/ordens_servico" class="nav-link with-sub"><?=iconeInterface('detalhes', 'menu')?>Ordens de Serviço</a>
+                <nav class="nav-sub">
+                    <a href="/ordens_servico?filtro=abertas" class="nav-sub-link <?=($pagina=='OS Abertas'?'active':'')?>">Abertas</a>
+                    <a href="/ordens_servico?filtro=fechadas" class="nav-sub-link <?=($pagina=='OS Fechadas'?'active':'')?>">Fechadas</a>
+                </nav>
+            </li>
             <li class="nav-item <?=($menu=='Financeiro'?'active show':'')?>">
                 <a href="/financeiro_notas" class="nav-link with-sub"><?=iconeInterface('financeiro', 'menu')?>Financeiro</a>
                 <nav class="nav-sub">
