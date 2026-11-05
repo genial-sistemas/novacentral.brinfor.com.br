@@ -31,12 +31,12 @@ include __DIR__ . '/partials/botoes_icone.php';
         <table class="table mg-b-0">
             <thead>
                 <tr>
-                    <th>Nosso número</th>
+                    <th class="text-center">Nosso número</th>
                     <th>Vencimento</th>
                     <th>Descrição</th>
-                    <th>Emissão</th>
-                    <th class="text-right">Valor</th>
-                    <th>Opções</th>
+                    <th class="text-center">Emissão</th>
+                    <th class="text-center">Valor</th>
+                    <th class="text-center">Opções</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,15 +50,15 @@ include __DIR__ . '/partials/botoes_icone.php';
                 $cancelado = $statusClasse === 'cancelada';
             ?>
                 <tr class="<?=$cancelado ? 'boleto-cancelado' : ''?>">
-                    <th scope="row"><?=$h($boleto['nosso_numero'] ?: '-')?></th>
+                    <th scope="row" class="text-center"><?=$h($boleto['nosso_numero'] ?: '-')?></th>
                     <td class="text-nowrap">
                         <?=$h($vencimento)?>
                         <br><span class="boleto-status <?=$h($statusClasse)?>"><?=$h($statusTexto)?></span>
                     </td>
                     <td><?=$h(trim((string)($boleto['descricao'] ?? '')) ?: 'Boleto avulso')?></td>
-                    <td class="text-nowrap"><?=$h($emissao)?></td>
-                    <td class="text-right text-nowrap">R$ <?=$h(number_format((float)$boleto['valor'], 2, ',', '.'))?></td>
-                    <td>
+                    <td class="text-center text-nowrap"><?=$h($emissao)?></td>
+                    <td class="text-center text-nowrap">R$ <?=$h(number_format((float)$boleto['valor'], 2, ',', '.'))?></td>
+                    <td class="text-center">
                         <?php if (!empty($boleto['tem_arquivo']) && !$cancelado): ?>
                             <a class="btn btn-icone btn-pdf" href="/financeiro_boleto_arquivo?id=<?=(int)$boleto['id']?>"
                                target="_blank" rel="noopener" title="Abrir boleto (PDF)" aria-label="Abrir boleto com vencimento em <?=$h($vencimento)?>">
