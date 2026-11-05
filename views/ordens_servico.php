@@ -14,6 +14,9 @@ $data = static function ($v) {
     </div>
 </div>
 <div class="az-content-body">
+    <?php if (!empty($erro_os)): ?>
+        <div class="alert alert-danger" role="alert"><?=$h($erro_os)?></div>
+    <?php endif; ?>
     <div class="table-responsive">
         <table class="table mg-b-0">
             <thead>
